@@ -1,0 +1,9 @@
+[
+    {
+        "id": 1,
+        "name": "Paciente",
+        "email": "ecoafono@email.com",
+        "password": "$2b$10$vVjDeIXPYar/lnGKPJp4JuVZGAWYItSC8IZhvldCdDVyFiBK7Fngq",
+        "access": "User"
+    }
+]

@@ -1,0 +1,52 @@
+{
+  "name": "ECOA_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": [
+    {
+      "nome": "Andre Neves",
+      "RM": "553515"
+    },
+    {
+      "nome": "Caio Tominaga",
+      "RM": "553633"
+    },
+    {
+      "nome": "Eduardo Brites",
+      "RM": "552943"
+    },
+    {
+      "nome": "Isabela Barcellos",
+      "RM": "553746"
+    },
+    {
+      "nome": "Thais Gonçalves",
+      "RM": "553892"
+    }
+  ],
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^6.0.3"
+  }
+}

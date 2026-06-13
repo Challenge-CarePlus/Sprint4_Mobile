@@ -13,6 +13,11 @@ type LoginResponse = {
     message?: string;
 };
 
+type RegisterResponse = {
+    success: boolean;
+    message?: string;
+};
+
 type AuthContextData = {
     token: string | null;
     loading: boolean;
@@ -21,6 +26,12 @@ type AuthContextData = {
         email: string,
         password: string
     ) => Promise<LoginResponse>;
+
+    register: (
+        name: string,
+        email: string,
+        password: string
+    ) => Promise<RegisterResponse>;
 
     logout: () => Promise<void>;
 };
@@ -50,6 +61,31 @@ export const AuthProvider = ({
         }
 
         setLoading(false);
+    }
+
+    async function register(
+        name: string,
+        email: string,
+        password: string
+    ) {
+        try {
+            await api.post("/auth/register", {
+                name,
+                email,
+                password,
+            });
+
+            return {
+                success: true,
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                message:
+                    error?.response?.data?.message ||
+                    "Erro ao conectar com o servidor",
+            };
+        }
     }
 
     async function login(
@@ -98,6 +134,7 @@ export const AuthProvider = ({
                 token,
                 loading,
                 login,
+                register,
                 logout,
             }}
         >

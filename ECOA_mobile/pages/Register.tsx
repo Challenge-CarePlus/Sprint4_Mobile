@@ -13,39 +13,58 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 
+export default function Register() {
+    const { register } = useAuth();
 
-export default function Login() {
-    const { login } = useAuth();
-
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const navigation = useNavigation();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
-    async function handleLogin() {
-        try {
-            setError("");
-            setLoading(true);
+    async function handleRegister() {
+        setError("");
+        setSuccess("");
 
-            const result = await login(
-                email.trim(),
-                password
+        if (password !== confirmPassword) {
+            setError("As senhas não coincidem");
+            return;
+        }
+
+        setLoading(true);
+
+        const result = await register(
+            name,
+            email,
+            password
+        );
+
+        if (!result.success) {
+            setError(
+                result.message ||
+                "Erro ao cadastrar usuário"
+            );
+        } else {
+            setSuccess(
+                "Usuário cadastrado com sucesso!"
             );
 
-            if (!result.success) {
-                setError(
-                    result.message ||
-                    "Erro ao realizar login"
-                );
-            }
-        } catch {
-            setError("Erro ao conectar com o servidor");
-        } finally {
-            setLoading(false);
+            setName("");
+            setEmail("");
+            setPassword("");
+            setConfirmPassword("");
+
+            setTimeout(() => {
+                navigation.navigate("LOGIN" as never);
+            }, 2000);
         }
+
+        setLoading(false);
     }
 
     return (
@@ -58,10 +77,20 @@ export default function Login() {
             />
 
             <View style={styles.loginContainer}>
-                <View style={styles.iconFieldContainer}>
+                <View
+                    style={styles.iconFieldContainer}
+                >
                     <Image
                         source={require("./../assets/icon.png")}
                         style={styles.iconImage}
+                    />
+
+                    <TextInput
+                        placeholder="Nome"
+                        placeholderTextColor="#d9d9d9"
+                        style={styles.loginInput}
+                        value={name}
+                        onChangeText={setName}
                     />
 
                     <TextInput
@@ -82,33 +111,35 @@ export default function Login() {
                         value={password}
                         onChangeText={setPassword}
                     />
-                </View>
 
-                <TouchableOpacity
-                    onPress={() =>
-                        navigation.navigate("REGISTER" as never)
-                    }
-                >
-                    <Text
-                        style={styles.link}
-                    >
-                        Criar conta
-                    </Text>
-                </TouchableOpacity>
+                    <TextInput
+                        placeholder="Confirmar senha"
+                        placeholderTextColor="#d9d9d9"
+                        secureTextEntry
+                        style={styles.loginInput}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                    />
+                </View>
 
                 <TouchableOpacity
                     style={[
                         styles.loginButton,
-                        loading && styles.disabledButton,
+                        loading &&
+                        styles.disabledButton,
                     ]}
-                    onPress={handleLogin}
+                    onPress={handleRegister}
                     disabled={loading}
                 >
                     {loading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.loginButtonText}>
-                            Entrar
+                        <Text
+                            style={
+                                styles.loginButtonText
+                            }
+                        >
+                            Cadastrar
                         </Text>
                     )}
                 </TouchableOpacity>
@@ -116,6 +147,12 @@ export default function Login() {
                 {error !== "" && (
                     <Text style={styles.errorText}>
                         {error}
+                    </Text>
+                )}
+
+                {success !== "" && (
+                    <Text style={styles.successText}>
+                        {success}
                     </Text>
                 )}
             </View>
@@ -155,7 +192,7 @@ const styles = StyleSheet.create({
         width: 200,
         height: 200,
         borderRadius: 100,
-        marginBottom: 60
+        marginBottom: 40,
     },
 
     loginInput: {
@@ -166,12 +203,6 @@ const styles = StyleSheet.create({
         height: 45,
         color: "#fff",
         fontWeight: "500",
-    },
-
-    link: {
-        color: "#284A7D",
-        textDecorationLine: "underline",
-        fontWeight: "700",
     },
 
     loginButton: {
@@ -194,6 +225,13 @@ const styles = StyleSheet.create({
 
     errorText: {
         color: "#ff3b30",
+        fontWeight: "500",
+        textAlign: "center",
+        marginTop: 10,
+    },
+
+    successText: {
+        color: "#34c759",
         fontWeight: "500",
         textAlign: "center",
         marginTop: 10,

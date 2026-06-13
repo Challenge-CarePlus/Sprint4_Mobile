@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Login from "../pages/Login";
 import Main from "../pages/Main";
+import Register from "../pages/Register";
 
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
@@ -24,6 +25,7 @@ function PrivateRoutes() {
     );
 }
 
+
 function PublicRoutes() {
     return (
         <Stack.Navigator
@@ -34,6 +36,11 @@ function PublicRoutes() {
             <Stack.Screen
                 name="LOGIN"
                 component={Login}
+            />
+
+            <Stack.Screen
+                name="REGISTER"
+                component={Register}
             />
         </Stack.Navigator>
     );

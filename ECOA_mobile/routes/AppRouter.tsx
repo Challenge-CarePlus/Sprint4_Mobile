@@ -7,6 +7,7 @@ import Register from "../pages/Register";
 
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
+import Camera from "../pages/Camera";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,10 @@ function PrivateRoutes() {
             <Stack.Screen
                 name="MAIN"
                 component={Main}
+            />
+            <Stack.Screen
+                name="CAMERA"
+                component={Camera}
             />
         </Stack.Navigator>
     );

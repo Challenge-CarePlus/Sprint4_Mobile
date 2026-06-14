@@ -11,9 +11,11 @@ import {
 } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Menu() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const navigation = useNavigation();
 
     const route = useRoute();
     const { logout } = useAuth();
@@ -49,6 +51,20 @@ export default function Menu() {
 
             {menuOpen && (
                 <View style={styles.dropDown}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("MAIN" as never)}
+                    >
+                        <Text style={styles.menuText}>
+                            Página inicial
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("CAMERA" as never)}
+                    >
+                        <Text style={styles.menuText}>
+                            Exercício
+                        </Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleLogout}
                     >

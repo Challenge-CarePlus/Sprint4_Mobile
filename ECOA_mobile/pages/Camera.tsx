@@ -8,6 +8,8 @@ import {
     usePhotoOutput,
 } from "react-native-vision-camera";
 
+import { WS_EXERCISE_URL } from "../config/apiConfig";
+
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import {
     AppSettings,
@@ -82,7 +84,7 @@ export default function Camera() {
 
         let isScreenActive = true;
 
-        const ws = new WebSocket("ws://10.0.2.2:3000/exercise");
+        const ws = new WebSocket(WS_EXERCISE_URL);
 
         wsRef.current = ws;
 

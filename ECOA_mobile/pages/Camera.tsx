@@ -264,14 +264,26 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "#fff",
+        paddingHorizontal: 20,
     },
 
     cameraArea: {
-        width: "80%",
-        height: "70%",
-        borderRadius: 20,
+        width: "78%",
+        height: "65%",
+        borderRadius: 12,
         overflow: "hidden",
         backgroundColor: "#000",
+        borderWidth: 3,
+        borderColor: "#284A7D",
+
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 6,
     },
 
     overlay: {
@@ -280,28 +292,39 @@ const styles = StyleSheet.create({
 
     facePoint: {
         position: "absolute",
-        width: 4,
-        height: 4,
-        borderRadius: 2,
+        width: 3,
+        height: 3,
+        borderRadius: 1.5,
         backgroundColor: "#00ff88",
     },
 
     feedbackBox: {
         marginTop: 20,
-        paddingHorizontal: 20,
+        backgroundColor: "#284A7D",
+        width: "60%",
         paddingVertical: 12,
-        borderRadius: 12,
-        backgroundColor: "#f1f1f1",
+        paddingHorizontal: 16,
+        borderRadius: 5,
+        alignItems: "center",
+
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 4,
+        elevation: 4,
     },
 
     feedbackText: {
-        fontSize: 18,
+        color: "#fff",
+        fontSize: 14,
         fontWeight: "600",
-        color: "#333",
         textAlign: "center",
     },
 
     bottomSpace: {
-        height: 60,
+        height: 40,
     },
 });

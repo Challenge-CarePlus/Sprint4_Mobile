@@ -20,7 +20,7 @@ export default function Main() {
             subtitle="Prática"
             iconName="fitness-center"
             active={true}
-            onPress={() => navigation.navigate("CAMERA" as never)}
+            onPress={() => navigation.navigate("EXERCISE_INTRO" as never)}
           />
 
           <Card
@@ -41,10 +41,10 @@ export default function Main() {
 
           <Card
             title="Configurações"
-            subtitle="Em breve"
+            subtitle="Preferências"
             iconName="settings"
-            active={false}
-            onPress={() => { }}
+            active={true}
+            onPress={() => navigation.navigate("SETTINGS" as never)}
           />
         </View>
       </View>
@@ -75,5 +75,5 @@ const styles = StyleSheet.create({
   cardContainer: {
     gap: 20,
   },
-  
+
 });

@@ -4,10 +4,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../pages/Login";
 import Main from "../pages/Main";
 import Register from "../pages/Register";
+import ExerciseIntro from "../pages/ExerciseIntro";
 
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
 import Camera from "../pages/Camera";
+import Settings from "../pages/Settings";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,8 +25,16 @@ function PrivateRoutes() {
                 component={Main}
             />
             <Stack.Screen
+                name="EXERCISE_INTRO"
+                component={ExerciseIntro}
+            />
+            <Stack.Screen
                 name="CAMERA"
                 component={Camera}
+            />
+            <Stack.Screen
+                name="SETTINGS"
+                component={Settings}
             />
         </Stack.Navigator>
     );

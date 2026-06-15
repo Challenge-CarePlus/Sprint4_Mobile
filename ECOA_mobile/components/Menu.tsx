@@ -59,10 +59,17 @@ export default function Menu() {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("CAMERA" as never)}
+                        onPress={() => navigation.navigate("EXERCISE_INTRO" as never)}
                     >
                         <Text style={styles.menuText}>
                             Exercício
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("SETTINGS" as never)}
+                    >
+                        <Text style={styles.menuText}>
+                            Configurações
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity

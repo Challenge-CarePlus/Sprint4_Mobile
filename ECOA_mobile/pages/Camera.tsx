@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import {
@@ -8,6 +8,13 @@ import {
     usePhotoOutput,
 } from "react-native-vision-camera";
 
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import {
+    AppSettings,
+    DEFAULT_SETTINGS,
+    getSettings,
+} from "../services/settingsStorage";
+
 type Landmark = {
     x: number;
     y: number;
@@ -15,9 +22,9 @@ type Landmark = {
 };
 
 export default function Camera() {
+    const isFocused = useIsFocused();
     const frontDevice = useCameraDevice("front");
     const backDevice = useCameraDevice("back");
-    const device = frontDevice ?? backDevice;
 
     const photoOutput = usePhotoOutput({});
 
@@ -35,6 +42,33 @@ export default function Camera() {
         imageHeight: 0,
     });
 
+    const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+
+    const device =
+        settings.preferredCamera === "front"
+            ? frontDevice ?? backDevice
+            : backDevice ?? frontDevice;
+
+    useFocusEffect(
+        useCallback(() => {
+            let isActive = true;
+
+            async function loadSettings() {
+                const storedSettings = await getSettings();
+
+                if (isActive) {
+                    setSettings(storedSettings);
+                }
+            }
+
+            loadSettings();
+
+            return () => {
+                isActive = false;
+            };
+        }, [])
+    );
+
     useEffect(() => {
         if (!hasPermission) {
             requestPermission();
@@ -42,19 +76,27 @@ export default function Camera() {
     }, [hasPermission, requestPermission]);
 
     useEffect(() => {
-        if (!hasPermission || !device) {
+        if (!isFocused || !hasPermission || !device) {
             return;
         }
+
+        let isScreenActive = true;
 
         const ws = new WebSocket("ws://10.0.2.2:3000/exercise");
 
         wsRef.current = ws;
 
         ws.onopen = () => {
-            setFeedback("WebSocket conectado");
+            if (isScreenActive) {
+                setFeedback("WebSocket conectado");
+            }
         };
 
         ws.onmessage = (event) => {
+            if (!isScreenActive) {
+                return;
+            }
+
             const data = JSON.parse(event.data);
 
             if (data.type === "exercise_feedback") {
@@ -71,25 +113,40 @@ export default function Camera() {
         };
 
         ws.onerror = () => {
-            setFeedback("Erro na conexão com o servidor");
+            if (isScreenActive) {
+                setFeedback("Erro na conexão com o servidor");
+            }
         };
 
         ws.onclose = () => {
-            setFeedback("Conexão encerrada");
+            if (isScreenActive) {
+                setFeedback("Conexão encerrada");
+            }
         };
 
         return () => {
+            isScreenActive = false;
+
             ws.close();
-            wsRef.current = null;
+
+            if (wsRef.current === ws) {
+                wsRef.current = null;
+            }
         };
-    }, [hasPermission, device]);
+    }, [isFocused, hasPermission, device]);
 
     useEffect(() => {
-        if (!hasPermission || !device) {
+        if (!isFocused || !hasPermission || !device) {
             return;
         }
 
+        let isScreenActive = true;
+
         const interval = setInterval(async () => {
+            if (!isScreenActive) {
+                return;
+            }
+
             const ws = wsRef.current;
 
             if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -102,6 +159,8 @@ export default function Camera() {
 
             isSendingFrameRef.current = true;
 
+            let uri: string | null = null;
+
             try {
                 console.log("Capturando foto...");
 
@@ -112,9 +171,13 @@ export default function Camera() {
                     {}
                 );
 
+                if (!isScreenActive) {
+                    return;
+                }
+
                 console.log("Foto capturada:", photo.filePath);
 
-                const uri = photo.filePath.startsWith("file://")
+                uri = photo.filePath.startsWith("file://")
                     ? photo.filePath
                     : `file://${photo.filePath}`;
 
@@ -122,30 +185,47 @@ export default function Camera() {
                     encoding: FileSystem.EncodingType.Base64,
                 });
 
+                if (!isScreenActive) {
+                    return;
+                }
+
+                const currentWs = wsRef.current;
+
+                if (!currentWs || currentWs.readyState !== WebSocket.OPEN) {
+                    return;
+                }
+
                 console.log("Enviando frame para o backend...");
 
-                ws.send(
+                currentWs.send(
                     JSON.stringify({
                         type: "frame",
                         image: base64,
                     })
                 );
-
-                await FileSystem.deleteAsync(uri, {
-                    idempotent: true,
-                });
             } catch (error) {
                 console.log("Erro ao capturar/enviar frame:", error);
-                setFeedback("Erro ao capturar frame da câmera");
+
+                if (isScreenActive) {
+                    setFeedback("Erro ao capturar frame da câmera");
+                }
             } finally {
+                if (uri) {
+                    await FileSystem.deleteAsync(uri, {
+                        idempotent: true,
+                    });
+                }
+
                 isSendingFrameRef.current = false;
             }
-        }, 500);
+        }, settings.captureInterval);
 
         return () => {
+            isScreenActive = false;
             clearInterval(interval);
+            isSendingFrameRef.current = false;
         };
-    }, [hasPermission, device, photoOutput]);
+    }, [isFocused, hasPermission, device, photoOutput, settings.captureInterval]);
 
     if (!hasPermission) {
         return (
@@ -202,6 +282,36 @@ export default function Camera() {
         };
     }
 
+    function getFeedbackStyle() {
+        const normalizedFeedback = feedback.toLowerCase();
+
+        if (!settings.visualFeedback) {
+            return styles.feedbackDefault;
+        }
+
+        if (normalizedFeedback.includes("muito bom")) {
+            return styles.feedbackSuccess;
+        }
+
+        if (normalizedFeedback.includes("abra")) {
+            return styles.feedbackWarning;
+        }
+
+        if (normalizedFeedback.includes("feche")) {
+            return styles.feedbackAttention;
+        }
+
+        if (
+            normalizedFeedback.includes("erro") ||
+            normalizedFeedback.includes("nenhum") ||
+            normalizedFeedback.includes("encerrada")
+        ) {
+            return styles.feedbackError;
+        }
+
+        return styles.feedbackDefault;
+    }
+
     return (
         <View style={styles.container}>
             <View
@@ -214,14 +324,12 @@ export default function Camera() {
                 <VisionCamera
                     style={StyleSheet.absoluteFill}
                     device={device}
-                    isActive={true}
+                    isActive={isFocused}
                     outputs={[photoOutput]}
                 />
 
                 <View style={styles.overlay} pointerEvents="none">
-                    {landmarks.map((point, index) => {
-                        const isFrontCamera = device.position === "front";
-
+                    {settings.showLandmarks && landmarks.map((point, index) => {
                         const rotatedPoint = rotatePoint(point);
 
                         const mappedPoint = mapPointToPreviewContain(
@@ -249,7 +357,7 @@ export default function Camera() {
                 </View>
             </View>
 
-            <View style={styles.feedbackBox}>
+            <View style={[styles.feedbackBox, getFeedbackStyle()]}>
                 <Text style={styles.feedbackText}>{feedback}</Text>
             </View>
 
@@ -326,5 +434,25 @@ const styles = StyleSheet.create({
 
     bottomSpace: {
         height: 40,
+    },
+
+    feedbackDefault: {
+        backgroundColor: "#284A7D",
+    },
+
+    feedbackSuccess: {
+        backgroundColor: "#2E7D32",
+    },
+
+    feedbackWarning: {
+        backgroundColor: "#F9A825",
+    },
+
+    feedbackAttention: {
+        backgroundColor: "#EF6C00",
+    },
+
+    feedbackError: {
+        backgroundColor: "#C62828",
     },
 });

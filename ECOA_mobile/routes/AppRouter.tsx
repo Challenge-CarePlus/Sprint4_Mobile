@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
 import Camera from "../pages/Camera";
 import Settings from "../pages/Settings";
+import VisionSpike from "../pages/_dev/VisionSpike";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,12 @@ function PrivateRoutes() {
             <Stack.Screen
                 name="SETTINGS"
                 component={Settings}
+            />
+
+            {/* Fase 0 (spike técnico) — tela de diagnóstico, não faz parte do produto final. */}
+            <Stack.Screen
+                name="VISION_SPIKE"
+                component={VisionSpike}
             />
         </Stack.Navigator>
     );

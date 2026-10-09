@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ECOA MediaPipe Bridge</title>
+</head>
+<body>
+    <script type="module">
+        import { FilesetResolver, FaceLandmarker } from "./vision_bundle.js";
+
+        let faceLandmarker = null;
+        let ready = false;
+
+        function post(message) {
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify(message));
+            }
+        }
+
+        async function init() {
+            try {
+                const vision = await FilesetResolver.forVisionTasks("./wasm");
+
+                faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: "./face_landmarker.task",
+                        delegate: "CPU",
+                    },
+                    outputFaceBlendshapes: true,
+                    outputFacialTransformationMatrixes: false,
+                    runningMode: "IMAGE",
+                    numFaces: 1,
+                });
+
+                ready = true;
+                post({ type: "ready" });
+            } catch (error) {
+                post({ type: "error", stage: "init", message: String((error && error.message) || error) });
+            }
+        }
+
+        async function detectFrame(requestId, base64Jpeg, sentAt) {
+            if (!ready || !faceLandmarker) {
+                post({ type: "error", requestId, message: "not-ready" });
+                return;
+            }
+
+            try {
+                const image = new Image();
+                image.src = "data:image/jpeg;base64," + base64Jpeg;
+                await image.decode();
+
+                const receivedAt = Date.now();
+                const result = faceLandmarker.detect(image);
+                const completedAt = Date.now();
+
+                const blendshapes =
+                    (result.faceBlendshapes[0] && result.faceBlendshapes[0].categories) || [];
+
+                post({
+                    type: "result",
+                    requestId,
+                    sentAt,
+                    receivedAt,
+                    completedAt,
+                    faceDetected: result.faceLandmarks.length > 0,
+                    blendshapes: blendshapes.map((category) => ({
+                        name: category.categoryName,
+                        score: category.score,
+                    })),
+                });
+            } catch (error) {
+                post({ type: "error", requestId, message: String((error && error.message) || error) });
+            }
+        }
+
+        function handleMessage(event) {
+            let data;
+
+            try {
+                data = JSON.parse(event.data);
+            } catch (error) {
+                post({ type: "error", message: "bad-message: " + String(error) });
+                return;
+            }
+
+            if (data.type === "frame") {
+                detectFrame(data.requestId, data.image, data.sentAt);
+            }
+        }
+
+        // react-native-webview delivers postMessage on `document` (Android) and
+        // `window` (iOS) — both listeners are needed for cross-platform support.
+        document.addEventListener("message", handleMessage);
+        window.addEventListener("message", handleMessage);
+
+        init();
+    </script>
+</body>
+</html>

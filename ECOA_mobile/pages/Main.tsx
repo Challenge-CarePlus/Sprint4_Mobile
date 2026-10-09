@@ -46,6 +46,15 @@ export default function Main() {
             active={true}
             onPress={() => navigation.navigate("SETTINGS" as never)}
           />
+
+          {/* Fase 0 (spike técnico) — remover no fechamento da v2 (Fase 8). */}
+          <Card
+            title="Spike (dev)"
+            subtitle="Latência MediaPipe"
+            iconName="science"
+            active={true}
+            onPress={() => navigation.navigate("VISION_SPIKE" as never)}
+          />
         </View>
       </View>
     </View>

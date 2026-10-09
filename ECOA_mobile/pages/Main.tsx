@@ -2,10 +2,16 @@ import { View, Text, StyleSheet } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import Card from "../components/Card";
+import { hasConsent } from "../services/consentStorage";
 
 export default function Main() {
   const { logout } = useAuth();
   const navigation = useNavigation();
+
+  async function handleOpenExercises() {
+    const consented = await hasConsent();
+    navigation.navigate((consented ? "TRACK_SELECT" : "CONSENT") as never);
+  }
 
   return (
     <View style={styles.container}>
@@ -20,7 +26,7 @@ export default function Main() {
             subtitle="Prática"
             iconName="fitness-center"
             active={true}
-            onPress={() => navigation.navigate("EXERCISE_INTRO" as never)}
+            onPress={handleOpenExercises}
           />
 
           <Card

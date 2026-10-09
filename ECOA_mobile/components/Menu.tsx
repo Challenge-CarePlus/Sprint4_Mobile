@@ -12,6 +12,7 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import { hasConsent } from "../services/consentStorage";
 
 export default function Menu() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +24,12 @@ export default function Menu() {
     async function handleLogout() {
         await logout();
         setMenuOpen(false);
+    }
+
+    async function handleOpenExercises() {
+        const consented = await hasConsent();
+        setMenuOpen(false);
+        navigation.navigate((consented ? "TRACK_SELECT" : "CONSENT") as never);
     }
 
     return (
@@ -59,7 +66,7 @@ export default function Menu() {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("EXERCISE_INTRO" as never)}
+                        onPress={handleOpenExercises}
                     >
                         <Text style={styles.menuText}>
                             Exercício

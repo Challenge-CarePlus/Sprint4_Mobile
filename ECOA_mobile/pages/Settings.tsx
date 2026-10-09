@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TouchableOpacity,
     View,
@@ -172,64 +171,6 @@ export default function Settings() {
                 <Text style={styles.subtitleText}>
                     Personalize a experiência do exercício conforme sua preferência.
                 </Text>
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                    Exibição
-                </Text>
-
-                <View style={styles.settingCard}>
-                    <View style={styles.settingTextContainer}>
-                        <Text style={styles.settingTitle}>
-                            Pontos faciais
-                        </Text>
-
-                        <Text style={styles.settingDescription}>
-                            Mostra os pontos detectados no rosto durante o exercício.
-                        </Text>
-                    </View>
-
-                    <Switch
-                        value={settings.showLandmarks}
-                        onValueChange={(value) =>
-                            updateSettings({ showLandmarks: value })
-                        }
-                        trackColor={{
-                            false: "#D1D5DB",
-                            true: "#AFC7E8",
-                        }}
-                        thumbColor={
-                            settings.showLandmarks ? "#284A7D" : "#F3F4F6"
-                        }
-                    />
-                </View>
-
-                <View style={styles.settingCard}>
-                    <View style={styles.settingTextContainer}>
-                        <Text style={styles.settingTitle}>
-                            Feedback visual
-                        </Text>
-
-                        <Text style={styles.settingDescription}>
-                            Altera a cor da mensagem conforme o retorno do exercício.
-                        </Text>
-                    </View>
-
-                    <Switch
-                        value={settings.visualFeedback}
-                        onValueChange={(value) =>
-                            updateSettings({ visualFeedback: value })
-                        }
-                        trackColor={{
-                            false: "#D1D5DB",
-                            true: "#AFC7E8",
-                        }}
-                        thumbColor={
-                            settings.visualFeedback ? "#284A7D" : "#F3F4F6"
-                        }
-                    />
-                </View>
             </View>
 
             <View style={styles.section}>

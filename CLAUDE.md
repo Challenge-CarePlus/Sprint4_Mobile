@@ -66,9 +66,14 @@ necessárias para passar AA sobre as cores já existentes no app. Fonte de títu
       **Não validado**: comportamento real em device (sem `adb`/emulador neste
       ambiente) — precisa rodar `npx expo prebuild && npx expo run:android` num
       device físico e checar a tela de spike. Ver "Como testar" abaixo.
-- [ ] Fase 3 — camada `vision/` (detectores por tipo de movimento + testes), depende
-      da validação da Fase 0.
-- [ ] Fase 4 — fluxo principal de telas.
+- [x] Fase 3 — camada `vision/`: `MovementDetector` (máquina de estados por exercício,
+      repetições, tempo de segurar), `calibration.ts` (linha de base relativa) e
+      `movementThresholds.ts` (mapeamento movimento → blendshape + limiares iniciais).
+      10 testes unitários cobrindo as regras (`npm test` em `ECOA_mobile/`). Limiares
+      de ativação ainda não calibrados com rostos reais — ajustar depois do teste da
+      Fase 0 em device.
+- [ ] Fase 4 — fluxo principal de telas (ainda não liga `MovementDetector` à
+      `FaceLandmarkerBridge`/câmera numa tela real — depende da Fase 0 validada).
 - [ ] Fase 5 — adaptação visual por faixa etária.
 - [ ] Fase 6 — progresso e resumo de ciclo.
 - [ ] Fase 7 — robustez e acessibilidade.

@@ -57,17 +57,33 @@ necessárias para passar AA sobre as cores já existentes no app. Fonte de títu
 - [x] Branch `v2` criada.
 - [x] Exploração do repositório e paleta aprovadas pelo usuário.
 - [x] Fase 1 — fundação: tokens, estrutura de pastas, este CLAUDE.md.
-- [ ] Fase 0 — spike técnico MediaPipe+WebView (latência em device real — não pode ser
-      validado neste ambiente, sem `adb`/emulador disponível; precisa ser rodado via
-      `expo run:android` por quem tem o device).
-- [ ] Fase 2 — modelo de dados + tabela de 15 exercícios (aguardando revisão com
-      fonoaudióloga antes de prosseguir).
-- [ ] Fase 3 — camada `vision/`.
+- [x] Fase 2 — modelo de dados (`data/types.ts`) + 15 exercícios revisados e aprovados
+      (`data/exercises.ts`, `data/tracks.ts`).
+- [~] Fase 0 — spike técnico MediaPipe+WebView: código implementado
+      (`vision/mediapipeAssets.ts`, `vision/FaceLandmarkerBridge.tsx`,
+      `pages/_dev/VisionSpike.tsx`, acessível pelo card "Spike (dev)" em Main).
+      Validado: typecheck limpo, `expo export --platform android` bundla sem erro.
+      **Não validado**: comportamento real em device (sem `adb`/emulador neste
+      ambiente) — precisa rodar `npx expo prebuild && npx expo run:android` num
+      device físico e checar a tela de spike. Ver "Como testar" abaixo.
+- [ ] Fase 3 — camada `vision/` (detectores por tipo de movimento + testes), depende
+      da validação da Fase 0.
 - [ ] Fase 4 — fluxo principal de telas.
 - [ ] Fase 5 — adaptação visual por faixa etária.
 - [ ] Fase 6 — progresso e resumo de ciclo.
 - [ ] Fase 7 — robustez e acessibilidade.
 - [ ] Fase 8 — limpeza do backend (remover detecção facial via WebSocket) + build Android.
+
+## Como testar o spike (Fase 0)
+
+1. `cd ECOA_mobile && npx expo prebuild && npx expo run:android` num device físico
+   Android (não funciona no Expo Go nem no emulador sem câmera).
+2. Na tela inicial, abrir o card "Spike (dev)".
+3. Aceitar a permissão de câmera. Esperar o status mudar para "MediaPipe pronto".
+4. Observar por ~30s: frames processados, latência última/média e FPS efetivo.
+5. Reportar os números e qualquer mensagem na caixa de log de erros — isso decide se
+   seguimos com a WebView ou se migramos para a alternativa de ML Kit nativo
+   considerada e descartada na decisão inicial.
 
 ## Adaptações em relação ao briefing original
 

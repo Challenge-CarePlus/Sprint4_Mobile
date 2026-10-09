@@ -3,7 +3,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { StyleSheet, Text, View } from "react-native";
 
 import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
-import { Blendshape } from "../../vision/FaceLandmarkerBridge";
+import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";

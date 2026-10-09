@@ -7,7 +7,7 @@ import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { Exercise, Track } from "../../data/types";
 import FaceTrackingCamera from "../../vision/FaceTrackingCamera";
-import { Blendshape } from "../../vision/FaceLandmarkerBridge";
+import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetector";
 import { getCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";

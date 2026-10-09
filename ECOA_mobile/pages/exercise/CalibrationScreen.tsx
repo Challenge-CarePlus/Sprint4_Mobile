@@ -1,0 +1,136 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { StyleSheet, Text, View } from "react-native";
+
+import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
+import { Blendshape } from "../../vision/FaceLandmarkerBridge";
+import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
+import { setCalibration } from "../../vision/calibrationStore";
+import { speak } from "../../services/speech";
+import { colors } from "../../theme/tokens";
+
+type RouteParams = {
+    trackId: string;
+    exerciseIndex: number;
+};
+
+export default function CalibrationScreen() {
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { trackId, exerciseIndex } = route.params as RouteParams;
+
+    const collectorRef = useRef(new CalibrationCollector());
+    const hasStartedRef = useRef(false);
+    const hasFinishedRef = useRef(false);
+
+    const [status, setStatus] = useState<FaceTrackingStatus>("initializing");
+    const [secondsRemaining, setSecondsRemaining] = useState(
+        Math.ceil(CALIBRATION_DURATION_MS / 1000)
+    );
+    const [collecting, setCollecting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const finishCalibration = useCallback(() => {
+        if (hasFinishedRef.current) {
+            return;
+        }
+
+        hasFinishedRef.current = true;
+        const baseline = collectorRef.current.buildBaseline();
+        setCalibration(trackId, baseline);
+
+        (navigation as any).replace("EXERCISE_SESSION", { trackId, exerciseIndex });
+    }, [navigation, trackId, exerciseIndex]);
+
+    useEffect(() => {
+        if (status !== "ready" || hasStartedRef.current) {
+            return;
+        }
+
+        hasStartedRef.current = true;
+        speak("Relaxe o rosto. Vamos calibrar por 3 segundos.");
+        setCollecting(true);
+
+        const startedAt = Date.now();
+        const tickInterval = setInterval(() => {
+            const elapsed = Date.now() - startedAt;
+            const remaining = Math.max(0, CALIBRATION_DURATION_MS - elapsed);
+            setSecondsRemaining(Math.ceil(remaining / 1000));
+        }, 250);
+
+        const finishTimeout = setTimeout(() => {
+            setCollecting(false);
+            clearInterval(tickInterval);
+            finishCalibration();
+        }, CALIBRATION_DURATION_MS);
+
+        return () => {
+            clearInterval(tickInterval);
+            clearTimeout(finishTimeout);
+        };
+    }, [status, finishCalibration]);
+
+    const handleReading = useCallback(
+        (blendshapes: Blendshape[]) => {
+            if (collecting) {
+                collectorRef.current.addSample(blendshapes);
+            }
+        },
+        [collecting]
+    );
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Calibração</Text>
+            <Text style={styles.subtitle}>
+                Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto.
+            </Text>
+
+            <FaceTrackingCamera
+                isActive
+                onReading={handleReading}
+                onStatusChange={setStatus}
+                onError={setErrorMessage}
+            />
+
+            {status === "ready" && (
+                <Text style={styles.countdown}>
+                    {collecting ? `Segure a posição: ${secondsRemaining}s` : "Pronto!"}
+                </Text>
+            )}
+
+            {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingHorizontal: 28,
+        paddingTop: 40,
+        gap: 16,
+        alignItems: "center",
+    },
+    title: {
+        fontFamily: "Righteous_400Regular",
+        fontSize: 26,
+        color: colors.primary900,
+    },
+    subtitle: {
+        fontSize: 15,
+        color: colors.textMuted,
+        textAlign: "center",
+        lineHeight: 20,
+    },
+    countdown: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: colors.primary700,
+    },
+    error: {
+        color: colors.error,
+        textAlign: "center",
+    },
+});

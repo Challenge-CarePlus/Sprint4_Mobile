@@ -94,6 +94,14 @@ faixa etária em cima desses tokens.
       alvos de toque ≥44px, `accessibilityRole`/`accessibilityLabel` nos controles principais.
 - [x] Fase 8 — backend reduzido a `/auth` + `/health`; fluxo antigo de câmera/exercício único
       (`Camera.tsx`, `ExerciseIntro.tsx`, rota WebSocket) removido.
+- [x] Compatibilidade web para teste de navegação (não faz parte do briefing, mas testado a
+      pedido do usuário): `vision/FaceTrackingCamera.web.tsx` e `pages/_dev/VisionSpike.web.tsx`
+      — variantes que o Metro escolhe automaticamente ao buildar para web, sem importar
+      `react-native-vision-camera`/`react-native-webview` (nenhum dos dois tem build web; sem
+      essas variantes o app inteiro ficava em tela branca, não só a tela de câmera, porque
+      `AppRouter.tsx` importa essas telas estaticamente). Validado de ponta a ponta com
+      Playwright headless: login → Main → consentimento → trilha → preview → calibração
+      renderizam certo no navegador, com aviso de que câmera é só no app nativo.
 
 ### Pendências reais (não posso validar neste ambiente)
 
@@ -131,13 +139,22 @@ faixa etária em cima desses tokens.
    npx expo prebuild
    npx expo run:android
    ```
-4. No app: Login (`ecoafono@email.com` / `ecoa2026`, ou cadastre pela tela de registro) →
+4. Para testar só a navegação/UI no navegador (câmera não funciona, é só placeholder — ver
+   Fase 0): `.env` traz `EXPO_PUBLIC_API_IP=10.0.2.2` (alias do emulador Android), que não
+   resolve num navegador desktop — sobrescreva na hora de rodar:
+   ```
+   cd ECOA_backend && npm run dev
+   # em outro terminal:
+   cd ECOA_mobile && EXPO_PUBLIC_API_IP=localhost npx expo start --web
+   ```
+6. No app: Login (`ecoafono@email.com` / `ecoa2026`, ou cadastre pela tela de registro) →
    "Exercícios" → aceitar consentimento → escolher uma trilha → calibração (3s, rosto
-   relaxado) → fazer os 5 exercícios → conferir o resumo do ciclo.
-5. Card "Spike (dev)" na Home mede latência bruta da ponte MediaPipe isoladamente, útil para
-   depurar se o fluxo de produção parecer lento ou travado.
-6. Reportar: a câmera abre? o status muda para "pronto"? o feedback por voz/texto reage aos
-   movimentos? a latência é aceitável? Isso decide se os limiares em
+   relaxado) → fazer os 5 exercícios → conferir o resumo do ciclo. No navegador, a tela de
+   calibração para aqui com um aviso — é esperado, a câmera é só no app nativo.
+7. Card "Spike (dev)" na Home mede latência bruta da ponte MediaPipe isoladamente, útil para
+   depurar se o fluxo de produção parecer lento ou travado (só funciona no app nativo).
+8. No device físico, reportar: a câmera abre? o status muda para "pronto"? o feedback por
+   voz/texto reage aos movimentos? a latência é aceitável? Isso decide se os limiares em
    `movementThresholds.ts` precisam de ajuste.
 
 ## Adaptações em relação ao briefing original

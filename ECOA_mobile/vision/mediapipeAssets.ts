@@ -35,23 +35,28 @@ export function getMediaPipeHtmlUri(): Promise<string> {
     return preparedHtmlUri;
 }
 
+async function copySpec(spec: AssetCopySpec): Promise<void> {
+    const asset = Asset.fromModule(spec.module);
+    await asset.downloadAsync();
+
+    if (!asset.localUri) {
+        throw new Error(`Falha ao preparar asset do MediaPipe: ${spec.destination}`);
+    }
+
+    const info = await FileSystem.getInfoAsync(spec.destination);
+
+    if (!info.exists) {
+        await FileSystem.copyAsync({ from: asset.localUri, to: spec.destination });
+    }
+}
+
 async function prepareAssets(): Promise<string> {
     await FileSystem.makeDirectoryAsync(WASM_DIR, { intermediates: true }).catch(() => {});
 
-    for (const spec of getCopySpecs()) {
-        const asset = Asset.fromModule(spec.module);
-        await asset.downloadAsync();
-
-        if (!asset.localUri) {
-            throw new Error(`Falha ao preparar asset do MediaPipe: ${spec.destination}`);
-        }
-
-        const info = await FileSystem.getInfoAsync(spec.destination);
-
-        if (!info.exists) {
-            await FileSystem.copyAsync({ from: asset.localUri, to: spec.destination });
-        }
-    }
+    // Os 5 arquivos são independentes entre si — copiar em paralelo evita
+    // somar a latência de 5 downloads/cópias sequenciais bem no caminho
+    // crítico de inicialização (antes da WebView poder reportar "pronto").
+    await Promise.all(getCopySpecs().map(copySpec));
 
     return `${MEDIAPIPE_DIR}index.html`;
 }

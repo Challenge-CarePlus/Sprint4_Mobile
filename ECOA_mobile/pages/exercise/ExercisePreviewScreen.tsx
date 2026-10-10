@@ -31,12 +31,13 @@ export default function ExercisePreviewScreen() {
     }
 
     const presentation = getPresentation(track.ageGroup);
+    const calibrated = hasCalibration(trackId);
 
     function handleStart() {
-        if (hasCalibration(trackId)) {
-            (navigation as any).navigate("EXERCISE_SESSION", { trackId, exerciseIndex });
+        if (calibrated) {
+            (navigation as any).replace("EXERCISE_SESSION", { trackId, exerciseIndex });
         } else {
-            (navigation as any).navigate("CALIBRATION", { trackId, exerciseIndex });
+            (navigation as any).replace("CALIBRATION", { trackId, exerciseIndex });
         }
     }
 
@@ -105,10 +106,10 @@ export default function ExercisePreviewScreen() {
                 onPress={handleStart}
                 activeOpacity={0.85}
                 accessibilityRole="button"
-                accessibilityLabel={hasCalibration(trackId) ? "Iniciar exercício" : "Começar calibração"}
+                accessibilityLabel={calibrated ? "Iniciar exercício" : "Começar calibração"}
             >
                 <Text style={[styles.startButtonText, { fontSize: 16 * presentation.fontScale }]}>
-                    {hasCalibration(trackId) ? "Iniciar exercício" : "Começar calibração"}
+                    {calibrated ? "Iniciar exercício" : "Começar calibração"}
                 </Text>
                 <MaterialIcons name="arrow-forward" size={24} color="#fff" />
             </TouchableOpacity>

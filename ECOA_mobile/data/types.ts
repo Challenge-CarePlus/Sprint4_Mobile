@@ -15,7 +15,7 @@ export type ValidationRule = {
     repetitions?: number;
 };
 
-export type Exercise = {
+type ExerciseBase = {
     id: string;
     name: string;
     ageGroup: AgeGroup;
@@ -23,11 +23,18 @@ export type Exercise = {
     instructions: string[];
     repetitions?: number;
     durationSeconds?: number;
-    validationType: ValidationType;
-    validationRule?: ValidationRule;
     demoVideoUrl: string;
     professionalGuidanceRecommended?: boolean;
 };
+
+/**
+ * Union discriminada por validationType: um exercício "validado" sempre tem
+ * validationRule (o MovementDetector depende dele); um "guiado" nunca tem.
+ * Evita precisar de `exercise.validationRule!` em quem consome o tipo.
+ */
+export type Exercise =
+    | (ExerciseBase & { validationType: "validado"; validationRule: ValidationRule })
+    | (ExerciseBase & { validationType: "guiado"; validationRule?: undefined });
 
 export type Track = {
     id: string;

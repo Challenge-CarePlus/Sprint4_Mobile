@@ -5,6 +5,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { TRACKS } from "../../data/tracks";
 import { AgeGroup } from "../../data/types";
 import { colors } from "../../theme/tokens";
+import { clearSessionOutcomes } from "../../services/sessionProgressStore";
+import { clearCalibration } from "../../vision/calibrationStore";
 
 const AGE_GROUP_ICON: Record<AgeGroup, keyof typeof MaterialIcons.glyphMap> = {
     children: "child-care",
@@ -16,6 +18,11 @@ export default function TrackSelectScreen() {
     const navigation = useNavigation();
 
     function handleSelectTrack(trackId: string) {
+        // Garante um início limpo: se uma tentativa anterior dessa trilha foi
+        // abandonada no meio, os resultados antigos não devem vazar para o
+        // resumo do ciclo que vai ser salvo desta vez.
+        clearSessionOutcomes(trackId);
+        clearCalibration(trackId);
         (navigation as any).navigate("EXERCISE_PREVIEW", { trackId, exerciseIndex: 0 });
     }
 

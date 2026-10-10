@@ -22,6 +22,8 @@ export type FaceTrackingStatus = "initializing" | "ready" | "error";
 const BASE_INTERVAL_MS = 400;
 const MAX_INTERVAL_MS = 1500;
 const SLOW_LATENCY_RATIO = 1.5;
+const FAST_LATENCY_RATIO = 0.6;
+const FAST_RECOVERY_STREAK = 5;
 const NO_FACE_WARNING_FRAMES = 6;
 
 type Props = {
@@ -53,7 +55,9 @@ export default function FaceTrackingCamera({
 
     const bridgeRef = useRef<FaceLandmarkerBridgeHandle>(null);
     const isSendingRef = useRef(false);
+    const baseIntervalRef = useRef(BASE_INTERVAL_MS);
     const intervalMsRef = useRef(BASE_INTERVAL_MS);
+    const fastStreakRef = useRef(0);
     const noFaceStreakRef = useRef(0);
 
     const [bridgeReady, setBridgeReady] = useState(false);
@@ -61,6 +65,9 @@ export default function FaceTrackingCamera({
     const [preferredCamera, setPreferredCamera] = useState(DEFAULT_SETTINGS.preferredCamera);
 
     const device = preferredCamera === "front" ? frontDevice ?? backDevice : backDevice ?? frontDevice;
+    const usingFallbackCamera =
+        (preferredCamera === "front" && !frontDevice && Boolean(backDevice)) ||
+        (preferredCamera === "back" && !backDevice && Boolean(frontDevice));
 
     useEffect(() => {
         if (!hasPermission) {
@@ -71,6 +78,7 @@ export default function FaceTrackingCamera({
     useEffect(() => {
         getSettings().then((settings) => {
             setPreferredCamera(settings.preferredCamera);
+            baseIntervalRef.current = settings.captureInterval;
             intervalMsRef.current = settings.captureInterval;
         });
     }, []);
@@ -93,7 +101,28 @@ export default function FaceTrackingCamera({
             const roundTripMs = result.completedAt - result.sentAt;
 
             if (roundTripMs > intervalMsRef.current * SLOW_LATENCY_RATIO) {
+                // Frame lento: reduz a taxa de captura imediatamente.
                 intervalMsRef.current = Math.min(intervalMsRef.current * 1.5, MAX_INTERVAL_MS);
+                fastStreakRef.current = 0;
+            } else if (roundTripMs < intervalMsRef.current * FAST_LATENCY_RATIO) {
+                // Vários frames rápidos seguidos: recupera a taxa aos poucos,
+                // nunca abaixo do intervalo configurado nas Configurações. Sem
+                // isso, um único soluço no aquecimento do MediaPipe deixava o
+                // device travado na taxa mais lenta pelo resto da sessão.
+                fastStreakRef.current += 1;
+
+                if (
+                    fastStreakRef.current >= FAST_RECOVERY_STREAK &&
+                    intervalMsRef.current > baseIntervalRef.current
+                ) {
+                    intervalMsRef.current = Math.max(
+                        intervalMsRef.current / 1.3,
+                        baseIntervalRef.current
+                    );
+                    fastStreakRef.current = 0;
+                }
+            } else {
+                fastStreakRef.current = 0;
             }
 
             if (result.faceDetected) {
@@ -217,6 +246,15 @@ export default function FaceTrackingCamera({
                     </Text>
                 </View>
             )}
+
+            {usingFallbackCamera && (
+                <View style={styles.fallbackBadge}>
+                    <Text style={styles.fallbackBadgeText}>
+                        Câmera {preferredCamera === "front" ? "frontal" : "traseira"} indisponível —
+                        usando a {preferredCamera === "front" ? "traseira" : "frontal"}
+                    </Text>
+                </View>
+            )}
         </View>
     );
 }
@@ -257,5 +295,21 @@ const styles = StyleSheet.create({
         color: colors.neutral900,
         textAlign: "center",
         fontWeight: "600",
+    },
+    fallbackBadge: {
+        position: "absolute",
+        top: 8,
+        left: 8,
+        right: 8,
+        backgroundColor: "rgba(0,0,0,0.6)",
+        borderRadius: 6,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+    },
+    fallbackBadgeText: {
+        color: colors.white,
+        fontSize: 11,
+        fontWeight: "600",
+        textAlign: "center",
     },
 });

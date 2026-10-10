@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { TRACKS } from "../../data/tracks";
-import { getCompletedCycleCount, saveCycleResult } from "../../services/progressStorage";
+import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
 import { colors } from "../../theme/tokens";
@@ -36,12 +36,16 @@ export default function CycleSummaryScreen() {
             exercisesCompleted: outcomes.length,
             validatedCompleted: validatedCount,
             guidedCompleted: guidedCount,
-        }).then(() => {
+        }).then((history) => {
+            // Deriva a contagem do próprio retorno em vez de uma segunda leitura
+            // do AsyncStorage — evita uma corrida entre leitura e escrita que
+            // deixava "ciclos concluídos" não determinístico.
+            const cyclesForTrack = history.filter((result) => result.trackId === trackId).length;
+            setPreviousCycles(cyclesForTrack);
+
             clearSessionOutcomes(trackId);
             clearCalibration(trackId);
         });
-
-        getCompletedCycleCount(trackId).then(setPreviousCycles);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [trackId]);
 

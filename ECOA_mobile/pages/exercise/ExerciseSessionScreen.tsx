@@ -9,7 +9,7 @@ import { Exercise, Track } from "../../data/types";
 import FaceTrackingCamera from "../../vision/FaceTrackingCamera";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetector";
-import { getCalibration } from "../../vision/calibrationStore";
+import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
 import { colors } from "../../theme/tokens";
@@ -28,6 +28,7 @@ type SessionProps = {
 };
 
 export default function ExerciseSessionScreen() {
+    const navigation = useNavigation();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
@@ -35,12 +36,29 @@ export default function ExerciseSessionScreen() {
     const exerciseId = track?.exerciseIds[exerciseIndex];
     const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
 
+    // Normalmente inalcançável: ExercisePreviewScreen só manda pra cá depois de
+    // calibrar. Mas essa tela também é alcançável por nome de rota sozinha (ex.:
+    // restauração de estado de navegação), então reforça o convite aqui em vez
+    // de rodar o detector com uma calibração vazia/sem sentido.
+    const needsCalibration = exercise?.validationType === "validado" && !hasCalibration(trackId);
+
+    useEffect(() => {
+        if (needsCalibration) {
+            (navigation as any).replace("CALIBRATION", { trackId, exerciseIndex });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [needsCalibration, trackId, exerciseIndex]);
+
     if (!track || !exercise) {
         return (
             <View style={styles.container}>
                 <Text style={styles.message}>Exercício não encontrado.</Text>
             </View>
         );
+    }
+
+    if (needsCalibration) {
+        return null;
     }
 
     const props: SessionProps = { track, exercise, trackId, exerciseIndex };
@@ -56,9 +74,9 @@ function goToNextStep(navigation: any, track: Track, trackId: string, exerciseIn
     const isLastExercise = exerciseIndex >= track.exerciseIds.length - 1;
 
     if (isLastExercise) {
-        navigation.navigate("CYCLE_SUMMARY", { trackId });
+        navigation.replace("CYCLE_SUMMARY", { trackId });
     } else {
-        navigation.navigate("EXERCISE_PREVIEW", { trackId, exerciseIndex: exerciseIndex + 1 });
+        navigation.replace("EXERCISE_PREVIEW", { trackId, exerciseIndex: exerciseIndex + 1 });
     }
 }
 
@@ -91,12 +109,18 @@ function RepetitionProgress({
 function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: SessionProps) {
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
-    const rule = exercise.validationRule!;
-    const targetReps = rule.repetitions ?? 1;
+    // exercise é tipado como Exercise (a union completa) aqui porque é passado
+    // via props — a narrowing do pai não atravessa a fronteira do componente,
+    // então reconfirma em runtime em vez de usar `!`. Com data/types.ts como
+    // union discriminada, isso só falha se os dados de exercises.ts estiverem
+    // errados, não por um exercício "validado" legítimo sem regra.
+    const rule = exercise.validationType === "validado" ? exercise.validationRule : undefined;
+    const targetReps = rule?.repetitions ?? 1;
 
     const detectorRef = useRef<MovementDetector | null>(null);
     const hasAnnouncedHoldRef = useRef(false);
     const hasFinishedRef = useRef(false);
+    const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [repsDone, setRepsDone] = useState(0);
     const [message, setMessage] = useState("Posicione o rosto na câmera");
@@ -106,9 +130,23 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
     useEffect(() => {
         resetSpeechDedup();
+
+        if (!rule) {
+            setErrorMessage("Este exercício não está configurado para validação por câmera.");
+            return;
+        }
+
         const baseline = getCalibration(trackId) ?? {};
         detectorRef.current = new MovementDetector(rule, baseline);
     }, [trackId, rule]);
+
+    useEffect(() => {
+        return () => {
+            if (finishTimeoutRef.current) {
+                clearTimeout(finishTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const finishExercise = useCallback(() => {
         if (hasFinishedRef.current) return;
@@ -121,7 +159,10 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
         });
 
         setSessionActive(false);
-        setTimeout(() => goToNextStep(navigation, track, trackId, exerciseIndex), 1200);
+        finishTimeoutRef.current = setTimeout(
+            () => goToNextStep(navigation, track, trackId, exerciseIndex),
+            1200
+        );
     }, [navigation, track, trackId, exerciseIndex, exercise.id]);
 
     const handleReading = useCallback(

@@ -107,15 +107,43 @@ faixa etária em cima desses tokens.
 
 1. **Comportamento em device físico** — sem `adb`/emulador aqui. Tudo foi validado
    estaticamente (typecheck, 10 testes unitários, `expo export --platform android` bundlando
-   os ~1084 módulos e todos os assets sem erro), mas ninguém rodou o app de verdade. Ver
+   os módulos e todos os assets sem erro), mas ninguém rodou o app de verdade. Ver
    "Como testar" abaixo.
 2. **Limiares de ativação dos movimentos** (`vision/movementThresholds.ts`) são valores
    iniciais, não calibrados com rostos reais — esperado ajuste fino depois do teste em device.
-3. **Card "Spike (dev)"** em Main ainda está no app — mantive de propósito como ferramenta de
-   diagnóstico até a validação em device confirmar que o fluxo de produção funciona; remover
-   depois.
+3. **Card "Spike (dev)"** continua no código, agora atrás de `__DEV__` (não aparece em build de
+   produção, mas ainda é usado em dev para medir latência). Remover de vez quando não precisar
+   mais dele como ferramenta de diagnóstico.
 4. **Build Android/EAS completo** não foi gerado (sem SDK Android neste ambiente) — só o bundle
    JS via `expo export` foi validado.
+
+### Revisão de código (code-review, 8 agentes, branch `main...v2`)
+
+Achados reais corrigidos: corrida no "ciclos concluídos" do resumo (3 agentes confirmaram),
+vazamento de progresso de trilha abandonada corrompendo o histórico salvo, calibração com
+fallback silencioso para baseline vazio (2 agentes confirmaram), pilha de navegação crescendo
+sem limite (`navigate`→`replace`), throttle adaptativo que nunca se recuperava, troca de
+câmera sem aviso, `setTimeout` sem limpeza, union discriminada faltando em `Exercise`, card
+dev visível em produção, cópia serial dos assets do MediaPipe. Detalhes no commit
+"fix: corrige bugs achados na revisão de código da v2".
+
+**Não corrigido, decisão em aberto com o usuário — segurança do backend de auth** (código
+pré-existente de antes da v2, não tocado por esta sprint, mas acessível pelo app):
+JWT secret hardcoded e duplicado em `authRouter.ts`/`middleware/auth.ts`, CORS totalmente
+aberto, cadastro com condição de corrida no arquivo JSON, sem validação de formato de
+e-mail/senha, `dotenv` declarado mas nunca usado (porta/secret não são configuráveis por
+ambiente), sem error handler global (vaza stack trace em dev). O mais sério é o secret
+hardcoded — qualquer um com acesso ao repo forja um token válido.
+
+**Não corrigido, aceito como débito técnico documentado** (baixo risco/baixo valor agora):
+`pages/_dev/VisionSpike.tsx` duplica o laço de captura de `vision/FaceTrackingCamera.tsx` e já
+diverge dele (sem o throttle adaptativo nem o aviso de "sem rosto"), e seu `pendingSinceRef`
+pode vazar entradas num caminho de erro sem `requestId`; a sobreposição visual dos pontos
+faciais que existia na tela antiga não foi reconstruída (a ponte só repassa blendshapes, não
+coordenadas); `vision/mediapipeAssets.ts` não teria como invalidar um asset desatualizado
+depois de um update do app (só copia se o arquivo de destino ainda não existe); alguns pontos
+de duplicação menores (lookup de trilha/exercício repetido em 3 telas, boilerplate de
+AsyncStorage repetido em 3 serviços, estilos entre as variantes `.tsx`/`.web.tsx`).
 
 ### Simplificações assumidas (documentadas, não decisões silenciosas)
 

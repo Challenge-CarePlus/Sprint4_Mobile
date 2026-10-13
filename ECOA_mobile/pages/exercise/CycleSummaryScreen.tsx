@@ -1,17 +1,37 @@
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import GradientButton from "../../components/GradientButton";
 import { TRACKS } from "../../data/tracks";
 import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
-import { colors } from "../../theme/tokens";
+import { colors, gradients, radii, shadow } from "../../theme/tokens";
 
 type RouteParams = {
     trackId: string;
 };
+
+function StatTile({
+    icon,
+    label,
+    value,
+}: {
+    icon: keyof typeof MaterialIcons.glyphMap;
+    label: string;
+    value: string | number;
+}) {
+    return (
+        <View style={styles.statTile}>
+            <MaterialIcons name={icon} size={20} color={colors.primary700} />
+            <Text style={styles.statValue}>{value}</Text>
+            <Text style={styles.statLabel}>{label}</Text>
+        </View>
+    );
+}
 
 export default function CycleSummaryScreen() {
     const navigation = useNavigation();
@@ -63,45 +83,38 @@ export default function CycleSummaryScreen() {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <View style={styles.iconContainer}>
-                <MaterialIcons name="emoji-events" size={44} color="#fff" />
-            </View>
-
-            <Text style={styles.title}>Ciclo concluído!</Text>
-            <Text style={styles.subtitle}>{track.name}</Text>
-
-            <View style={styles.statsBox}>
-                <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Exercícios concluídos</Text>
-                    <Text style={styles.statValue}>
-                        {outcomes.length}/{track.exerciseIds.length}
-                    </Text>
-                </View>
-
-                <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Validados pela câmera</Text>
-                    <Text style={styles.statValue}>{validatedCount}</Text>
-                </View>
-
-                <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Guiados (autoavaliação)</Text>
-                    <Text style={styles.statValue}>{guidedCount}</Text>
-                </View>
-
-                <View style={styles.statRow}>
-                    <Text style={styles.statLabel}>Ciclos concluídos nesta trilha</Text>
-                    <Text style={styles.statValue}>{previousCycles > 0 ? previousCycles : "—"}</Text>
-                </View>
-            </View>
-
-            <TouchableOpacity
-                style={styles.homeButton}
-                onPress={handleBackToHome}
-                activeOpacity={0.85}
-                accessibilityRole="button"
+            <LinearGradient
+                colors={gradients.success}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.hero, shadow.md]}
             >
-                <Text style={styles.homeButtonText}>Voltar ao início</Text>
-            </TouchableOpacity>
+                <View style={styles.trophyBadge}>
+                    <MaterialIcons name="emoji-events" size={44} color={colors.secondary500} />
+                </View>
+
+                <Text style={styles.title}>Ciclo concluído!</Text>
+                <Text style={styles.subtitle}>{track.name}</Text>
+            </LinearGradient>
+
+            <View style={styles.statsGrid}>
+                <StatTile
+                    icon="check-circle"
+                    label="Exercícios concluídos"
+                    value={`${outcomes.length}/${track.exerciseIds.length}`}
+                />
+                <StatTile icon="videocam" label="Validados pela câmera" value={validatedCount} />
+                <StatTile icon="visibility" label="Guiados (autoavaliação)" value={guidedCount} />
+                <StatTile
+                    icon="military-tech"
+                    label="Ciclos concluídos"
+                    value={previousCycles > 0 ? previousCycles : "—"}
+                />
+            </View>
+
+            <View style={styles.buttonSpacer}>
+                <GradientButton title="Voltar ao início" onPress={handleBackToHome} icon="home" />
+            </View>
         </ScrollView>
     );
 }
@@ -112,65 +125,68 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     content: {
-        paddingHorizontal: 28,
-        paddingVertical: 40,
-        gap: 16,
+        paddingHorizontal: 24,
+        paddingVertical: 32,
+        gap: 20,
         alignItems: "center",
     },
-    iconContainer: {
-        width: 84,
-        height: 84,
-        borderRadius: 999,
-        backgroundColor: colors.secondary700,
+    hero: {
+        width: "100%",
+        borderRadius: radii.xxl,
+        paddingVertical: 32,
+        paddingHorizontal: 24,
+        alignItems: "center",
+        gap: 6,
+    },
+    trophyBadge: {
+        width: 88,
+        height: 88,
+        borderRadius: radii.pill,
+        backgroundColor: colors.white,
         alignItems: "center",
         justifyContent: "center",
+        marginBottom: 8,
+        ...shadow.md,
     },
     title: {
         fontFamily: "Righteous_400Regular",
-        fontSize: 28,
-        color: colors.primary900,
+        fontSize: 26,
+        color: colors.white,
         textAlign: "center",
     },
     subtitle: {
-        fontSize: 16,
-        color: colors.textMuted,
+        fontSize: 15,
+        color: "rgba(255,255,255,0.9)",
+        fontWeight: "600",
         textAlign: "center",
     },
-    statsBox: {
+    statsGrid: {
         width: "100%",
-        backgroundColor: colors.neutral100,
-        borderRadius: 8,
-        padding: 16,
-        gap: 12,
-        marginTop: 8,
-    },
-    statRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: 14,
     },
-    statLabel: {
-        color: colors.neutral900,
-        fontSize: 14,
+    statTile: {
+        width: "47%",
+        backgroundColor: colors.white,
+        borderRadius: radii.lg,
+        padding: 16,
+        gap: 6,
+        ...shadow.sm,
     },
     statValue: {
-        color: colors.primary700,
-        fontSize: 14,
-        fontWeight: "700",
+        fontSize: 22,
+        fontWeight: "800",
+        color: colors.primary900,
     },
-    homeButton: {
-        marginTop: 16,
-        backgroundColor: colors.primary700,
-        borderRadius: 5,
-        paddingVertical: 16,
-        minHeight: 44,
+    statLabel: {
+        fontSize: 12,
+        color: colors.textMuted,
+        fontWeight: "600",
+    },
+    buttonSpacer: {
         width: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    homeButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: "700",
+        marginTop: 8,
     },
     paragraph: {
         padding: 24,

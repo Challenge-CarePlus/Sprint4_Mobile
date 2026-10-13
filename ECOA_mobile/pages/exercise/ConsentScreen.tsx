@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import IconBadge from "../../components/IconBadge";
+import GradientButton from "../../components/GradientButton";
 import { saveConsent } from "../../services/consentStorage";
-import { colors } from "../../theme/tokens";
+import { colors, radii, shadow } from "../../theme/tokens";
 
 type ConsentOption = "patient" | "guardian";
 
@@ -28,9 +30,7 @@ export default function ConsentScreen() {
             showsVerticalScrollIndicator={false}
             accessibilityLabel="Tela de consentimento"
         >
-            <View style={styles.iconContainer}>
-                <MaterialIcons name="shield" size={38} color="#fff" />
-            </View>
+            <IconBadge name="shield" size={76} iconSize={38} gradient="primary" style={styles.icon} />
 
             <Text style={styles.title}>Antes de começar</Text>
 
@@ -47,10 +47,13 @@ export default function ConsentScreen() {
 
             <Text style={styles.sectionLabel}>Quem está aceitando?</Text>
 
-            <TouchableOpacity
-                style={[styles.option, selected === "patient" && styles.optionSelected]}
+            <Pressable
+                style={({ pressed }) => [
+                    styles.option,
+                    selected === "patient" && styles.optionSelected,
+                    pressed && styles.optionPressed,
+                ]}
                 onPress={() => setSelected("patient")}
-                activeOpacity={0.85}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: selected === "patient" }}
             >
@@ -58,12 +61,15 @@ export default function ConsentScreen() {
                 {selected === "patient" && (
                     <MaterialIcons name="check-circle" size={22} color={colors.primary700} />
                 )}
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-                style={[styles.option, selected === "guardian" && styles.optionSelected]}
+            <Pressable
+                style={({ pressed }) => [
+                    styles.option,
+                    selected === "guardian" && styles.optionSelected,
+                    pressed && styles.optionPressed,
+                ]}
                 onPress={() => setSelected("guardian")}
-                activeOpacity={0.85}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: selected === "guardian" }}
             >
@@ -73,17 +79,16 @@ export default function ConsentScreen() {
                 {selected === "guardian" && (
                     <MaterialIcons name="check-circle" size={22} color={colors.primary700} />
                 )}
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-                style={[styles.continueButton, !selected && styles.continueButtonDisabled]}
-                onPress={handleContinue}
-                disabled={!selected}
-                activeOpacity={0.85}
-                accessibilityRole="button"
-            >
-                <Text style={styles.continueButtonText}>Aceito e quero continuar</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonSpacer}>
+                <GradientButton
+                    title="Aceito e quero continuar"
+                    onPress={handleContinue}
+                    disabled={!selected}
+                    icon="arrow-forward"
+                />
+            </View>
         </ScrollView>
     );
 }
@@ -98,14 +103,8 @@ const styles = StyleSheet.create({
         paddingVertical: 40,
         gap: 16,
     },
-    iconContainer: {
+    icon: {
         alignSelf: "center",
-        width: 72,
-        height: 72,
-        borderRadius: 999,
-        backgroundColor: colors.primary700,
-        alignItems: "center",
-        justifyContent: "center",
         marginBottom: 8,
     },
     title: {
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
     },
     paragraph: {
         fontSize: 15,
-        lineHeight: 21,
+        lineHeight: 22,
         color: colors.text,
     },
     sectionLabel: {
@@ -126,18 +125,24 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     option: {
+        backgroundColor: colors.white,
+        borderRadius: radii.lg,
         borderWidth: 2,
-        borderColor: colors.primary700,
-        borderRadius: 8,
+        borderColor: "transparent",
         padding: 16,
         minHeight: 44,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 12,
+        ...shadow.sm,
+    },
+    optionPressed: {
+        transform: [{ scale: 0.99 }],
     },
     optionSelected: {
         backgroundColor: colors.primary100,
+        borderColor: colors.primary700,
     },
     optionText: {
         flex: 1,
@@ -145,21 +150,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: colors.neutral900,
     },
-    continueButton: {
+    buttonSpacer: {
         marginTop: 16,
-        backgroundColor: colors.primary700,
-        borderRadius: 5,
-        paddingVertical: 16,
-        minHeight: 44,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    continueButtonDisabled: {
-        backgroundColor: colors.neutral300,
-    },
-    continueButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: "700",
     },
 });

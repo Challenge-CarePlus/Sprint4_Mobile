@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import {
     View,
     Image,
-    TextInput,
     TouchableOpacity,
     Text,
     StyleSheet,
     StatusBar,
-    ActivityIndicator,
 } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-
+import AuthTextField from "../components/AuthTextField";
+import GradientButton from "../components/GradientButton";
+import { colors, radii, shadow } from "../theme/tokens";
 
 export default function Login() {
     const { login } = useAuth();
@@ -58,27 +58,27 @@ export default function Login() {
             />
 
             <View style={styles.loginContainer}>
-                <View style={styles.iconFieldContainer}>
+                <View style={styles.iconWrapper}>
                     <Image
                         source={require("./../assets/icon.png")}
                         style={styles.iconImage}
                     />
+                </View>
 
-                    <TextInput
+                <View style={styles.fieldsContainer}>
+                    <AuthTextField
+                        icon="mail-outline"
                         placeholder="Email"
-                        placeholderTextColor="#d9d9d9"
-                        style={styles.loginInput}
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
                         keyboardType="email-address"
                     />
 
-                    <TextInput
+                    <AuthTextField
+                        icon="lock-outline"
                         placeholder="Senha"
-                        placeholderTextColor="#d9d9d9"
                         secureTextEntry
-                        style={styles.loginInput}
                         value={password}
                         onChangeText={setPassword}
                     />
@@ -89,34 +89,20 @@ export default function Login() {
                         navigation.navigate("REGISTER" as never)
                     }
                 >
-                    <Text
-                        style={styles.link}
-                    >
-                        Criar conta
-                    </Text>
+                    <Text style={styles.link}>Criar conta</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={[
-                        styles.loginButton,
-                        loading && styles.disabledButton,
-                    ]}
+                <GradientButton
+                    title="Entrar"
                     onPress={handleLogin}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.loginButtonText}>
-                            Entrar
-                        </Text>
-                    )}
-                </TouchableOpacity>
+                    loading={loading}
+                    style={styles.loginButton}
+                />
 
                 {error !== "" && (
-                    <Text style={styles.errorText}>
-                        {error}
-                    </Text>
+                    <View style={styles.errorBanner}>
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
                 )}
             </View>
         </View>
@@ -127,6 +113,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
+        backgroundColor: colors.background,
     },
 
     waves: {
@@ -140,62 +127,54 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        width: "70%",
-        gap: 10,
-        top: -70,
+        width: "80%",
+        gap: 14,
+        top: -40,
     },
 
-    iconFieldContainer: {
-        width: "100%",
+    iconWrapper: {
+        width: 140,
+        height: 140,
+        borderRadius: radii.pill,
+        backgroundColor: colors.white,
         alignItems: "center",
-        gap: 10,
+        justifyContent: "center",
+        marginBottom: 20,
+        ...shadow.lg,
     },
 
     iconImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        marginBottom: 60
+        width: 116,
+        height: 116,
+        borderRadius: radii.pill,
     },
 
-    loginInput: {
-        backgroundColor: "#4887E3",
-        borderRadius: 5,
-        paddingHorizontal: 20,
+    fieldsContainer: {
         width: "100%",
-        height: 45,
-        color: "#fff",
-        fontWeight: "500",
+        gap: 12,
     },
 
     link: {
-        color: "#284A7D",
-        textDecorationLine: "underline",
+        color: colors.primary700,
         fontWeight: "700",
     },
 
     loginButton: {
-        backgroundColor: "#284A7D",
-        width: "60%",
-        padding: 12,
-        borderRadius: 5,
-        marginTop: 20,
-        alignItems: "center",
+        marginTop: 12,
     },
 
-    disabledButton: {
-        opacity: 0.7,
-    },
-
-    loginButtonText: {
-        color: "#fff",
-        fontWeight: "600",
+    errorBanner: {
+        marginTop: 8,
+        backgroundColor: "#FDECEA",
+        borderRadius: radii.md,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
     },
 
     errorText: {
-        color: "#ff3b30",
-        fontWeight: "500",
+        color: colors.error,
+        fontWeight: "600",
         textAlign: "center",
-        marginTop: 10,
+        fontSize: 13,
     },
 });

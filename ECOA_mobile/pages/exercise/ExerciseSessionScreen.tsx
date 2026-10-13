@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import GradientButton from "../../components/GradientButton";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { Exercise, Track } from "../../data/types";
@@ -12,7 +13,7 @@ import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetecto
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
-import { colors } from "../../theme/tokens";
+import { colors, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
 
 type RouteParams = {
@@ -205,9 +206,11 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
-                Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
-            </Text>
+            <View style={styles.progressPill}>
+                <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                    Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+                </Text>
+            </View>
 
             <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
                 {exercise.name}
@@ -282,9 +285,11 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
-                Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
-            </Text>
+            <View style={styles.progressPill}>
+                <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                    Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+                </Text>
+            </View>
 
             <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
                 {exercise.name}
@@ -317,42 +322,55 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                         gamified={presentation.gamified}
                     />
 
-                    <TouchableOpacity
-                        style={[styles.repButton, { minHeight: presentation.minTouchTarget }]}
+                    <GradientButton
+                        title="Concluí uma repetição"
                         onPress={handleCompleteRepetition}
-                        activeOpacity={0.85}
-                        accessibilityRole="button"
-                    >
-                        <Text style={[styles.repButtonText, { fontSize: 16 * presentation.fontScale }]}>
-                            Concluí uma repetição
-                        </Text>
-                    </TouchableOpacity>
+                        icon="check"
+                        iconPosition="left"
+                        minHeight={presentation.minTouchTarget}
+                        fontSize={16 * presentation.fontScale}
+                    />
                 </>
             ) : (
                 <View style={styles.assessmentBox}>
                     <Text style={styles.assessmentTitle}>Você conseguiu realizar o exercício?</Text>
 
                     <View style={styles.assessmentRow}>
-                        <TouchableOpacity
-                            style={[styles.assessmentButton, styles.assessmentYes]}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.assessmentButton,
+                                styles.assessmentYes,
+                                pressed && styles.assessmentPressed,
+                            ]}
                             onPress={() => handleSelfAssessment("yes")}
                         >
+                            <MaterialIcons name="check-circle" size={20} color="#fff" />
                             <Text style={styles.assessmentButtonText}>Sim</Text>
-                        </TouchableOpacity>
+                        </Pressable>
 
-                        <TouchableOpacity
-                            style={[styles.assessmentButton, styles.assessmentPartial]}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.assessmentButton,
+                                styles.assessmentPartial,
+                                pressed && styles.assessmentPressed,
+                            ]}
                             onPress={() => handleSelfAssessment("partial")}
                         >
+                            <MaterialIcons name="adjust" size={20} color="#fff" />
                             <Text style={styles.assessmentButtonText}>Em parte</Text>
-                        </TouchableOpacity>
+                        </Pressable>
 
-                        <TouchableOpacity
-                            style={[styles.assessmentButton, styles.assessmentNo]}
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.assessmentButton,
+                                styles.assessmentNo,
+                                pressed && styles.assessmentPressed,
+                            ]}
                             onPress={() => handleSelfAssessment("no")}
                         >
+                            <MaterialIcons name="cancel" size={20} color="#fff" />
                             <Text style={styles.assessmentButtonText}>Não</Text>
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
                 </View>
             )}
@@ -383,8 +401,14 @@ const styles = StyleSheet.create({
         padding: 24,
         color: colors.text,
     },
+    progressPill: {
+        backgroundColor: colors.primary100,
+        borderRadius: radii.pill,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+    },
     progressLabel: {
-        color: colors.textMuted,
+        color: colors.primary900,
         fontWeight: "700",
     },
     exerciseName: {
@@ -394,10 +418,11 @@ const styles = StyleSheet.create({
     },
     messageBox: {
         width: "100%",
-        borderRadius: 8,
-        paddingVertical: 14,
+        borderRadius: radii.lg,
+        paddingVertical: 16,
         paddingHorizontal: 16,
         alignItems: "center",
+        ...shadow.sm,
     },
     messageText: {
         color: colors.white,
@@ -421,8 +446,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
         backgroundColor: "#FFF4E5",
-        borderRadius: 8,
-        padding: 10,
+        borderRadius: radii.lg,
+        padding: 12,
         width: "100%",
     },
     guidanceText: {
@@ -434,25 +459,15 @@ const styles = StyleSheet.create({
     instructionsBox: {
         width: "100%",
         gap: 6,
+        backgroundColor: colors.white,
+        borderRadius: radii.lg,
+        padding: 16,
+        ...shadow.sm,
     },
     guidedInstruction: {
         color: colors.neutral900,
         fontSize: 14,
         lineHeight: 19,
-    },
-    repButton: {
-        backgroundColor: colors.primary700,
-        borderRadius: 5,
-        paddingVertical: 16,
-        minHeight: 44,
-        width: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    repButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: "700",
     },
     assessmentBox: {
         width: "100%",
@@ -472,11 +487,16 @@ const styles = StyleSheet.create({
     },
     assessmentButton: {
         flex: 1,
-        minHeight: 44,
-        borderRadius: 8,
+        minHeight: 56,
+        borderRadius: radii.lg,
         alignItems: "center",
         justifyContent: "center",
+        gap: 4,
         paddingVertical: 12,
+        ...shadow.sm,
+    },
+    assessmentPressed: {
+        transform: [{ scale: 0.96 }],
     },
     assessmentYes: {
         backgroundColor: colors.success,
@@ -490,5 +510,6 @@ const styles = StyleSheet.create({
     assessmentButtonText: {
         color: colors.white,
         fontWeight: "700",
+        fontSize: 13,
     },
 });

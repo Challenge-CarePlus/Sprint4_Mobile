@@ -52,6 +52,9 @@ export const spacing = {
 export const radii = {
     sm: 5,
     md: 8,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
     pill: 999,
 } as const;
 
@@ -67,4 +70,51 @@ export const shadow = {
         shadowRadius: 5,
         elevation: 5,
     },
+    sm: {
+        shadowColor: "#0B1C33",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    md: {
+        shadowColor: "#0B1C33",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 16,
+        elevation: 8,
+    },
+    lg: {
+        shadowColor: "#0B1C33",
+        shadowOffset: { width: 0, height: 16 },
+        shadowOpacity: 0.16,
+        shadowRadius: 28,
+        elevation: 14,
+    },
+    glow: {
+        shadowColor: colors.secondary500,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 18,
+        elevation: 10,
+    },
+} as const;
+
+/**
+ * Gradientes reaproveitando a identidade do logo ECOA (azul-marinho -> coral).
+ * Arrays de cor para usar com expo-linear-gradient (`colors` prop).
+ */
+export const gradients = {
+    /** Fundo de hero/cabeçalho — a mesma direção do degradê do logo. */
+    hero: [colors.primary900, colors.primary700, colors.secondary500] as const,
+    /** CTA primário — profundidade sutil sem sair do azul da marca. */
+    primary: [colors.primary700, colors.primary900] as const,
+    /** Destaque/gamificação — o coral do logo, pouco usado em UI até aqui. */
+    accent: [colors.secondary500, colors.secondary700] as const,
+    /** Variante mais suave do azul — trilhas de idosos, estados calmos. */
+    calm: [colors.primary500, colors.primary900] as const,
+    /** Comemorativo — fim de ciclo, conquistas. */
+    success: [colors.success, "#1B5E20"] as const,
+    /** Véu claro para fundos de cartão, mantém contraste de texto alto. */
+    surface: [colors.white, colors.primary100] as const,
 } as const;

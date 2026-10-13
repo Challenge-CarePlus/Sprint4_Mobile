@@ -1,12 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
+import IconBadge from "../components/IconBadge";
+import { colors, radii, shadow } from "../theme/tokens";
 
 import {
     AppSettings,
@@ -72,53 +69,30 @@ const cameraOptions: {
     },
 ];
 
-function OptionButton({
-    title,
-    description,
-    iconName,
-    selected,
-    onPress,
-}: OptionButtonProps) {
+function OptionButton({ title, description, iconName, selected, onPress }: OptionButtonProps) {
     return (
-        <TouchableOpacity
-            style={[
+        <Pressable
+            style={({ pressed }) => [
                 styles.optionButton,
                 selected && styles.optionButtonSelected,
+                pressed && styles.optionButtonPressed,
             ]}
             onPress={onPress}
-            activeOpacity={0.85}
         >
-            <View
-                style={[
-                    styles.optionIconContainer,
-                    selected && styles.optionIconContainerSelected,
-                ]}
-            >
-                <MaterialIcons
-                    name={iconName}
-                    size={24}
-                    color={selected ? "#284A7D" : "#fff"}
-                />
-            </View>
+            <IconBadge
+                name={iconName}
+                size={48}
+                iconSize={22}
+                gradient={selected ? "accent" : "primary"}
+            />
 
             <View style={styles.optionTextContainer}>
-                <Text style={styles.optionTitle}>
-                    {title}
-                </Text>
-
-                <Text style={styles.optionDescription}>
-                    {description}
-                </Text>
+                <Text style={styles.optionTitle}>{title}</Text>
+                <Text style={styles.optionDescription}>{description}</Text>
             </View>
 
-            {selected && (
-                <MaterialIcons
-                    name="check-circle"
-                    size={24}
-                    color="#284A7D"
-                />
-            )}
-        </TouchableOpacity>
+            {selected && <MaterialIcons name="check-circle" size={24} color={colors.primary700} />}
+        </Pressable>
     );
 }
 
@@ -156,17 +130,9 @@ export default function Settings() {
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.headerContainer}>
-                <View style={styles.headerIconContainer}>
-                    <MaterialIcons
-                        name="settings"
-                        size={38}
-                        color="#fff"
-                    />
-                </View>
+                <IconBadge name="settings" size={78} iconSize={38} gradient="primary" />
 
-                <Text style={styles.titleText}>
-                    Configurações
-                </Text>
+                <Text style={styles.titleText}>Configurações</Text>
 
                 <Text style={styles.subtitleText}>
                     Personalize a experiência do exercício conforme sua preferência.
@@ -174,9 +140,7 @@ export default function Settings() {
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                    Frequência de captura
-                </Text>
+                <Text style={styles.sectionTitle}>Frequência de captura</Text>
 
                 <View style={styles.optionsContainer}>
                     {captureIntervalOptions.map((option) => (
@@ -197,9 +161,7 @@ export default function Settings() {
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                    Câmera preferida
-                </Text>
+                <Text style={styles.sectionTitle}>Câmera preferida</Text>
 
                 <View style={styles.optionsContainer}>
                     {cameraOptions.map((option) => (
@@ -219,21 +181,13 @@ export default function Settings() {
                 </View>
             </View>
 
-            <TouchableOpacity
-                style={styles.resetButton}
+            <Pressable
+                style={({ pressed }) => [styles.resetButton, pressed && styles.resetButtonPressed]}
                 onPress={handleResetSettings}
-                activeOpacity={0.85}
             >
-                <MaterialIcons
-                    name="restart-alt"
-                    size={24}
-                    color="#284A7D"
-                />
-
-                <Text style={styles.resetButtonText}>
-                    Restaurar configurações padrão
-                </Text>
-            </TouchableOpacity>
+                <MaterialIcons name="restart-alt" size={22} color={colors.primary700} />
+                <Text style={styles.resetButtonText}>Restaurar configurações padrão</Text>
+            </Pressable>
         </ScrollView>
     );
 }
@@ -241,14 +195,14 @@ export default function Settings() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-        paddingTop: "10%"
+        backgroundColor: colors.background,
+        paddingTop: "10%",
     },
 
     contentContainer: {
-        paddingHorizontal: 32,
+        paddingHorizontal: 28,
         paddingVertical: 40,
-        gap: 24,
+        gap: 28,
     },
 
     headerContainer: {
@@ -256,35 +210,17 @@ const styles = StyleSheet.create({
         gap: 12,
     },
 
-    headerIconContainer: {
-        width: 78,
-        height: 78,
-        borderRadius: 999,
-        backgroundColor: "#284A7D",
-        justifyContent: "center",
-        alignItems: "center",
-
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.18,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-
     titleText: {
         fontFamily: "Righteous_400Regular",
-        fontSize: 32,
-        color: "#1E3E6D",
+        fontSize: 30,
+        color: colors.primary900,
         textAlign: "center",
     },
 
     subtitleText: {
-        color: "#6B7280",
-        fontSize: 16,
-        lineHeight: 22,
+        color: colors.textMuted,
+        fontSize: 15,
+        lineHeight: 21,
         textAlign: "center",
         fontWeight: "500",
     },
@@ -295,38 +231,8 @@ const styles = StyleSheet.create({
 
     sectionTitle: {
         fontFamily: "Righteous_400Regular",
-        fontSize: 24,
-        color: "#1E3E6D",
-    },
-
-    settingCard: {
-        width: "100%",
-        borderColor: "#284A7D",
-        borderWidth: 2,
-        borderRadius: 8,
-        padding: 16,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        backgroundColor: "#fff",
-    },
-
-    settingTextContainer: {
-        flex: 1,
-        gap: 4,
-    },
-
-    settingTitle: {
-        color: "#000",
-        fontFamily: "Righteous_400Regular",
         fontSize: 20,
-    },
-
-    settingDescription: {
-        color: "#6B7280",
-        fontSize: 14,
-        lineHeight: 19,
-        fontWeight: "500",
+        color: colors.primary900,
     },
 
     optionsContainer: {
@@ -335,31 +241,23 @@ const styles = StyleSheet.create({
 
     optionButton: {
         width: "100%",
-        borderColor: "#284A7D",
+        backgroundColor: colors.white,
+        borderRadius: radii.xl,
         borderWidth: 2,
-        borderRadius: 8,
+        borderColor: "transparent",
         padding: 14,
         flexDirection: "row",
         alignItems: "center",
         gap: 14,
-        backgroundColor: "#fff",
+        ...shadow.sm,
+    },
+    optionButtonPressed: {
+        transform: [{ scale: 0.99 }],
     },
 
     optionButtonSelected: {
-        backgroundColor: "#EAF2FF",
-    },
-
-    optionIconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 999,
-        backgroundColor: "#284A7D",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-    optionIconContainerSelected: {
-        backgroundColor: "#fff",
+        backgroundColor: colors.primary100,
+        borderColor: colors.primary700,
     },
 
     optionTextContainer: {
@@ -368,36 +266,39 @@ const styles = StyleSheet.create({
     },
 
     optionTitle: {
-        color: "#000",
+        color: colors.neutral900,
         fontFamily: "Righteous_400Regular",
-        fontSize: 19,
+        fontSize: 17,
     },
 
     optionDescription: {
-        color: "#6B7280",
-        fontSize: 14,
-        lineHeight: 19,
+        color: colors.textMuted,
+        fontSize: 13,
+        lineHeight: 18,
         fontWeight: "500",
     },
 
     resetButton: {
-        borderColor: "#284A7D",
+        borderColor: colors.primary700,
         borderWidth: 2,
-        borderRadius: 8,
+        borderRadius: radii.lg,
         paddingVertical: 14,
         paddingHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-        backgroundColor: "#fff",
-        marginBottom: "20%"
+        backgroundColor: colors.white,
+        marginBottom: 24,
+    },
+    resetButtonPressed: {
+        backgroundColor: colors.primary100,
     },
 
     resetButtonText: {
-        color: "#284A7D",
-        fontSize: 16,
+        color: colors.primary700,
+        fontSize: 15,
         fontWeight: "700",
-        textAlign: "center"
+        textAlign: "center",
     },
 });

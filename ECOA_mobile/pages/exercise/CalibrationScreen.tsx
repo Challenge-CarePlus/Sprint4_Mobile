@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { StyleSheet, Text, View } from "react-native";
 
+import CircularProgress from "../../components/CircularProgress";
 import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
@@ -27,6 +28,7 @@ export default function CalibrationScreen() {
     const [secondsRemaining, setSecondsRemaining] = useState(
         Math.ceil(CALIBRATION_DURATION_MS / 1000)
     );
+    const [progress, setProgress] = useState(0);
     const [collecting, setCollecting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -56,10 +58,12 @@ export default function CalibrationScreen() {
             const elapsed = Date.now() - startedAt;
             const remaining = Math.max(0, CALIBRATION_DURATION_MS - elapsed);
             setSecondsRemaining(Math.ceil(remaining / 1000));
-        }, 250);
+            setProgress(Math.min(1, elapsed / CALIBRATION_DURATION_MS));
+        }, 100);
 
         const finishTimeout = setTimeout(() => {
             setCollecting(false);
+            setProgress(1);
             clearInterval(tickInterval);
             finishCalibration();
         }, CALIBRATION_DURATION_MS);
@@ -94,9 +98,10 @@ export default function CalibrationScreen() {
             />
 
             {status === "ready" && (
-                <Text style={styles.countdown}>
-                    {collecting ? `Segure a posição: ${secondsRemaining}s` : "Pronto!"}
-                </Text>
+                <CircularProgress
+                    progress={progress}
+                    label={collecting ? `${secondsRemaining}s` : "Pronto!"}
+                />
             )}
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
@@ -110,7 +115,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
         paddingHorizontal: 28,
         paddingTop: 40,
-        gap: 16,
+        gap: 20,
         alignItems: "center",
     },
     title: {
@@ -123,11 +128,6 @@ const styles = StyleSheet.create({
         color: colors.textMuted,
         textAlign: "center",
         lineHeight: 20,
-    },
-    countdown: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: colors.primary700,
     },
     error: {
         color: colors.error,

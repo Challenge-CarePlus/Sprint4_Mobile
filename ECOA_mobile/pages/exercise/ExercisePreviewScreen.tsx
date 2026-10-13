@@ -1,10 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import GradientButton from "../../components/GradientButton";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
-import { colors } from "../../theme/tokens";
+import { colors, gradients, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
 
@@ -54,14 +56,24 @@ export default function ExercisePreviewScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={styles.progress}>
-                Exercício {exerciseIndex + 1} de {track.exerciseIds.length} — {track.name}
-            </Text>
-
-            <View style={styles.videoPlaceholder} accessibilityLabel="Vídeo de demonstração">
-                <MaterialIcons name="play-circle-filled" size={48} color="#fff" />
-                <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
+            <View style={styles.progressPill}>
+                <Text style={styles.progress}>
+                    Exercício {exerciseIndex + 1} de {track.exerciseIds.length} · {track.name}
+                </Text>
             </View>
+
+            <LinearGradient
+                colors={gradients.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.videoPlaceholder, shadow.md]}
+                accessibilityLabel="Vídeo de demonstração"
+            >
+                <View style={styles.playButton}>
+                    <MaterialIcons name="play-arrow" size={34} color={colors.primary900} />
+                </View>
+                <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
+            </LinearGradient>
 
             <Text style={[styles.title, { fontSize: 26 * presentation.fontScale }]}>
                 {exercise.name}
@@ -91,7 +103,12 @@ export default function ExercisePreviewScreen() {
             <View style={styles.instructionsBox}>
                 {exercise.instructions.map((instruction, index) => (
                     <View key={index} style={styles.instructionRow}>
-                        <Text style={styles.instructionNumber}>{index + 1}</Text>
+                        <LinearGradient
+                            colors={gradients.accent}
+                            style={styles.instructionNumber}
+                        >
+                            <Text style={styles.instructionNumberText}>{index + 1}</Text>
+                        </LinearGradient>
                         <Text style={[styles.instructionText, { fontSize: 15 * presentation.fontScale }]}>
                             {instruction}
                         </Text>
@@ -99,20 +116,22 @@ export default function ExercisePreviewScreen() {
                 ))}
             </View>
 
-            {repetitionLabel ? <Text style={styles.repetitionLabel}>{repetitionLabel}</Text> : null}
+            {repetitionLabel ? (
+                <View style={styles.repetitionPill}>
+                    <MaterialIcons name="repeat" size={16} color={colors.primary700} />
+                    <Text style={styles.repetitionLabel}>{repetitionLabel}</Text>
+                </View>
+            ) : null}
 
-            <TouchableOpacity
-                style={[styles.startButton, { minHeight: presentation.minTouchTarget }]}
-                onPress={handleStart}
-                activeOpacity={0.85}
-                accessibilityRole="button"
-                accessibilityLabel={calibrated ? "Iniciar exercício" : "Começar calibração"}
-            >
-                <Text style={[styles.startButtonText, { fontSize: 16 * presentation.fontScale }]}>
-                    {calibrated ? "Iniciar exercício" : "Começar calibração"}
-                </Text>
-                <MaterialIcons name="arrow-forward" size={24} color="#fff" />
-            </TouchableOpacity>
+            <View style={styles.buttonSpacer}>
+                <GradientButton
+                    title={calibrated ? "Iniciar exercício" : "Começar calibração"}
+                    onPress={handleStart}
+                    icon="arrow-forward"
+                    minHeight={presentation.minTouchTarget}
+                    fontSize={16 * presentation.fontScale}
+                />
+            </View>
         </ScrollView>
     );
 }
@@ -127,24 +146,39 @@ const styles = StyleSheet.create({
         paddingVertical: 32,
         gap: 16,
     },
+    progressPill: {
+        alignSelf: "center",
+        backgroundColor: colors.primary100,
+        borderRadius: radii.pill,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+    },
     progress: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: "700",
-        color: colors.textMuted,
+        color: colors.primary900,
         textAlign: "center",
     },
     videoPlaceholder: {
         width: "100%",
         height: 180,
-        borderRadius: 12,
-        backgroundColor: colors.primary700,
+        borderRadius: radii.xl,
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
+        gap: 10,
+    },
+    playButton: {
+        width: 56,
+        height: 56,
+        borderRadius: radii.pill,
+        backgroundColor: colors.white,
+        alignItems: "center",
+        justifyContent: "center",
+        ...shadow.sm,
     },
     videoPlaceholderText: {
         color: colors.white,
-        fontWeight: "600",
+        fontWeight: "700",
     },
     title: {
         fontFamily: "Righteous_400Regular",
@@ -161,7 +195,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
         backgroundColor: "#FFF4E5",
-        borderRadius: 8,
+        borderRadius: radii.lg,
         padding: 12,
     },
     guidanceText: {
@@ -171,7 +205,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
     instructionsBox: {
-        gap: 12,
+        gap: 14,
     },
     instructionRow: {
         flexDirection: "row",
@@ -179,42 +213,40 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
     },
     instructionNumber: {
-        width: 24,
-        height: 24,
-        borderRadius: 999,
-        backgroundColor: colors.primary100,
-        color: colors.primary900,
-        textAlign: "center",
-        lineHeight: 24,
+        width: 26,
+        height: 26,
+        borderRadius: radii.pill,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    instructionNumberText: {
+        color: "#fff",
         fontWeight: "700",
         fontSize: 13,
-        overflow: "hidden",
     },
     instructionText: {
         flex: 1,
         color: colors.neutral900,
         lineHeight: 20,
+        marginTop: 3,
     },
-    repetitionLabel: {
-        textAlign: "center",
-        fontWeight: "700",
-        color: colors.primary700,
-    },
-    startButton: {
-        backgroundColor: colors.primary700,
-        borderRadius: 5,
-        paddingVertical: 16,
-        minHeight: 44,
+    repetitionPill: {
+        alignSelf: "center",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        marginTop: 8,
+        gap: 6,
+        backgroundColor: colors.primary100,
+        borderRadius: radii.pill,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
     },
-    startButtonText: {
-        color: colors.white,
-        fontSize: 16,
+    repetitionLabel: {
         fontWeight: "700",
+        color: colors.primary700,
+        fontSize: 13,
+    },
+    buttonSpacer: {
+        marginTop: 8,
     },
     paragraph: {
         padding: 24,

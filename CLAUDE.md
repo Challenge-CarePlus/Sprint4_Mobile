@@ -48,6 +48,33 @@ necessárias para passar AA sobre as cores já existentes no app. Fonte de títu
 `theme/ageGroupThemes.ts` adapta escala de fonte, contraste, gamificação e alvo de toque por
 faixa etária em cima desses tokens.
 
+`theme/tokens.ts` também define `gradients` (hero/primary/accent/calm/success/surface — o
+`hero` reaproveita o degradê navy→coral do próprio logo ECOA) e uma escala maior de `radii`
+(`lg`/`xl`/`xxl`) e `shadow` (`sm`/`md`/`lg`/`glow`), usados pelo design system em
+`components/` (ver "Redesign visual" abaixo).
+
+## Design system (componentes reutilizáveis)
+
+A pedido do usuário ("mais moderno, sofisticado, que cause impacto"), a interface inteira foi
+redesenhada por cima da paleta acima — nenhuma cor nova fora da CarePlus, só execução visual
+melhor. Peças centrais em `components/`:
+
+- `IconBadge.tsx` — selo circular com gradiente para ícones em destaque (cards, cabeçalhos,
+  conquistas), substitui os círculos de cor lisa que o app tinha.
+- `GradientButton.tsx` — o único botão primário do app (gradiente, feedback tátil ao tocar,
+  estado `loading` com spinner). Trocar o CTA do app inteiro é mudar aqui, não em cada tela.
+- `CircularProgress.tsx` — anel de progresso animado (`react-native-svg`), usado na contagem
+  de 3s da calibração em vez de texto cru.
+- `AuthTextField.tsx` — campo de texto de Login/Cadastro (ícone + fundo branco + sombra).
+
+Aplicado em todas as telas: autenticação, Home (hero em gradiente com a textura de
+`assets/waves1.png`), Menu (dropdown em gradiente), Configurações e todo o fluxo de
+exercícios. Um bug real foi descoberto testando: `components/Menu.tsx` (cabeçalho fixo de
+todas as telas) é posicionado `absolute` e não reservava altura de verdade no layout — o
+conteúdo das telas começava atrás dele. Passava despercebido com fundo branco liso; ficou
+óbvio com o hero em gradiente cobrindo o título. Corrigido dando altura explícita ao wrapper
+do header. Validado visualmente (Playwright) nas 10 telas principais depois do fix.
+
 ## Estrutura de pastas (nova aba)
 
 - `theme/` — tokens centralizados (cores, tipografia, espaçamento, raios, sombra) e as
@@ -94,14 +121,27 @@ faixa etária em cima desses tokens.
       alvos de toque ≥44px, `accessibilityRole`/`accessibilityLabel` nos controles principais.
 - [x] Fase 8 — backend reduzido a `/auth` + `/health`; fluxo antigo de câmera/exercício único
       (`Camera.tsx`, `ExerciseIntro.tsx`, rota WebSocket) removido.
-- [x] Compatibilidade web para teste de navegação (não faz parte do briefing, mas testado a
-      pedido do usuário): `vision/FaceTrackingCamera.web.tsx` e `pages/_dev/VisionSpike.web.tsx`
-      — variantes que o Metro escolhe automaticamente ao buildar para web, sem importar
-      `react-native-vision-camera`/`react-native-webview` (nenhum dos dois tem build web; sem
-      essas variantes o app inteiro ficava em tela branca, não só a tela de câmera, porque
-      `AppRouter.tsx` importa essas telas estaticamente). Validado de ponta a ponta com
-      Playwright headless: login → Main → consentimento → trilha → preview → calibração
-      renderizam certo no navegador, com aviso de que câmera é só no app nativo.
+- [x] Compatibilidade web (não faz parte do briefing, pedido do usuário para testar sem
+      device): `vision/FaceTrackingCamera.web.tsx` e `pages/_dev/VisionSpike.web.tsx` —
+      variantes que o Metro escolhe automaticamente ao buildar para web, evitando que
+      `react-native-vision-camera`/`react-native-webview` (sem build web) quebrassem o app
+      inteiro em tela branca (`AppRouter.tsx` importa essas telas estaticamente).
+- [x] **Câmera e detecção facial reais no navegador** (webcam do PC/tablet via
+      `getUserMedia`), não só um aviso — pedido explícito do usuário depois de testar.
+      `FaceTrackingCamera.web.tsx` roda `@mediapipe/tasks-vision` direto no mesmo contexto JS
+      da página (sem WebView, diferente do nativo) com `runningMode: "VIDEO"` sobre um
+      `<video>` ao vivo via `requestAnimationFrame`. Carrega o runtime wasm do CDN oficial via
+      `new Function("specifier", "return import(specifier)")` — importar o pacote
+      `@mediapipe/tasks-vision` direto (`require`/`import` estático) faz o Metro tentar
+      analisar seu `vision_bundle.mjs`, que tem um `import()` dinâmico interno que o Metro não
+      suporta estaticamente (erro "Invalid call... import(t.toString())"); o truque força um
+      `import()` de verdade resolvido pelo navegador em runtime. O modelo `.task` continua
+      bundlado localmente. Validado com Chromium headless + webcam simulada
+      (`--use-fake-device-for-media-stream`): MediaPipe inicializa de verdade ("Graph
+      successfully started running"), calibração roda, chega no exercício real.
+- [x] **Redesign visual completo** (pedido do usuário: "mais moderno, sofisticado, que cause
+      impacto"), mantendo a paleta CarePlus — ver "Design system" acima. Descobriu e corrigiu
+      um bug real: o header (`Menu.tsx`) não reservava altura de verdade no layout.
 
 ### Pendências reais (não posso validar neste ambiente)
 
@@ -167,9 +207,9 @@ AsyncStorage repetido em 3 serviços, estilos entre as variantes `.tsx`/`.web.ts
    npx expo prebuild
    npx expo run:android
    ```
-4. Para testar só a navegação/UI no navegador (câmera não funciona, é só placeholder — ver
-   Fase 0): `.env` traz `EXPO_PUBLIC_API_IP=10.0.2.2` (alias do emulador Android), que não
-   resolve num navegador desktop — sobrescreva na hora de rodar:
+4. Para testar no navegador com a webcam do PC/tablet de verdade: `.env` traz
+   `EXPO_PUBLIC_API_IP=10.0.2.2` (alias do emulador Android), que não resolve num navegador
+   desktop — sobrescreva na hora de rodar:
    ```
    cd ECOA_backend && npm run dev
    # em outro terminal:
@@ -177,8 +217,9 @@ AsyncStorage repetido em 3 serviços, estilos entre as variantes `.tsx`/`.web.ts
    ```
 6. No app: Login (`ecoafono@email.com` / `ecoa2026`, ou cadastre pela tela de registro) →
    "Exercícios" → aceitar consentimento → escolher uma trilha → calibração (3s, rosto
-   relaxado) → fazer os 5 exercícios → conferir o resumo do ciclo. No navegador, a tela de
-   calibração para aqui com um aviso — é esperado, a câmera é só no app nativo.
+   relaxado) → fazer os 5 exercícios → conferir o resumo do ciclo. No navegador a câmera e a
+   detecção já rodam de verdade (webcam via `getUserMedia`); `vision/FaceTrackingCamera.tsx`
+   (app nativo) continua sendo o caminho de produção.
 7. Card "Spike (dev)" na Home mede latência bruta da ponte MediaPipe isoladamente, útil para
    depurar se o fluxo de produção parecer lento ou travado (só funciona no app nativo).
 8. No device físico, reportar: a câmera abre? o status muda para "pronto"? o feedback por

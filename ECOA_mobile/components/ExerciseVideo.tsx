@@ -31,7 +31,7 @@ export default function ExerciseVideo({ source, style }: Props) {
             player={player}
             style={[styles.video, style]}
             nativeControls={false}
-            contentFit="cover"
+            contentFit="contain"
         />
     );
 }

@@ -168,7 +168,9 @@ const styles = StyleSheet.create({
     },
     videoPlaceholder: {
         width: "100%",
-        height: 180,
+        maxWidth: 320,
+        aspectRatio: 1,
+        alignSelf: "center",
         borderRadius: radii.xl,
         alignItems: "center",
         justifyContent: "center",

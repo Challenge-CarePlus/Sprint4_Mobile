@@ -111,6 +111,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "jawOpen", repetitions: 10 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-vowel-overarticulation.mp4",
+        demoVideoAsset: require("../assets/videos/adults-vowel-overarticulation.mp4"),
     },
     {
         id: "adults-smile-pucker",
@@ -126,6 +127,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "mouthSmile", repetitions: 8 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-smile-pucker.mp4",
+        demoVideoAsset: require("../assets/videos/adults-smile-pucker.mp4"),
     },
     {
         id: "adults-lip-trill",
@@ -141,6 +143,7 @@ export const EXERCISES: Exercise[] = [
         durationSeconds: 3,
         validationType: "guiado",
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-lip-trill.mp4",
+        demoVideoAsset: require("../assets/videos/adults-lip-trill.mp4"),
     },
     {
         id: "adults-diaphragmatic-breathing",
@@ -155,6 +158,7 @@ export const EXERCISES: Exercise[] = [
         repetitions: 5,
         validationType: "guiado",
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-diaphragmatic-breathing.mp4",
+        demoVideoAsset: require("../assets/videos/adults-diaphragmatic-breathing.mp4"),
     },
 
     {

@@ -202,14 +202,23 @@ controles. `Exercise.demoVideoAsset` (local, `require(...)`) tem prioridade sobr
 `Exercise.demoVideoUrl` (remoto, ainda placeholder); `ExercisePreviewScreen` cai no gradiente
 com ícone de play só quando nenhum dos dois estiver resolvido.
 
-- **Feito**: `adults-jaw-stretch` ("Alongamento de mandíbula") — primeiro vídeo gerado pelo
-  usuário via prompt de IA (roteiro completo e os 15 prompts por trilha estão num artifact
-  publicado nesta conversa, não neste repo). Arquivo em `assets/videos/adults-jaw-stretch.mp4`.
-- **Pendente**: os outros 14. Plano combinado com o usuário: gerar a trilha adulta inteira
-  primeiro e validar antes de seguir pras outras duas. Reaproveitamento entre trilhas é limitado
-  — só "Alongamento de mandíbula" tem um par visual parecido na trilha de idosos (abertura e
-  fechamento de boca); os outros 4 exercícios da trilha adulta não têm equivalente nas outras
-  trilhas.
+- **Feito**: trilha adulta inteira (5 de 5) — todos gerados pelo usuário via prompt de IA
+  (roteiro completo e os 15 prompts por trilha estão num artifact publicado nesta conversa, não
+  neste repo). Arquivos em `assets/videos/adults-*.mp4`: `jaw-stretch`,
+  `vowel-overarticulation`, `smile-pucker`, `lip-trill`, `diaphragmatic-breathing`. Todos
+  1024×576 (16:9).
+- **Bug corrigido**: a caixa de preview tinha `height: 180` fixo com largura total — numa tela
+  larga isso dá uma proporção bem mais "esticada" que 16:9, e com `contentFit="cover"` o vídeo
+  era escalado e cortado verticalmente (só aparecia uma fatia central, ex. só olhos e nariz).
+  Troquei `videoPlaceholder` para `aspectRatio: 16/9` (em vez de altura fixa) e o `contentFit` de
+  `ExerciseVideo` de `"cover"` para `"contain"` — mesmo raciocínio já aplicado antes na câmera
+  (`FaceTrackingCamera.web.tsx`), prioriza nunca cortar o rosto mesmo que um vídeo futuro venha
+  numa proporção diferente de 16:9.
+- **Pendente**: os outros 10 (trilhas infantil e idosos). Plano combinado com o usuário: a
+  trilha adulta era o primeiro lote, agora validada — próximo passo é gerar as outras duas.
+  Reaproveitamento entre trilhas é limitado — só "Alongamento de mandíbula" tem um par visual
+  parecido na trilha de idosos (abertura e fechamento de boca); os outros 4 exercícios da trilha
+  adulta não têm equivalente nas outras trilhas.
 - **Hospedagem**: os vídeos bundlados localmente (`require`) funcionam bem para este estágio,
   mas não escalam para produção (infla o tamanho do app, não tem cache/CDN). Decisão de produção
   ainda em aberto — ao hospedar externamente, só trocar `demoVideoAsset` por

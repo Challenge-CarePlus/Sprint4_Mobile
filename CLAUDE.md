@@ -191,11 +191,33 @@ AsyncStorage repetido em 3 serviços, estilos entre as variantes `.tsx`/`.web.ts
   backend/portal profissional nesta fase (decisão já registrada: sem backend para o conteúdo).
   O modelo de dados (`getExerciseById`) já suporta acessar um exercício avulso por id, então dá
   para ligar isso depois sem reestruturar nada.
-- Vídeo de demonstração é um placeholder visual (ícone + texto), não um player de vídeo real —
-  o campo `demoVideoUrl` já existe no modelo de dados para quando houver vídeos de verdade.
 - Calibração acontece uma vez por trilha por sessão do app (não a cada exercício), seguindo a
   ordem do fluxo descrito no briefing; a calibração fica só em memória (`vision/
   calibrationStore.ts`), recalibra a cada nova sessão.
+
+## Vídeos de demonstração
+
+`components/ExerciseVideo.tsx` (expo-video) já toca vídeo de verdade — silencioso, em loop, sem
+controles. `Exercise.demoVideoAsset` (local, `require(...)`) tem prioridade sobre
+`Exercise.demoVideoUrl` (remoto, ainda placeholder); `ExercisePreviewScreen` cai no gradiente
+com ícone de play só quando nenhum dos dois estiver resolvido.
+
+- **Feito**: `adults-jaw-stretch` ("Alongamento de mandíbula") — primeiro vídeo gerado pelo
+  usuário via prompt de IA (roteiro completo e os 15 prompts por trilha estão num artifact
+  publicado nesta conversa, não neste repo). Arquivo em `assets/videos/adults-jaw-stretch.mp4`.
+- **Pendente**: os outros 14. Plano combinado com o usuário: gerar a trilha adulta inteira
+  primeiro e validar antes de seguir pras outras duas. Reaproveitamento entre trilhas é limitado
+  — só "Alongamento de mandíbula" tem um par visual parecido na trilha de idosos (abertura e
+  fechamento de boca); os outros 4 exercícios da trilha adulta não têm equivalente nas outras
+  trilhas.
+- **Hospedagem**: os vídeos bundlados localmente (`require`) funcionam bem para este estágio,
+  mas não escalam para produção (infla o tamanho do app, não tem cache/CDN). Decisão de produção
+  ainda em aberto — ao hospedar externamente, só trocar `demoVideoAsset` por
+  `{ uri: exercise.demoVideoUrl }` no `source` passado a `ExerciseVideo`, o componente não muda.
+  Vercel Hobby (grátis) não é uma opção viável para isso: proíbe uso comercial nos termos e o
+  plano Pro (US$ 20/mês) seria necessário de qualquer forma; para o vídeo em si, object storage
+  com CDN voltado a mídia (Cloudflare R2, Bunny.net) é mais apropriado que servir do mesmo deploy
+  do app.
 
 ## Como testar
 

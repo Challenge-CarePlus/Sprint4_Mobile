@@ -226,6 +226,24 @@ AsyncStorage repetido em 3 serviços, estilos entre as variantes `.tsx`/`.web.ts
    voz/texto reage aos movimentos? a latência é aceitável? Isso decide se os limiares em
    `movementThresholds.ts` precisam de ajuste.
 
+### Testar num celular de verdade (Android/iOS) — não é Expo Go
+
+O Expo Go genérico (da loja de apps) **não funciona** neste projeto — ele só roda módulos
+nativos pré-compilados, e `react-native-vision-camera` não está entre eles. O caminho certo é
+um *development build* (um app próprio, não o Expo Go): depois de instalado uma vez, aceita o
+mesmo fluxo de QR code via `npx expo start --dev-client` para recarregar só o JS sem recompilar.
+
+- **Android** (grátis, local): celular por USB com depuração USB ativada, `npx expo prebuild &&
+  npx expo run:android` — só precisa do Android SDK na máquina (já presente neste setup, em
+  `AppData/Local/Android/Sdk`).
+- **iOS**: `expo run:ios` exige Xcode, que só roda em Mac — **não tem como compilar pra iOS
+  numa máquina Windows**. Sem Mac disponível, as opções são: (a) conta Apple Developer Program
+  (US$ 99/ano) + EAS Build (compila na nuvem, sem precisar de Mac, mas precisa dessa conta paga
+  pra instalar via TestFlight/ad-hoc num iPhone físico); ou (b) acesso a um Mac emprestado/
+  alugado (MacInCloud etc.) com Apple ID gratuito — `expo run:ios` instala de graça, mas o
+  provisionamento expira em 7 dias e precisa reinstalar. Não existe caminho gratuito sem passar
+  por um Mac em algum momento. Decisão em aberto com o usuário — por ora, só Android.
+
 ## Adaptações em relação ao briefing original
 
 - "Deploy no Vercel" não se aplica (app nativo, não web) — critério substituído por

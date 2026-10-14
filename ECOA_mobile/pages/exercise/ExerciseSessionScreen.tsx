@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import GradientButton from "../../components/GradientButton";
 import { getExerciseById } from "../../data/exercises";
@@ -28,6 +29,49 @@ type SessionProps = {
     exerciseIndex: number;
 };
 
+const SESSION_CONTENT_PADDING = 40; // paddingHorizontal: 20 dos dois lados (styles.content)
+
+/**
+ * Câmera como elemento principal da tela (estilo "espelho" de apps de
+ * fisioterapia/fitness por câmera — Kaia Health, True Pose), não uma caixa
+ * pequena entre textos. `ratio` é a fração da altura da janela; min/max
+ * evitam que fique grande demais num monitor ou pequena demais num celular
+ * baixo.
+ *
+ * `aspect` é a proporção real do stream da webcam (largura/altura), lida do
+ * próprio vídeo assim que carrega — sem isso, uma caixa larga de desktop
+ * (ex. 1800x450) forçada sobre uma webcam 4:3 sobrava tarja preta nas
+ * laterais com `contentFit: "contain"`. Calculando a largura da caixa a
+ * partir da proporção real da câmera, a caixa já nasce do tamanho certo e a
+ * tarja preta não aparece — sem precisar de `"cover"`, que cortaria o rosto
+ * (o mesmo problema já corrigido antes no vídeo de demonstração).
+ */
+function getCameraBoxSize(
+    ratio: number,
+    min: number,
+    max: number,
+    aspect: number | null
+): { width: number; height: number } {
+    const window = Dimensions.get("window");
+    const maxWidth = window.width - SESSION_CONTENT_PADDING;
+    const height = Math.min(max, Math.max(min, window.height * ratio));
+
+    if (!aspect) {
+        return { width: maxWidth, height };
+    }
+
+    const width = height * aspect;
+    if (width <= maxWidth) {
+        return { width, height };
+    }
+
+    // A altura "ideal" (baseada na janela) faria a caixa ficar mais larga do
+    // que a tela permite — encolhe os dois lados juntos pra manter a
+    // proporção real da câmera (senão a largura ficaria presa na tela mas a
+    // altura não, voltando a sobrar tarja preta, só que em cima/embaixo).
+    return { width: maxWidth, height: maxWidth / aspect };
+}
+
 export default function ExerciseSessionScreen() {
     const navigation = useNavigation();
     const route = useRoute();
@@ -52,7 +96,7 @@ export default function ExerciseSessionScreen() {
 
     if (!track || !exercise) {
         return (
-            <View style={styles.container}>
+            <View style={styles.notFound}>
                 <Text style={styles.message}>Exercício não encontrado.</Text>
             </View>
         );
@@ -128,6 +172,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const [feedbackKind, setFeedbackKind] = useState<DetectorFeedback["kind"] | null>(null);
     const [sessionActive, setSessionActive] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [cameraAspect, setCameraAspect] = useState<number | null>(null);
 
     useEffect(() => {
         resetSpeechDedup();
@@ -204,40 +249,63 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
         [finishExercise]
     );
 
+    const cameraBox = getCameraBoxSize(0.52, 340, 520, cameraAspect);
+
     return (
-        <View style={styles.container}>
-            <View style={styles.progressPill}>
-                <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
-                    Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={styles.header}>
+                <View style={styles.progressPill}>
+                    <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                        Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+                    </Text>
+                </View>
+
+                <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
+                    {exercise.name}
                 </Text>
             </View>
 
-            <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
-                {exercise.name}
-            </Text>
+            <View style={[styles.cameraWrapper, shadow.md, cameraBox]}>
+                <FaceTrackingCamera
+                    isActive={sessionActive}
+                    onReading={handleReading}
+                    onError={setErrorMessage}
+                    onAspectRatioChange={setCameraAspect}
+                    cameraStyle={styles.cameraFill}
+                    borderColor={getFeedbackColor(feedbackKind)}
+                />
 
-            <FaceTrackingCamera
-                isActive={sessionActive}
-                onReading={handleReading}
-                onError={setErrorMessage}
-            />
+                <LinearGradient
+                    colors={["transparent", "rgba(10,16,26,0.85)"]}
+                    style={styles.cameraScrim}
+                    pointerEvents="none"
+                />
 
-            <View style={[styles.messageBox, getMessageBoxStyle(feedbackKind)]}>
-                <Text style={[styles.messageText, { fontSize: 15 * presentation.fontScale }]}>
-                    {message}
-                </Text>
+                <View style={styles.cameraOverlay} pointerEvents="none">
+                    <Text style={[styles.overlayMessage, { fontSize: 15 * presentation.fontScale }]}>
+                        {message}
+                    </Text>
+
+                    <RepetitionProgress
+                        done={repsDone}
+                        total={targetReps}
+                        gamified={presentation.gamified}
+                    />
+
+                    {presentation.metricsFocused && (
+                        <Text style={styles.overlayMetrics}>
+                            {repsDone}/{targetReps} repetições
+                        </Text>
+                    )}
+                </View>
             </View>
-
-            <RepetitionProgress done={repsDone} total={targetReps} gamified={presentation.gamified} />
-
-            {presentation.metricsFocused && (
-                <Text style={styles.metrics}>
-                    {repsDone}/{targetReps} repetições
-                </Text>
-            )}
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
-        </View>
+        </ScrollView>
     );
 }
 
@@ -249,6 +317,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
     const hasFinishedRef = useRef(false);
     const [repsDone, setRepsDone] = useState(0);
     const [showSelfAssessment, setShowSelfAssessment] = useState(false);
+    const [cameraAspect, setCameraAspect] = useState<number | null>(null);
 
     useEffect(() => {
         resetSpeechDedup();
@@ -283,19 +352,33 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
         goToNextStep(navigation, track, trackId, exerciseIndex);
     }
 
+    const cameraBox = getCameraBoxSize(0.38, 260, 400, cameraAspect);
+
     return (
-        <View style={styles.container}>
-            <View style={styles.progressPill}>
-                <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
-                    Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={styles.header}>
+                <View style={styles.progressPill}>
+                    <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                        Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
+                    </Text>
+                </View>
+
+                <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
+                    {exercise.name}
                 </Text>
             </View>
 
-            <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
-                {exercise.name}
-            </Text>
-
-            <FaceTrackingCamera isActive />
+            <View style={[styles.cameraWrapper, shadow.md, cameraBox]}>
+                <FaceTrackingCamera
+                    isActive
+                    onAspectRatioChange={setCameraAspect}
+                    cameraStyle={styles.cameraFill}
+                />
+            </View>
 
             {exercise.professionalGuidanceRecommended && (
                 <View style={styles.guidanceBanner}>
@@ -374,32 +457,45 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                     </View>
                 </View>
             )}
-        </View>
+        </ScrollView>
     );
 }
 
-function getMessageBoxStyle(kind: DetectorFeedback["kind"] | null) {
+function getFeedbackColor(kind: DetectorFeedback["kind"] | null): string {
     if (kind === "waiting-release" || kind === "repetition-complete" || kind === "exercise-complete") {
-        return { backgroundColor: colors.success };
+        return colors.success;
     }
     if (kind === "holding") {
-        return { backgroundColor: colors.primary500 };
+        return colors.primary500;
     }
-    return { backgroundColor: colors.primary700 };
+    return colors.primary700;
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
+    },
+    notFound: {
+        flex: 1,
+        backgroundColor: colors.background,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    content: {
         paddingHorizontal: 20,
         paddingTop: 24,
-        gap: 14,
+        paddingBottom: 32,
+        gap: 16,
         alignItems: "center",
     },
     message: {
         padding: 24,
         color: colors.text,
+    },
+    header: {
+        gap: 8,
+        alignItems: "center",
     },
     progressPill: {
         backgroundColor: colors.primary100,
@@ -416,18 +512,46 @@ const styles = StyleSheet.create({
         color: colors.primary900,
         textAlign: "center",
     },
-    messageBox: {
-        width: "100%",
-        borderRadius: radii.lg,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        alignItems: "center",
-        ...shadow.sm,
+    cameraWrapper: {
+        alignSelf: "center",
+        borderRadius: radii.xl,
+        overflow: "hidden",
+        position: "relative",
     },
-    messageText: {
+    cameraFill: {
+        width: "100%",
+        height: "100%",
+        borderRadius: radii.xl,
+        borderWidth: 4,
+    },
+    cameraScrim: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: "48%",
+    },
+    cameraOverlay: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 20,
+        paddingBottom: 18,
+        gap: 10,
+        alignItems: "center",
+    },
+    overlayMessage: {
         color: colors.white,
         fontWeight: "700",
         textAlign: "center",
+        textShadowColor: "rgba(0,0,0,0.45)",
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
+    },
+    overlayMetrics: {
+        color: "rgba(255,255,255,0.85)",
+        fontWeight: "600",
     },
     progressRow: {
         flexDirection: "row",

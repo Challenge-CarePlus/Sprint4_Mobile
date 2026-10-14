@@ -13,6 +13,15 @@ type Blendshape = { name: string; score: number };
 type Props = {
     isActive: boolean;
     cameraStyle?: StyleProp<ViewStyle>;
+    /** Cor do contorno da câmera — usada pra refletir o feedback do exercício (aguardando/segurando/sucesso) sem precisar de uma caixa de texto separada. */
+    borderColor?: string;
+    /**
+     * Proporção real (largura/altura) do stream da webcam assim que o primeiro
+     * frame carrega — a tela que usa esse componente pode usar isso pra
+     * dimensionar a caixa sem esticar o vídeo (sem recorte) nem sobrar tarja
+     * preta (sem distorcer a proporção real da câmera do usuário).
+     */
+    onAspectRatioChange?: (ratio: number) => void;
     onReading?: (blendshapes: Blendshape[], timestamp: number) => void;
     onStatusChange?: (status: FaceTrackingStatus) => void;
     onError?: (message: string) => void;
@@ -38,6 +47,8 @@ const NO_FACE_WARNING_FRAMES = 20;
 export default function FaceTrackingCamera({
     isActive,
     cameraStyle,
+    borderColor,
+    onAspectRatioChange,
     onReading,
     onStatusChange,
     onError,
@@ -152,7 +163,7 @@ export default function FaceTrackingCamera({
     }, [isActive, preferredFacing]);
 
     return (
-        <View style={[styles.cameraArea, cameraStyle]}>
+        <View style={[styles.cameraArea, cameraStyle, borderColor ? { borderColor } : null]}>
             {React.createElement("video", {
                 ref: videoRef,
                 autoPlay: true,
@@ -167,6 +178,12 @@ export default function FaceTrackingCamera({
                     objectFit: "contain",
                     backgroundColor: "#000",
                     transform: "scaleX(-1)",
+                },
+                onLoadedMetadata: (event: { target: HTMLVideoElement }) => {
+                    const videoEl = event.target;
+                    if (videoEl.videoWidth > 0 && videoEl.videoHeight > 0) {
+                        onAspectRatioChange?.(videoEl.videoWidth / videoEl.videoHeight);
+                    }
                 },
             })}
 

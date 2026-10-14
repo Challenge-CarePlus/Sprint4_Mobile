@@ -228,6 +228,41 @@ com ícone de play só quando nenhum dos dois estiver resolvido.
   com CDN voltado a mídia (Cloudflare R2, Bunny.net) é mais apropriado que servir do mesmo deploy
   do app.
 
+## Redesign da tela de execução do exercício (câmera)
+
+A pedido do usuário, pesquisei apps do mesmo ramo que usam vídeo/câmera (fisioterapia por
+câmera como Kaia Health, apps de pose detection como True Pose/FLEX//AI, um protótipo de
+treino de fala do Interspeech 2021) pra replicar os padrões de interação. Achado comum: a
+câmera é o elemento principal da tela (quase em espelho), com o feedback **sobreposto** nela
+em vez de caixas de texto separadas ao lado. `ExerciseSessionScreen.tsx` foi redesenhado nessa
+linha:
+
+- A câmera agora ocupa a maior parte da tela (altura calculada como fração da altura da janela
+  via `getCameraHeight`, não mais um `height: 280` fixo), com a tela inteira dentro de um
+  `ScrollView` (antes era uma `View` com `flex: 1`, sem rolagem).
+- `FaceTrackingCamera`/`FaceTrackingCamera.web.tsx` ganharam uma prop `borderColor` — o contorno
+  da câmera muda de cor conforme o feedback (`getFeedbackColor`): azul-marinho aguardando,
+  azul claro segurando, verde ao concluir repetição/exercício.
+- A mensagem de feedback, a fileira de repetições e a métrica numérica viraram um overlay
+  (`LinearGradient` + texto branco) na base da própria câmera, em vez de uma caixa sólida
+  abaixo dela — libera espaço vertical e deixa a câmera maior.
+- A tela guiada (sem validação por câmera) ganhou o mesmo tratamento visual de câmera maior,
+  mas manteve instruções/botão abaixo dela (sem overlay), já que não há feedback ao vivo pra
+  mostrar por cima.
+- A caixa da câmera não usa mais altura fixa com largura total — isso deixava tarja preta nas
+  laterais (desktop) ou em cima/embaixo (celular) sempre que a proporção real da webcam (lida
+  do próprio `<video>` via `onLoadedMetadata`, nova prop `onAspectRatioChange` em
+  `FaceTrackingCamera.web.tsx`) não batia com a proporção da caixa. `getCameraBoxSize` em
+  `ExerciseSessionScreen.tsx` calcula largura e altura juntas a partir dessa proporção real, e
+  encolhe as duas junto quando a tela é estreita — sem isso, uma caixa larga em desktop (ex.
+  1800×450) sobre uma webcam 4:3 sobrava tarja enorme nas laterais com `contentFit: "contain"`.
+  Resolvido sem usar `"cover"` (que cortaria o rosto, o mesmo problema já corrigido antes no
+  vídeo de demonstração).
+- `CalibrationScreen.tsx` **não foi alterado** — continua com a câmera no tamanho original
+  (280px), decisão deliberada pra não arriscar o layout dela (não usa `ScrollView`, tem
+  título+subtítulo+anel de progresso abaixo da câmera; aumentar a câmera ali sem rolagem podia
+  cortar o anel de progresso em telas baixas).
+
 ## Como testar
 
 1. `cd ECOA_mobile && npm install && npm test` — 10 testes unitários das regras de validação.

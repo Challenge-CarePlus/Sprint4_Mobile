@@ -29,6 +29,15 @@ const NO_FACE_WARNING_FRAMES = 6;
 type Props = {
     isActive: boolean;
     cameraStyle?: StyleProp<ViewStyle>;
+    /** Cor do contorno da câmera — usada pra refletir o feedback do exercício (aguardando/segurando/sucesso) sem precisar de uma caixa de texto separada. */
+    borderColor?: string;
+    /**
+     * Só tem efeito na variante web (`.web.tsx`) — a câmera nativa já ocupa a
+     * caixa inteira sem tarja preta, então essa tela não precisa ajustar nada
+     * aqui. Mantido na assinatura só pra bater com a variante web (o
+     * typecheck resolve pra este arquivo, não pro `.web.tsx`).
+     */
+    onAspectRatioChange?: (ratio: number) => void;
     onReading?: (blendshapes: Blendshape[], timestamp: number) => void;
     onStatusChange?: (status: FaceTrackingStatus) => void;
     onError?: (message: string) => void;
@@ -43,6 +52,7 @@ type Props = {
 export default function FaceTrackingCamera({
     isActive,
     cameraStyle,
+    borderColor,
     onReading,
     onStatusChange,
     onError,
@@ -216,7 +226,7 @@ export default function FaceTrackingCamera({
     }
 
     return (
-        <View style={[styles.cameraArea, cameraStyle]}>
+        <View style={[styles.cameraArea, cameraStyle, borderColor ? { borderColor } : null]}>
             <VisionCamera
                 style={StyleSheet.absoluteFill}
                 device={device}

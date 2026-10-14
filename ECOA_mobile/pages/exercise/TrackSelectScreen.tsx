@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import IconBadge from "../../components/IconBadge";
 import { TRACKS } from "../../data/tracks";
 import { AgeGroup } from "../../data/types";
-import { colors, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, radii, shadow } from "../../theme/tokens";
 import { clearSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
 
@@ -63,7 +63,7 @@ export default function TrackSelectScreen() {
                         <Text style={styles.trackDescription}>{track.description}</Text>
                     </View>
 
-                    <MaterialIcons name="arrow-forward" size={22} color={colors.neutral300} />
+                    <MaterialIcons name="arrow-forward" size={22} color={colors.lineStrong} />
                 </Pressable>
             ))}
         </ScrollView>
@@ -73,7 +73,7 @@ export default function TrackSelectScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     content: {
         paddingHorizontal: 24,
@@ -81,20 +81,21 @@ const styles = StyleSheet.create({
         gap: 18,
     },
     title: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 28,
-        color: colors.primary900,
+        color: colors.ink,
         textAlign: "center",
     },
     subtitle: {
         fontSize: 15,
-        color: colors.textMuted,
+        fontFamily: fonts.body,
+        color: colors.inkMuted,
         textAlign: "center",
         marginBottom: 8,
     },
     trackCard: {
-        backgroundColor: colors.white,
-        borderRadius: radii.xl,
+        backgroundColor: colors.surfaceRaised,
+        borderRadius: radii.lg,
         padding: 16,
         minHeight: 44,
         flexDirection: "row",
@@ -110,13 +111,14 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     trackTitle: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_600SemiBold",
         fontSize: 18,
-        color: colors.neutral900,
+        color: colors.ink,
     },
     trackDescription: {
         fontSize: 13,
+        fontFamily: fonts.body,
         lineHeight: 18,
-        color: colors.textMuted,
+        color: colors.inkMuted,
     },
 });

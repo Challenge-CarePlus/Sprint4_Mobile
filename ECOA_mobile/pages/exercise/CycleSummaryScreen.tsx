@@ -9,7 +9,7 @@ import { TRACKS } from "../../data/tracks";
 import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
-import { colors, gradients, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
 
 type RouteParams = {
     trackId: string;
@@ -26,7 +26,7 @@ function StatTile({
 }) {
     return (
         <View style={styles.statTile}>
-            <MaterialIcons name={icon} size={20} color={colors.primary700} />
+            <MaterialIcons name={icon} size={20} color={colors.brand} />
             <Text style={styles.statValue}>{value}</Text>
             <Text style={styles.statLabel}>{label}</Text>
         </View>
@@ -90,7 +90,7 @@ export default function CycleSummaryScreen() {
                 style={[styles.hero, shadow.md]}
             >
                 <View style={styles.trophyBadge}>
-                    <MaterialIcons name="emoji-events" size={44} color={colors.secondary500} />
+                    <MaterialIcons name="emoji-events" size={44} color={colors.brand} />
                 </View>
 
                 <Text style={styles.title}>Ciclo concluído!</Text>
@@ -122,7 +122,7 @@ export default function CycleSummaryScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     content: {
         paddingHorizontal: 24,
@@ -149,14 +149,15 @@ const styles = StyleSheet.create({
         ...shadow.md,
     },
     title: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 26,
-        color: colors.white,
+        color: colors.onBrand,
         textAlign: "center",
     },
     subtitle: {
         fontSize: 15,
         color: "rgba(255,255,255,0.9)",
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
         textAlign: "center",
     },
@@ -168,20 +169,22 @@ const styles = StyleSheet.create({
     },
     statTile: {
         width: "47%",
-        backgroundColor: colors.white,
-        borderRadius: radii.lg,
+        backgroundColor: colors.surfaceRaised,
+        borderRadius: radii.md,
         padding: 16,
         gap: 6,
         ...shadow.sm,
     },
     statValue: {
         fontSize: 22,
+        fontFamily: fonts.display,
         fontWeight: "800",
-        color: colors.primary900,
+        color: colors.ink,
     },
     statLabel: {
         fontSize: 12,
-        color: colors.textMuted,
+        color: colors.inkMuted,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
     },
     buttonSpacer: {
@@ -190,6 +193,7 @@ const styles = StyleSheet.create({
     },
     paragraph: {
         padding: 24,
-        color: colors.text,
+        color: colors.ink,
+        fontFamily: fonts.body,
     },
 });

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import IconBadge from "../components/IconBadge";
-import { colors, radii, shadow } from "../theme/tokens";
+import { colors, fonts, radii, shadow } from "../theme/tokens";
 
 import {
     AppSettings,
@@ -91,7 +91,7 @@ function OptionButton({ title, description, iconName, selected, onPress }: Optio
                 <Text style={styles.optionDescription}>{description}</Text>
             </View>
 
-            {selected && <MaterialIcons name="check-circle" size={24} color={colors.primary700} />}
+            {selected && <MaterialIcons name="check-circle" size={24} color={colors.brand} />}
         </Pressable>
     );
 }
@@ -185,7 +185,7 @@ export default function Settings() {
                 style={({ pressed }) => [styles.resetButton, pressed && styles.resetButtonPressed]}
                 onPress={handleResetSettings}
             >
-                <MaterialIcons name="restart-alt" size={22} color={colors.primary700} />
+                <MaterialIcons name="restart-alt" size={22} color={colors.brand} />
                 <Text style={styles.resetButtonText}>Restaurar configurações padrão</Text>
             </Pressable>
         </ScrollView>
@@ -195,7 +195,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
         paddingTop: "10%",
     },
 
@@ -211,14 +211,15 @@ const styles = StyleSheet.create({
     },
 
     titleText: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 30,
-        color: colors.primary900,
+        color: colors.ink,
         textAlign: "center",
     },
 
     subtitleText: {
-        color: colors.textMuted,
+        color: colors.inkMuted,
+        fontFamily: fonts.body,
         fontSize: 15,
         lineHeight: 21,
         textAlign: "center",
@@ -230,9 +231,9 @@ const styles = StyleSheet.create({
     },
 
     sectionTitle: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_600SemiBold",
         fontSize: 20,
-        color: colors.primary900,
+        color: colors.ink,
     },
 
     optionsContainer: {
@@ -241,8 +242,8 @@ const styles = StyleSheet.create({
 
     optionButton: {
         width: "100%",
-        backgroundColor: colors.white,
-        borderRadius: radii.xl,
+        backgroundColor: colors.surfaceRaised,
+        borderRadius: radii.lg,
         borderWidth: 2,
         borderColor: "transparent",
         padding: 14,
@@ -256,8 +257,8 @@ const styles = StyleSheet.create({
     },
 
     optionButtonSelected: {
-        backgroundColor: colors.primary100,
-        borderColor: colors.primary700,
+        backgroundColor: colors.brandSoft,
+        borderColor: colors.brand,
     },
 
     optionTextContainer: {
@@ -266,37 +267,39 @@ const styles = StyleSheet.create({
     },
 
     optionTitle: {
-        color: colors.neutral900,
-        fontFamily: "Righteous_400Regular",
+        color: colors.ink,
+        fontFamily: "Montserrat_600SemiBold",
         fontSize: 17,
     },
 
     optionDescription: {
-        color: colors.textMuted,
+        color: colors.inkMuted,
+        fontFamily: fonts.body,
         fontSize: 13,
         lineHeight: 18,
         fontWeight: "500",
     },
 
     resetButton: {
-        borderColor: colors.primary700,
+        borderColor: colors.brandInk,
         borderWidth: 2,
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
         paddingVertical: 14,
         paddingHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surfaceRaised,
         marginBottom: 24,
     },
     resetButtonPressed: {
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
     },
 
     resetButtonText: {
-        color: colors.primary700,
+        color: colors.brandInk,
+        fontFamily: fonts.bodySemiBold,
         fontSize: 15,
         fontWeight: "700",
         textAlign: "center",

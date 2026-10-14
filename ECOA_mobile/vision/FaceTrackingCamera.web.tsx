@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         backgroundColor: "#000",
         borderWidth: 3,
-        borderColor: colors.primary700,
+        borderColor: colors.brand,
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,

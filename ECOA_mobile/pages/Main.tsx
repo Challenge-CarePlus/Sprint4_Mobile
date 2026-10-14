@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import Card from "../components/Card";
 import { hasConsent } from "../services/consentStorage";
-import { colors, gradients, radii } from "../theme/tokens";
+import { colors, fonts, gradients, radii } from "../theme/tokens";
 
 export default function Main() {
   const navigation = useNavigation();
@@ -90,7 +90,7 @@ export default function Main() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   content: {
     paddingBottom: 40,
@@ -114,19 +114,21 @@ const styles = StyleSheet.create({
   },
   heroEyebrow: {
     color: "rgba(255,255,255,0.75)",
+    fontFamily: fonts.bodySemiBold,
     fontWeight: "700",
     letterSpacing: 3,
     fontSize: 12,
     textTransform: "uppercase",
   },
   heroTitle: {
-    fontFamily: "Righteous_400Regular",
+    fontFamily: "Montserrat_700Bold",
     fontSize: 26,
-    color: "#fff",
+    color: colors.onBrand,
     lineHeight: 32,
   },
   heroSubtitle: {
     color: "rgba(255,255,255,0.88)",
+    fontFamily: fonts.bodySemiBold,
     fontSize: 14,
     fontWeight: "600",
     marginTop: 4,

@@ -7,7 +7,7 @@ import GradientButton from "../../components/GradientButton";
 import ExerciseVideo from "../../components/ExerciseVideo";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
-import { colors, gradients, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
 
@@ -76,7 +76,7 @@ export default function ExercisePreviewScreen() {
                     accessibilityLabel="Vídeo de demonstração"
                 >
                     <View style={styles.playButton}>
-                        <MaterialIcons name="play-arrow" size={34} color={colors.primary900} />
+                        <MaterialIcons name="play-arrow" size={34} color={colors.ink} />
                     </View>
                     <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
                 </LinearGradient>
@@ -91,7 +91,7 @@ export default function ExercisePreviewScreen() {
                     styles.goal,
                     {
                         fontSize: 15 * presentation.fontScale,
-                        color: presentation.highContrast ? colors.text : colors.textMuted,
+                        color: presentation.highContrast ? colors.ink : colors.inkMuted,
                     },
                 ]}
             >
@@ -100,7 +100,7 @@ export default function ExercisePreviewScreen() {
 
             {exercise.professionalGuidanceRecommended && (
                 <View style={styles.guidanceBanner}>
-                    <MaterialIcons name="info" size={20} color={colors.attention} />
+                    <MaterialIcons name="info" size={20} color={colors.warning} />
                     <Text style={styles.guidanceText}>
                         Recomendado com orientação do(a) fonoaudiólogo(a).
                     </Text>
@@ -125,7 +125,7 @@ export default function ExercisePreviewScreen() {
 
             {repetitionLabel ? (
                 <View style={styles.repetitionPill}>
-                    <MaterialIcons name="repeat" size={16} color={colors.primary700} />
+                    <MaterialIcons name="repeat" size={16} color={colors.brand} />
                     <Text style={styles.repetitionLabel}>{repetitionLabel}</Text>
                 </View>
             ) : null}
@@ -146,7 +146,7 @@ export default function ExercisePreviewScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     content: {
         paddingHorizontal: 28,
@@ -155,15 +155,16 @@ const styles = StyleSheet.create({
     },
     progressPill: {
         alignSelf: "center",
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
         borderRadius: radii.pill,
         paddingHorizontal: 14,
         paddingVertical: 6,
     },
     progress: {
         fontSize: 12,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
-        color: colors.primary900,
+        color: colors.ink,
         textAlign: "center",
     },
     videoPlaceholder: {
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
         maxWidth: 320,
         aspectRatio: 1,
         alignSelf: "center",
-        borderRadius: radii.xl,
+        borderRadius: radii.lg,
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
@@ -179,13 +180,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#000",
     },
     videoPlayer: {
-        borderRadius: radii.xl,
+        borderRadius: radii.lg,
     },
     playButton: {
         width: 56,
         height: 56,
         borderRadius: radii.pill,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surfaceRaised,
         alignItems: "center",
         justifyContent: "center",
         ...shadow.sm,
@@ -195,12 +196,13 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     title: {
-        fontFamily: "Righteous_400Regular",
-        color: colors.primary900,
+        fontFamily: "Montserrat_700Bold",
+        color: colors.ink,
         textAlign: "center",
     },
     goal: {
-        color: colors.textMuted,
+        color: colors.inkMuted,
+        fontFamily: fonts.body,
         textAlign: "center",
         lineHeight: 20,
     },
@@ -208,13 +210,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: "#FFF4E5",
-        borderRadius: radii.lg,
+        backgroundColor: colors.warningSoft,
+        borderRadius: radii.md,
         padding: 12,
     },
     guidanceText: {
         flex: 1,
-        color: colors.attention,
+        color: colors.warning,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
         fontSize: 13,
     },
@@ -234,13 +237,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     instructionNumberText: {
-        color: "#fff",
+        color: colors.white,
         fontWeight: "700",
         fontSize: 13,
     },
     instructionText: {
         flex: 1,
-        color: colors.neutral900,
+        color: colors.ink,
+        fontFamily: fonts.body,
         lineHeight: 20,
         marginTop: 3,
     },
@@ -249,14 +253,15 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
         borderRadius: radii.pill,
         paddingHorizontal: 14,
         paddingVertical: 8,
     },
     repetitionLabel: {
         fontWeight: "700",
-        color: colors.primary700,
+        fontFamily: fonts.bodySemiBold,
+        color: colors.brandInk,
         fontSize: 13,
     },
     buttonSpacer: {
@@ -264,6 +269,7 @@ const styles = StyleSheet.create({
     },
     paragraph: {
         padding: 24,
-        color: colors.text,
+        color: colors.ink,
+        fontFamily: fonts.body,
     },
 });

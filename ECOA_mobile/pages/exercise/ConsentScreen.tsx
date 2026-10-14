@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import IconBadge from "../../components/IconBadge";
 import GradientButton from "../../components/GradientButton";
 import { saveConsent } from "../../services/consentStorage";
-import { colors, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, radii, shadow } from "../../theme/tokens";
 
 type ConsentOption = "patient" | "guardian";
 
@@ -59,7 +59,7 @@ export default function ConsentScreen() {
             >
                 <Text style={styles.optionText}>Sou o(a) paciente e tenho 18 anos ou mais</Text>
                 {selected === "patient" && (
-                    <MaterialIcons name="check-circle" size={22} color={colors.primary700} />
+                    <MaterialIcons name="check-circle" size={22} color={colors.brand} />
                 )}
             </Pressable>
 
@@ -77,7 +77,7 @@ export default function ConsentScreen() {
                     Sou responsável legal por um(a) paciente menor de 18 anos
                 </Text>
                 {selected === "guardian" && (
-                    <MaterialIcons name="check-circle" size={22} color={colors.primary700} />
+                    <MaterialIcons name="check-circle" size={22} color={colors.brand} />
                 )}
             </Pressable>
 
@@ -96,7 +96,7 @@ export default function ConsentScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     content: {
         paddingHorizontal: 28,
@@ -108,25 +108,26 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     title: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 28,
-        color: colors.primary900,
+        color: colors.ink,
         textAlign: "center",
     },
     paragraph: {
         fontSize: 15,
+        fontFamily: fonts.body,
         lineHeight: 22,
-        color: colors.text,
+        color: colors.ink,
     },
     sectionLabel: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_600SemiBold",
         fontSize: 18,
-        color: colors.primary900,
+        color: colors.ink,
         marginTop: 8,
     },
     option: {
-        backgroundColor: colors.white,
-        borderRadius: radii.lg,
+        backgroundColor: colors.surfaceRaised,
+        borderRadius: radii.md,
         borderWidth: 2,
         borderColor: "transparent",
         padding: 16,
@@ -141,14 +142,15 @@ const styles = StyleSheet.create({
         transform: [{ scale: 0.99 }],
     },
     optionSelected: {
-        backgroundColor: colors.primary100,
-        borderColor: colors.primary700,
+        backgroundColor: colors.brandSoft,
+        borderColor: colors.brand,
     },
     optionText: {
         flex: 1,
         fontSize: 15,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
-        color: colors.neutral900,
+        color: colors.ink,
     },
     buttonSpacer: {
         marginTop: 16,

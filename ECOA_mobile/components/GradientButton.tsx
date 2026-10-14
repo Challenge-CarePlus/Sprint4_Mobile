@@ -10,7 +10,7 @@ import {
     ViewStyle,
 } from "react-native";
 
-import { colors, gradients, radii, shadow } from "../theme/tokens";
+import { colors, fonts, gradients, radii, shadow } from "../theme/tokens";
 
 type GradientName = keyof typeof gradients;
 
@@ -51,7 +51,7 @@ export default function GradientButton({
     const isDisabled = disabled || loading;
 
     const iconElement = icon ? (
-        <MaterialIcons name={icon} size={22} color="#fff" style={styles.icon} />
+        <MaterialIcons name={icon} size={22} color={colors.white} style={styles.icon} />
     ) : null;
 
     return (
@@ -69,13 +69,13 @@ export default function GradientButton({
             ]}
         >
             <LinearGradient
-                colors={isDisabled ? [colors.neutral300, colors.neutral300] : gradients[gradient]}
+                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : gradients[gradient]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.gradient, { minHeight }, !isDisabled && shadow.sm]}
             >
                 {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={colors.white} />
                 ) : (
                     <>
                         {icon && iconPosition === "left" ? iconElement : null}
@@ -91,7 +91,7 @@ export default function GradientButton({
 const styles = StyleSheet.create({
     wrapper: {
         width: "100%",
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
     },
     pressed: {
         transform: [{ scale: 0.97 }],
@@ -105,11 +105,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
         paddingHorizontal: 20,
     },
     text: {
-        color: "#fff",
+        color: colors.white,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
     },
     icon: {

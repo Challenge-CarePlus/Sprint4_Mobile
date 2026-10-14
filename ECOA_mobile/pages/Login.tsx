@@ -12,7 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
 import GradientButton from "../components/GradientButton";
-import { colors, radii, shadow } from "../theme/tokens";
+import { colors, fonts, radii, shadow } from "../theme/tokens";
 
 export default function Login() {
     const { login } = useAuth();
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
 
     waves: {
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
         width: 140,
         height: 140,
         borderRadius: radii.pill,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surfaceRaised,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 20,
@@ -155,7 +155,8 @@ const styles = StyleSheet.create({
     },
 
     link: {
-        color: colors.primary700,
+        color: colors.brandInk,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
     },
 
@@ -165,14 +166,15 @@ const styles = StyleSheet.create({
 
     errorBanner: {
         marginTop: 8,
-        backgroundColor: "#FDECEA",
-        borderRadius: radii.md,
+        backgroundColor: colors.dangerSoft,
+        borderRadius: radii.sm,
         paddingVertical: 8,
         paddingHorizontal: 14,
     },
 
     errorText: {
-        color: colors.error,
+        color: colors.danger,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
         textAlign: "center",
         fontSize: 13,

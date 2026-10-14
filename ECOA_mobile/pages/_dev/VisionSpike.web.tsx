@@ -21,13 +21,13 @@ export default function VisionSpike() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
         alignItems: "center",
         justifyContent: "center",
         padding: 32,
     },
     text: {
-        color: colors.neutral900,
+        color: colors.ink,
         textAlign: "center",
         fontWeight: "600",
     },

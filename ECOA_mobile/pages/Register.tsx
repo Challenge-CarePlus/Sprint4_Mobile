@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
 import GradientButton from "../components/GradientButton";
-import { colors, radii, shadow } from "../theme/tokens";
+import { colors, fonts, radii, shadow } from "../theme/tokens";
 
 export default function Register() {
     const { register } = useAuth();
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
 
     waves: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: radii.pill,
-        backgroundColor: colors.white,
+        backgroundColor: colors.surfaceRaised,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 16,
@@ -187,14 +187,15 @@ const styles = StyleSheet.create({
 
     errorBanner: {
         marginTop: 4,
-        backgroundColor: "#FDECEA",
-        borderRadius: radii.md,
+        backgroundColor: colors.dangerSoft,
+        borderRadius: radii.sm,
         paddingVertical: 8,
         paddingHorizontal: 14,
     },
 
     errorText: {
-        color: colors.error,
+        color: colors.danger,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
         textAlign: "center",
         fontSize: 13,
@@ -202,14 +203,15 @@ const styles = StyleSheet.create({
 
     successBanner: {
         marginTop: 4,
-        backgroundColor: "#E8F5E9",
-        borderRadius: radii.md,
+        backgroundColor: colors.successSoft,
+        borderRadius: radii.sm,
         paddingVertical: 8,
         paddingHorizontal: 14,
     },
 
     successText: {
         color: colors.success,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
         textAlign: "center",
         fontSize: 13,

@@ -14,7 +14,7 @@ import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetecto
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
-import { colors, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
 
 type RouteParams = {
@@ -144,7 +144,7 @@ function RepetitionProgress({
                     key={index}
                     name={index < done ? icon : iconOutline}
                     size={gamified ? 28 : 20}
-                    color={index < done ? colors.secondary500 : colors.neutral300}
+                    color={index < done ? colors.brand : colors.lineStrong}
                 />
             ))}
         </View>
@@ -382,7 +382,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
 
             {exercise.professionalGuidanceRecommended && (
                 <View style={styles.guidanceBanner}>
-                    <MaterialIcons name="info" size={18} color={colors.attention} />
+                    <MaterialIcons name="info" size={18} color={colors.warning} />
                     <Text style={styles.guidanceText}>
                         Recomendado com orientação do(a) fonoaudiólogo(a).
                     </Text>
@@ -427,7 +427,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                             ]}
                             onPress={() => handleSelfAssessment("yes")}
                         >
-                            <MaterialIcons name="check-circle" size={20} color="#fff" />
+                            <MaterialIcons name="check-circle" size={20} color={colors.white} />
                             <Text style={styles.assessmentButtonText}>Sim</Text>
                         </Pressable>
 
@@ -439,7 +439,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                             ]}
                             onPress={() => handleSelfAssessment("partial")}
                         >
-                            <MaterialIcons name="adjust" size={20} color="#fff" />
+                            <MaterialIcons name="adjust" size={20} color={colors.white} />
                             <Text style={styles.assessmentButtonText}>Em parte</Text>
                         </Pressable>
 
@@ -451,7 +451,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                             ]}
                             onPress={() => handleSelfAssessment("no")}
                         >
-                            <MaterialIcons name="cancel" size={20} color="#fff" />
+                            <MaterialIcons name="cancel" size={20} color={colors.white} />
                             <Text style={styles.assessmentButtonText}>Não</Text>
                         </Pressable>
                     </View>
@@ -466,19 +466,19 @@ function getFeedbackColor(kind: DetectorFeedback["kind"] | null): string {
         return colors.success;
     }
     if (kind === "holding") {
-        return colors.primary500;
+        return colors.brandStrong;
     }
-    return colors.primary700;
+    return colors.brand;
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     notFound: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -491,37 +491,39 @@ const styles = StyleSheet.create({
     },
     message: {
         padding: 24,
-        color: colors.text,
+        color: colors.ink,
+        fontFamily: fonts.body,
     },
     header: {
         gap: 8,
         alignItems: "center",
     },
     progressPill: {
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
         borderRadius: radii.pill,
         paddingHorizontal: 14,
         paddingVertical: 6,
     },
     progressLabel: {
-        color: colors.primary900,
+        color: colors.ink,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
     },
     exerciseName: {
-        fontFamily: "Righteous_400Regular",
-        color: colors.primary900,
+        fontFamily: "Montserrat_700Bold",
+        color: colors.ink,
         textAlign: "center",
     },
     cameraWrapper: {
         alignSelf: "center",
-        borderRadius: radii.xl,
+        borderRadius: radii.lg,
         overflow: "hidden",
         position: "relative",
     },
     cameraFill: {
         width: "100%",
         height: "100%",
-        borderRadius: radii.xl,
+        borderRadius: radii.lg,
         borderWidth: 4,
     },
     cameraScrim: {
@@ -543,6 +545,7 @@ const styles = StyleSheet.create({
     },
     overlayMessage: {
         color: colors.white,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
         textAlign: "center",
         textShadowColor: "rgba(0,0,0,0.45)",
@@ -551,45 +554,44 @@ const styles = StyleSheet.create({
     },
     overlayMetrics: {
         color: "rgba(255,255,255,0.85)",
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
     },
     progressRow: {
         flexDirection: "row",
         gap: 6,
     },
-    metrics: {
-        color: colors.neutral500,
-        fontWeight: "600",
-    },
     error: {
-        color: colors.error,
+        color: colors.danger,
         textAlign: "center",
     },
     guidanceBanner: {
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: "#FFF4E5",
-        borderRadius: radii.lg,
+        backgroundColor: colors.warningSoft,
+        borderRadius: radii.md,
         padding: 12,
         width: "100%",
     },
     guidanceText: {
         flex: 1,
-        color: colors.attention,
+        color: colors.warning,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
         fontSize: 12,
     },
     instructionsBox: {
         width: "100%",
         gap: 6,
-        backgroundColor: colors.white,
-        borderRadius: radii.lg,
+        backgroundColor: colors.surfaceRaised,
+        borderRadius: radii.md,
         padding: 16,
         ...shadow.sm,
     },
     guidedInstruction: {
-        color: colors.neutral900,
+        color: colors.ink,
+        fontFamily: fonts.body,
         fontSize: 14,
         lineHeight: 19,
     },
@@ -599,9 +601,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     assessmentTitle: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_600SemiBold",
         fontSize: 18,
-        color: colors.primary900,
+        color: colors.ink,
         textAlign: "center",
     },
     assessmentRow: {
@@ -612,7 +614,7 @@ const styles = StyleSheet.create({
     assessmentButton: {
         flex: 1,
         minHeight: 56,
-        borderRadius: radii.lg,
+        borderRadius: radii.md,
         alignItems: "center",
         justifyContent: "center",
         gap: 4,
@@ -626,13 +628,14 @@ const styles = StyleSheet.create({
         backgroundColor: colors.success,
     },
     assessmentPartial: {
-        backgroundColor: colors.attention,
+        backgroundColor: colors.warning,
     },
     assessmentNo: {
-        backgroundColor: colors.error,
+        backgroundColor: colors.danger,
     },
     assessmentButtonText: {
         color: colors.white,
+        fontFamily: fonts.bodySemiBold,
         fontWeight: "700",
         fontSize: 13,
     },

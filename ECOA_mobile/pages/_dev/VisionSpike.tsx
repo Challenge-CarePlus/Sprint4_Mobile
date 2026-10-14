@@ -231,7 +231,7 @@ export default function VisionSpike() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
     },
     content: {
         paddingHorizontal: 20,
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     title: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 20,
-        color: colors.primary900,
+        color: colors.ink,
     },
     status: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.ink,
         fontWeight: "600",
     },
     cameraArea: {
@@ -256,34 +256,34 @@ const styles = StyleSheet.create({
         backgroundColor: "#000",
     },
     statsBox: {
-        backgroundColor: colors.neutral100,
+        backgroundColor: colors.surface,
         borderRadius: 8,
         padding: 14,
         gap: 4,
     },
     blendshapeBox: {
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
         borderRadius: 8,
         padding: 14,
         gap: 4,
     },
     errorBox: {
-        backgroundColor: "#FDEAEA",
+        backgroundColor: colors.dangerSoft,
         borderRadius: 8,
         padding: 14,
         gap: 4,
     },
     sectionLabel: {
         fontWeight: "700",
-        color: colors.neutral900,
+        color: colors.ink,
         marginBottom: 4,
     },
     statLine: {
         fontSize: 13,
-        color: colors.neutral900,
+        color: colors.ink,
     },
     errorLine: {
         fontSize: 12,
-        color: colors.error,
+        color: colors.danger,
     },
 });

@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import IconBadge from "./IconBadge";
-import { colors, radii, shadow } from "../theme/tokens";
+import { colors, fonts, radii, shadow } from "../theme/tokens";
 
 type CardProps = {
   title: string;
@@ -41,7 +41,7 @@ export default function Card({
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 
-      {active && <MaterialIcons name="chevron-right" size={26} color={colors.neutral300} />}
+      {active && <MaterialIcons name="chevron-right" size={26} color={colors.lineStrong} />}
     </Pressable>
   );
 }
@@ -49,13 +49,15 @@ export default function Card({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: colors.white,
-    borderRadius: radii.xl,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radii.md,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    ...shadow.sm,
+    ...shadow.card,
   },
   pressed: {
     transform: [{ scale: 0.98 }],
@@ -69,12 +71,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    color: colors.neutral900,
-    fontFamily: "Righteous_400Regular",
+    color: colors.ink,
+    fontFamily: "Montserrat_600SemiBold",
   },
   subtitle: {
     fontSize: 14,
-    color: colors.textMuted,
+    color: colors.inkMuted,
+    fontFamily: fonts.bodySemiBold,
     fontWeight: "600",
   },
 });

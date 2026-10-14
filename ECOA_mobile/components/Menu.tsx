@@ -7,7 +7,7 @@ import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-nativ
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { hasConsent } from "../services/consentStorage";
-import { colors, gradients, radii, shadow } from "../theme/tokens";
+import { colors, fonts, gradients, radii, shadow } from "../theme/tokens";
 
 type MenuItem = {
     key: string;
@@ -76,7 +76,7 @@ export default function Menu() {
                                 accessibilityRole="button"
                                 accessibilityLabel="Voltar"
                             >
-                                <MaterialIcons name="arrow-back" size={22} color={colors.primary700} />
+                                <MaterialIcons name="arrow-back" size={22} color={colors.brand} />
                             </Pressable>
                         )}
 
@@ -89,7 +89,7 @@ export default function Menu() {
                         accessibilityRole="button"
                         accessibilityLabel="Abrir menu"
                     >
-                        <MaterialIcons name={menuOpen ? "close" : "menu"} size={26} color={colors.primary700} />
+                        <MaterialIcons name={menuOpen ? "close" : "menu"} size={26} color={colors.brand} />
                     </Pressable>
                 </View>
             </View>
@@ -107,7 +107,7 @@ export default function Menu() {
                             onPress={item.onPress}
                             style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
                         >
-                            <MaterialIcons name={item.icon} size={20} color="#fff" />
+                            <MaterialIcons name={item.icon} size={20} color={colors.white} />
                             <Text style={styles.menuText}>{item.label}</Text>
                         </Pressable>
                     ))}
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         top: 0,
         width: "100%",
         height: 70,
-        backgroundColor: "white",
+        backgroundColor: colors.surfaceRaised,
         justifyContent: "center",
         paddingHorizontal: 25,
         ...shadow.sm,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: radii.pill,
-        backgroundColor: colors.primary100,
+        backgroundColor: colors.brandSoft,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         gap: 4,
 
-        borderBottomLeftRadius: radii.xl,
-        borderBottomRightRadius: radii.xl,
+        borderBottomLeftRadius: radii.lg,
+        borderBottomRightRadius: radii.lg,
         ...shadow.lg,
     },
 
@@ -195,14 +195,15 @@ const styles = StyleSheet.create({
         gap: 12,
         paddingVertical: 12,
         paddingHorizontal: 8,
-        borderRadius: radii.md,
+        borderRadius: radii.sm,
     },
     menuItemPressed: {
         backgroundColor: "rgba(255,255,255,0.12)",
     },
 
     menuText: {
-        color: "#fff",
+        color: colors.white,
+        fontFamily: fonts.bodySemiBold,
         fontSize: 16,
         fontWeight: "600",
     },

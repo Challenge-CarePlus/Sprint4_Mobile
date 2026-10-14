@@ -8,7 +8,7 @@ import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
-import { colors } from "../../theme/tokens";
+import { colors, fonts } from "../../theme/tokens";
 
 type RouteParams = {
     trackId: string;
@@ -112,25 +112,26 @@ export default function CalibrationScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
         paddingHorizontal: 28,
         paddingTop: 40,
         gap: 20,
         alignItems: "center",
     },
     title: {
-        fontFamily: "Righteous_400Regular",
+        fontFamily: "Montserrat_700Bold",
         fontSize: 26,
-        color: colors.primary900,
+        color: colors.ink,
     },
     subtitle: {
         fontSize: 15,
-        color: colors.textMuted,
+        fontFamily: fonts.body,
+        color: colors.inkMuted,
         textAlign: "center",
         lineHeight: 20,
     },
     error: {
-        color: colors.error,
+        color: colors.danger,
         textAlign: "center",
     },
 });

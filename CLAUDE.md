@@ -26,32 +26,73 @@ em device físico neste ambiente** (sem `adb`/emulador disponível). Ver "Como t
 
 ## Paleta (design tokens)
 
-Arquivo central: `ECOA_mobile/theme/tokens.ts`.
+Arquivo central: `ECOA_mobile/theme/tokens.ts`. **v2 da paleta** — substituiu a navy+coral das
+fases anteriores da v2 (criada "no escuro", sem fonte oficial) pelo **design system oficial da
+Care Plus** (artifact fornecido pelo usuário, só tema claro aplicado — ver "Migração para o
+design system oficial" abaixo).
 
 | Token | Hex | Uso |
 |---|---|---|
-| `primary900` | `#1E3E6D` | títulos |
-| `primary700` | `#284A7D` | marca, CTAs, bordas |
-| `primary500` | `#3C64AA` | estados hover/pressed, UI secundária |
-| `primary100` | `#EAF2FF` | tint de seleção/dica |
-| `secondary500` | `#E0704F` | coral do logo, decorativo/gamificação (com texto escuro) |
-| `secondary700` | `#B84A2E` | coral escurecido, botões/chips com texto branco |
-| `neutral900` | `#1F2933` | texto principal |
-| `neutral500` | `#6E7681` | texto secundário |
-| `neutral300` | `#8B8B8B` | decorativo apenas (não usar em texto, falha AA) |
-| `neutral200` / `neutral100` | `#E5E7EB` / `#F3F4F6` | bordas suaves / fundos alternativos |
-| `success` / `warning` / `attention` / `error` | `#2E7D32` / `#F9A825` / `#B84F00` / `#C62828` | feedback de exercício |
+| `brand` | `#0079C8` | Azul Care Plus — cor institucional publicada no site da marca. CTAs, ícone ativo, destaques |
+| `brandInk` / `brandStrong` | `#005A96` | texto em azul sobre fundo claro / estado pressionado do botão primário |
+| `brandSoft` | `#E3F1FB` | fundo tonal — chips selecionados, tint de seleção |
+| `brandDeep` / `ink` | `#0B2340` | marinho institucional — hero, cartão de destaque / texto principal e títulos |
+| `inkMuted` | `#4E6279` | texto secundário |
+| `sky` | `#7FC4EE` | decorativo (ilustrações, gráficos) — nunca em texto |
+| `surface` / `surfaceRaised` | `#F4F8FC` / `#FFFFFF` | fundo das telas / cards, campos, sheets |
+| `line` / `lineStrong` | `#D7E2EE` / `#8A9DB3` | divisores sutis / bordas de campo e decorativo |
+| `success` / `warning` / `danger` | `#1D7044` / `#8A5300` / `#B3261E` | feedback de exercício, cada um com par `*Soft` para fundo de banner/badge |
 
-Todas as combinações texto/fundo validadas em AA (≥4.5:1). `warning` usa texto `neutral900`
-(não branco) e `attention` foi escurecido de `#EF6C00` para `#B84F00` — as duas correções
-necessárias para passar AA sobre as cores já existentes no app. Fonte de títulos: `Righteous`.
-`theme/ageGroupThemes.ts` adapta escala de fonte, contraste, gamificação e alvo de toque por
-faixa etária em cima desses tokens.
+**Regra que mais se erra** (do próprio DS): `brand` como **texto** só passa contraste sobre
+`surfaceRaised` (branco puro); sobre `surface` ou `brandSoft`, usar `brandInk`. O DS oficial
+não define nenhuma cor de apoio/coral — era uma invenção da v1 desta paleta; a v2 é mono-azul
+("Azul é a assinatura, branco é o respiro"), com variação só de tom dentro do próprio azul.
+Fonte de títulos: **Montserrat** (700 para `display`/`title-lg`, 600 para `title-md`); texto
+corrido: **Open Sans** — nenhuma das duas estava carregada de fato antes (`Righteous_400Regular`
+era uma string solta sem `useFonts`, caindo silenciosamente na fonte padrão do SO; ver "Fontes"
+abaixo). `theme/ageGroupThemes.ts` adapta escala de fonte, contraste, gamificação e alvo de
+toque por faixa etária em cima desses tokens — não foi tocado pela migração (não referencia
+nenhum token de cor).
 
-`theme/tokens.ts` também define `gradients` (hero/primary/accent/calm/success/surface — o
-`hero` reaproveita o degradê navy→coral do próprio logo ECOA) e uma escala maior de `radii`
-(`lg`/`xl`/`xxl`) e `shadow` (`sm`/`md`/`lg`/`glow`), usados pelo design system em
-`components/` (ver "Redesign visual" abaixo).
+`theme/tokens.ts` também define `gradients` (hero/primary/accent/calm/success/surface — todas
+variações tonais dentro do azul único, já que o DS não define gradiente nenhum: os botões do DS
+são preenchimento sólido) e `radii` (`sm` 8 / `md` 16 / `lg` 24 / `pill` 999, do DS, mais um
+`xxl` 32 nosso para os cantos bem grandes do hero da Home e do card de resumo de ciclo — o DS
+para em 24). `shadow` só define `card` e `nav` oficialmente (ambos cor `ink`, variando
+offset/blur); `sm`/`md`/`lg` são extrapolações nossas da mesma receita para os outros níveis de
+elevação que o app já usa. O `glow` que existia antes (usado só em `IconBadge`, nunca de fato
+acionado por nenhum consumidor) foi removido — dead code, não uma simplificação do DS.
+
+### Migração para o design system oficial
+
+O usuário forneceu um artifact do tipo "Design System" com a paleta real da Care Plus
+(`#0079C8`, tirada do site oficial da marca) — substituiu a paleta anterior desta v2, que tinha
+sido inventada sem essa fonte. Decisão combinada com o usuário: substituir tudo (cores,
+tipografia, raios, sombra) nas telas do fluxo ECOA, mas **só o tema claro** — o DS também
+define tema escuro, mas o app não tem nenhuma infraestrutura de tema (sem contexto, sem
+`useColorScheme`); fica para uma etapa separada depois.
+
+- **~140 pontos de uso renomeados** em 20 arquivos (`colors.primary900` → `colors.ink`,
+  `colors.secondary500` → `colors.brand`, etc.) — sem deixar alias de compatibilidade no
+  `tokens.ts` depois de migrar (checado com grep antes de remover).
+- **Fontes de verdade pela primeira vez**: não existia `useFonts` em lugar nenhum do app —
+  instalados `@expo-google-fonts/montserrat` e `@expo-google-fonts/open-sans`, carregados em
+  `App.tsx` com um gate (`ActivityIndicator` até `fontsLoaded`). Open Sans vira a fonte padrão
+  de todo `<Text>` via `Text.defaultProps.style` (truque global de uma linha só, em vez de criar
+  um componente `AppText` e trocar todo `<Text>` do app); títulos continuam definindo Montserrat
+  explicitamente por cima (tem precedência).
+- **Componentes do DS (`BeneficiaryCard`, `TextField`, `ListItem`, `BottomNav`, `Badge`) não
+  foram recriados 1:1** — são peças do app CarePlus mais amplo, não do fluxo ECOA. Só `Card` e
+  `Button`(`GradientButton`) têm equivalente direto aqui, e esses dois tiveram a receita exata
+  do DS aplicada (`Card`: `surfaceRaised` + borda `line` + `radius-md` + `shadow-card`,
+  inclusive o `radius-md` corrigindo um valor que antes usava `radius-lg`).
+- `GradientButton` continua renderizando um gradiente de 2 tons (`brand` → `brandStrong`), não
+  o preenchimento sólido que o DS especifica pro componente `Button` — simplificação deliberada
+  pra não reescrever a arquitetura do componente nesta passada (os dois tons são próximos o
+  bastante pra ler como quase sólido). Documentado aqui como pendência em aberto, não decisão
+  silenciosa.
+- **Validado**: `npx tsc --noEmit` limpo, os 14 testes unitários passando, captura de tela no
+  navegador confirmando fontes e cores aplicadas (ver "Como testar").
 
 ## Design system (componentes reutilizáveis)
 

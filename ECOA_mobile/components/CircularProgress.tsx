@@ -24,8 +24,8 @@ export default function CircularProgress({
     progress,
     size = 140,
     strokeWidth = 10,
-    color = colors.secondary500,
-    trackColor = colors.primary100,
+    color = colors.brand,
+    trackColor = colors.brandSoft,
     label,
 }: Props) {
     const animatedProgress = useRef(new Animated.Value(progress)).current;
@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 36,
         fontWeight: "700",
-        color: colors.primary900,
+        color: colors.ink,
     },
 });

@@ -23,6 +23,8 @@ export default function Menu() {
     const route = useRoute();
     const { logout } = useAuth();
 
+    const canGoBack = navigation.canGoBack() && route.name !== "MAIN";
+
     async function handleLogout() {
         await logout();
         setMenuOpen(false);
@@ -63,7 +65,23 @@ export default function Menu() {
 
             <View style={styles.menuContainer}>
                 <View style={styles.menu}>
-                    <Image source={require("./../assets/ECOA.png")} style={styles.logo} />
+                    <View style={styles.leftSection}>
+                        {canGoBack && (
+                            <Pressable
+                                onPress={() => navigation.goBack()}
+                                style={({ pressed }) => [
+                                    styles.backButton,
+                                    pressed && styles.menuButtonPressed,
+                                ]}
+                                accessibilityRole="button"
+                                accessibilityLabel="Voltar"
+                            >
+                                <MaterialIcons name="arrow-back" size={22} color={colors.primary700} />
+                            </Pressable>
+                        )}
+
+                        <Image source={require("./../assets/ECOA.png")} style={styles.logo} />
+                    </View>
 
                     <Pressable
                         onPress={() => setMenuOpen(!menuOpen)}
@@ -121,6 +139,20 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+    },
+
+    leftSection: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+
+    backButton: {
+        width: 36,
+        height: 36,
+        borderRadius: radii.pill,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     logo: {

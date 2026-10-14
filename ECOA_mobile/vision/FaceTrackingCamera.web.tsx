@@ -161,7 +161,11 @@ export default function FaceTrackingCamera({
                 style: {
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
+                    // "contain" (não "cover"): garante que o rosto inteiro apareça, mesmo
+                    // que a proporção da webcam não bata com a da caixa — "cover" cortava
+                    // as bordas do vídeo pra preencher o quadro, e cortava parte do rosto.
+                    objectFit: "contain",
+                    backgroundColor: "#000",
                     transform: "scaleX(-1)",
                 },
             })}

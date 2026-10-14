@@ -23,7 +23,10 @@ type ExerciseBase = {
     instructions: string[];
     repetitions?: number;
     durationSeconds?: number;
+    /** URL remota (produção — ainda placeholder até os vídeos serem hospedados). */
     demoVideoUrl: string;
+    /** Asset de vídeo local bundlado (require), usado enquanto não há hospedagem remota. */
+    demoVideoAsset?: number;
     professionalGuidanceRecommended?: boolean;
 };
 

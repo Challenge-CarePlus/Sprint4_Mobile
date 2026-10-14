@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import GradientButton from "../../components/GradientButton";
+import ExerciseVideo from "../../components/ExerciseVideo";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { colors, gradients, radii, shadow } from "../../theme/tokens";
@@ -62,18 +63,24 @@ export default function ExercisePreviewScreen() {
                 </Text>
             </View>
 
-            <LinearGradient
-                colors={gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.videoPlaceholder, shadow.md]}
-                accessibilityLabel="Vídeo de demonstração"
-            >
-                <View style={styles.playButton}>
-                    <MaterialIcons name="play-arrow" size={34} color={colors.primary900} />
+            {exercise.demoVideoAsset ? (
+                <View style={[styles.videoPlaceholder, shadow.md]} accessibilityLabel="Vídeo de demonstração">
+                    <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} />
                 </View>
-                <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
-            </LinearGradient>
+            ) : (
+                <LinearGradient
+                    colors={gradients.primary}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[styles.videoPlaceholder, shadow.md]}
+                    accessibilityLabel="Vídeo de demonstração"
+                >
+                    <View style={styles.playButton}>
+                        <MaterialIcons name="play-arrow" size={34} color={colors.primary900} />
+                    </View>
+                    <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
+                </LinearGradient>
+            )}
 
             <Text style={[styles.title, { fontSize: 26 * presentation.fontScale }]}>
                 {exercise.name}
@@ -166,6 +173,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
+        overflow: "hidden",
+        backgroundColor: "#000",
+    },
+    videoPlayer: {
+        borderRadius: radii.xl,
     },
     playButton: {
         width: 56,

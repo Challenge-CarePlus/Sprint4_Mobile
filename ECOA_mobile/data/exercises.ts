@@ -95,6 +95,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "jawOpen", repetitions: 3, holdDurationMs: 3000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-jaw-stretch.mp4",
+        demoVideoAsset: require("../assets/videos/adults-jaw-stretch.mp4"),
     },
     {
         id: "adults-vowel-overarticulation",

@@ -35,11 +35,13 @@
       "favicon": "./assets/favicon.png"
     },
     "assetBundlePatterns": [
-      "assets/mediapipe/**/*"
+      "assets/mediapipe/**/*",
+      "assets/videos/**/*"
     ],
     "plugins": [
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-video"
     ]
   }
 }

@@ -45,8 +45,11 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 5,
         durationSeconds: 2,
-        validationType: "validado",
-        validationRule: { movement: "tongueOut", repetitions: 5, holdDurationMs: 2000 },
+        // "guiado", não "validado": o MediaPipe não expõe um blendshape de
+        // língua (ver nota em data/types.ts) — com câmera, esse exercício
+        // nunca validava de verdade, ficava preso pedindo o movimento pra
+        // sempre.
+        validationType: "guiado",
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-tongue-out.mp4",
     },
     {

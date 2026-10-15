@@ -304,6 +304,34 @@ linha:
   da câmera. Agora usa `getCameraBoxSize` também, dentro de um `ScrollView` — mesmo mecanismo
   das outras telas, sem caixa especial.
 
+## Correção: movimento "tongueOut" nunca validava
+
+O usuário relatou alguns exercícios "pedindo para abrir a boca" quando não deveriam. Revisei o
+mapeamento movimento→exercício em `data/exercises.ts` e a lógica de `vision/MovementDetector.ts`
+a fundo: cada exercício só é avaliado contra o `movement` do seu próprio `validationRule` (sem
+vazamento entre exercícios — confirmado lendo `computeRelativeScore`), e os únicos três
+exercícios com `movement: "jawOpen"` são, de fato, os três sobre abertura de mandíbula/vogais
+(`adults-jaw-stretch`, `adults-vowel-overarticulation`, `elderly-jaw-open-close`) — nenhum
+outro usa jawOpen nos dados.
+
+**Achado real, diferente**: `children-tongue-out` ("Língua de cobrinha") estava configurado como
+`validado` com `movement: "tongueOut"` — mas o MediaPipe Face Landmarker **não expõe esse
+blendshape**. A lista oficial de 52 categorias do MediaPipe (diferente da do ARKit, que tem um
+a mais) não inclui rastreamento de língua — não dá pra ver a língua de forma confiável só com
+landmarks 2D de rosto. Na prática, o score desse movimento ficava sempre em 0, nunca passava do
+limiar, e o exercício ficava preso pra sempre pedindo "Coloque mais a língua para fora".
+Corrigido: `FacialMovement` perdeu `"tongueOut"` (removido de `data/types.ts` e das três tabelas
+em `vision/movementThresholds.ts`), e `children-tongue-out` virou `"guiado"` — mesmo tratamento
+que seus "irmãos" de língua já tinham (`children-tongue-click`, `elderly-tongue-elevation`),
+que por essa mesma razão já eram guiados, não validados.
+
+Não encontrei, revisando o código, como o prompt de um exercício vazaria pro de outro — se o
+problema relatado persistir num exercício específico depois dessa correção, preciso saber qual
+exercício e a mensagem exata que apareceu pra investigar mais a fundo (os limiares em
+`vision/movementThresholds.ts` são valores iniciais, nunca calibrados contra rostos reais —
+ver "Pendências reais" acima — então também é possível que seja um limiar solto demais/apertado
+demais pro movimento certo, não o movimento errado sendo checado).
+
 ## Como testar
 
 1. `cd ECOA_mobile && npm install && npm test` — 10 testes unitários das regras de validação.

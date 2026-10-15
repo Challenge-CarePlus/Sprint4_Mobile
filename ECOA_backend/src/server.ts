@@ -5,11 +5,14 @@ import authRouter from "./routes/authRouter";
 
 const app = express();
 
-// Sem CORS_ORIGIN definido, aceita qualquer origem (como antes) — em
-// produção, configurar com a URL do front-end hospedado (ex. no painel da
-// Vercel) restringe a quem pode de fato chamar a API.
-const corsOrigin = process.env.CORS_ORIGIN;
-app.use(cors(corsOrigin ? { origin: corsOrigin } : undefined));
+// Sem CORS_ORIGIN definido, aceita qualquer origem (como antes). Em
+// produção, configura com as URLs do front-end hospedado — aceita mais de
+// uma separada por vírgula, porque a Vercel gera várias (o domínio fixo do
+// projeto, a URL por branch, a URL específica de cada deployment).
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+app.use(cors(allowedOrigins?.length ? { origin: allowedOrigins } : undefined));
 app.use(express.json({ limit: "5mb" }));
 
 app.use("/auth", authRouter);

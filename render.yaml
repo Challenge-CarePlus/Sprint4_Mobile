@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ecoa-backend
+    runtime: node
+    plan: free
+    rootDir: ECOA_backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false

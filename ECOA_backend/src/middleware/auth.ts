@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const SECRET = "ecoafono_secret";
+import { JWT_SECRET } from "../config/jwt";
 
 export function auth(
   req: Request,
@@ -20,7 +20,7 @@ export function auth(
   const [, token] = authHeader.split(" ");
 
   try {
-    jwt.verify(token, SECRET);
+    jwt.verify(token, JWT_SECRET);
 
     next();
   } catch {

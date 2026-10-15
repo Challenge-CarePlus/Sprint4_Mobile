@@ -3,10 +3,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import { Access, Login } from "../models/login";
+import { JWT_SECRET } from "../config/jwt";
 
 const router = Router();
-
-const SECRET = "ecoafono_secret";
 
 function lerUsuarios(): Login[] {
     const dados = fs.readFileSync(
@@ -124,7 +123,7 @@ router.post("/login", async (req, res) => {
                 email: user.email,
                 access: user.access
             },
-            SECRET,
+            JWT_SECRET,
             {
                 expiresIn: "3d"
             }

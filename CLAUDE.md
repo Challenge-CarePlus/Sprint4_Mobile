@@ -379,10 +379,60 @@ mesmo fluxo de QR code via `npx expo start --dev-client` para recarregar só o J
   provisionamento expira em 7 dias e precisa reinstalar. Não existe caminho gratuito sem passar
   por um Mac em algum momento. Decisão em aberto com o usuário — por ora, só Android.
 
+## Deploy (Render + Vercel)
+
+Back-end no **Render** (free), front-end web no **Vercel** — cada um na sua própria conta
+conectada ao GitHub (`Challenge-CarePlus/Sprint4_Mobile`), ninguém além do usuário consegue
+autenticar essas contas. Dois ajustes de infraestrutura foram necessários pra isso funcionar:
+
+- **`ECOA_backend/tsconfig.json` estava vazio** — sem `outDir`, `tsc` compilava os `.js` dentro
+  da própria `src/` em vez de `dist/`, e o script `start` (`node dist/server.js`) quebraria no
+  primeiro deploy. Corrigido com `outDir: "dist"`, `rootDir: "src"`, `module: "CommonJS"`.
+- **Porta e segredo do JWT hardcoded** — `PORT` agora vem de `process.env.PORT` (hosts como o
+  Render atribuem a porta por env var; sem isso o serviço nunca fica "healthy"). O `JWT_SECRET`
+  duplicado em `authRouter.ts`/`middleware/auth.ts` virou um único `src/config/jwt.ts` lido de
+  `process.env.JWT_SECRET` — o Render gera um valor aleatório sozinho via `generateValue: true`
+  no `render.yaml`. `CORS_ORIGIN` também é configurável (sem definir, aceita qualquer origem,
+  como antes).
+- `ECOA_mobile/config/apiConfig.ts` ganhou `EXPO_PUBLIC_API_BASE_URL` — o esquema antigo
+  (`EXPO_PUBLIC_API_IP` + `EXPO_PUBLIC_API_PORT`) monta sempre `http://IP:PORTA`, que não
+  representa um host de produção (HTTPS, sem porta custom, ex. `https://ecoa-backend.onrender.com`).
+  A variável nova tem prioridade quando definida; o esquema antigo continua valendo pra
+  emulador Android/LAN em dev local.
+- `render.yaml` (raiz do repo) e `ECOA_mobile/vercel.json` guardam a configuração de build como
+  código — `rootDir`/Root Directory apontando pra cada pasta do monorepo, já que back-end e
+  front-end vivem no mesmo repositório.
+- **Achado testando o build de produção**: `npx expo export --platform web` com variável de
+  ambiente nova (`EXPO_PUBLIC_API_BASE_URL`) **não pegava o valor** se já existia um `dist/`
+  ou cache do Metro de uma exportação anterior — o bundle saía idêntico (mesmo hash de arquivo)
+  ao de antes, ignorando a env var. Resolvido adicionando `--clear` ao comando de build (limpa
+  o cache do bundler); por segurança, isso foi incluído no `vercel.json` também, não só
+  localmente.
+- **Validado de ponta a ponta antes de publicar**: build de produção do back-end
+  (`npm run build && PORT=4001 JWT_SECRET=... npm start`) respondendo `/health` e `/auth/login`
+  de verdade; export estático do front-end (`npx expo export --platform web --clear`) servido
+  por um servidor HTTP puro (sem dev server do Expo) com `EXPO_PUBLIC_API_BASE_URL` apontando
+  pro back-end de teste — login completo funcionando via Playwright, sem nenhum processo de
+  desenvolvimento no meio.
+
+**Limitação conhecida, não resolvida**: `ECOA_backend/src/db/users.json` é um arquivo JSON local
+(sem banco de dados de verdade) — no plano free do Render, o sistema de arquivos é efêmero.
+Novos cadastros feitos no site publicado funcionam enquanto o serviço não reinicia, mas podem
+ser perdidos num redeploy ou quando o Render reinicia o serviço por inatividade (free tier
+"dorme" depois de 15 min sem uso). O usuário de teste (`ecoafono@email.com`) sempre volta, por
+estar no arquivo versionado no repo. Resolver de verdade exigiria um banco de dados externo
+(ex. Postgres gratuito do próprio Render/Supabase) — fora do escopo de hoje.
+
+**Versionamento**: conectando os dois projetos ao GitHub (não um deploy avulso por CLI), tanto
+Render quanto Vercel criam um deploy novo a cada push na branch configurada, cada um amarrado
+ao commit exato — dá pra ver o histórico, comparar e reverter pelo painel de cada serviço sem
+precisar resolver isso aqui. A Vercel também gera uma preview URL separada por Pull Request,
+útil pra revisar uma mudança antes de ir pra produção.
+
 ## Adaptações em relação ao briefing original
 
-- "Deploy no Vercel" não se aplica (app nativo, não web) — critério substituído por
-  "build Android funcionando" via `expo run:android`.
+- "Deploy no Vercel" (frontend web) e Render (API) — ver "Deploy" acima; o app nativo (Android)
+  continua existindo em paralelo via `expo run:android`, descrito em "Como testar".
 - "Mobile futuro via Capacitor/WebView" já é o presente: a WebView entra agora como sandbox
   de cálculo do MediaPipe, não como o app inteiro.
 - "Web Speech API" (específica de navegador) substituída por `expo-speech`, o equivalente

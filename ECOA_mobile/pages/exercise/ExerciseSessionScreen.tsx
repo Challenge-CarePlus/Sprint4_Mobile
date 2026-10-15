@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import GradientButton from "../../components/GradientButton";
@@ -9,6 +9,7 @@ import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { Exercise, Track } from "../../data/types";
 import FaceTrackingCamera from "../../vision/FaceTrackingCamera";
+import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetector";
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
@@ -30,47 +31,6 @@ type SessionProps = {
 };
 
 const SESSION_CONTENT_PADDING = 40; // paddingHorizontal: 20 dos dois lados (styles.content)
-
-/**
- * Câmera como elemento principal da tela (estilo "espelho" de apps de
- * fisioterapia/fitness por câmera — Kaia Health, True Pose), não uma caixa
- * pequena entre textos. `ratio` é a fração da altura da janela; min/max
- * evitam que fique grande demais num monitor ou pequena demais num celular
- * baixo.
- *
- * `aspect` é a proporção real do stream da webcam (largura/altura), lida do
- * próprio vídeo assim que carrega — sem isso, uma caixa larga de desktop
- * (ex. 1800x450) forçada sobre uma webcam 4:3 sobrava tarja preta nas
- * laterais com `contentFit: "contain"`. Calculando a largura da caixa a
- * partir da proporção real da câmera, a caixa já nasce do tamanho certo e a
- * tarja preta não aparece — sem precisar de `"cover"`, que cortaria o rosto
- * (o mesmo problema já corrigido antes no vídeo de demonstração).
- */
-function getCameraBoxSize(
-    ratio: number,
-    min: number,
-    max: number,
-    aspect: number | null
-): { width: number; height: number } {
-    const window = Dimensions.get("window");
-    const maxWidth = window.width - SESSION_CONTENT_PADDING;
-    const height = Math.min(max, Math.max(min, window.height * ratio));
-
-    if (!aspect) {
-        return { width: maxWidth, height };
-    }
-
-    const width = height * aspect;
-    if (width <= maxWidth) {
-        return { width, height };
-    }
-
-    // A altura "ideal" (baseada na janela) faria a caixa ficar mais larga do
-    // que a tela permite — encolhe os dois lados juntos pra manter a
-    // proporção real da câmera (senão a largura ficaria presa na tela mas a
-    // altura não, voltando a sobrar tarja preta, só que em cima/embaixo).
-    return { width: maxWidth, height: maxWidth / aspect };
-}
 
 export default function ExerciseSessionScreen() {
     const navigation = useNavigation();
@@ -249,7 +209,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
         [finishExercise]
     );
 
-    const cameraBox = getCameraBoxSize(0.52, 340, 520, cameraAspect);
+    const cameraBox = getCameraBoxSize(0.52, 340, 520, cameraAspect, SESSION_CONTENT_PADDING);
 
     return (
         <ScrollView
@@ -352,7 +312,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
         goToNextStep(navigation, track, trackId, exerciseIndex);
     }
 
-    const cameraBox = getCameraBoxSize(0.38, 260, 400, cameraAspect);
+    const cameraBox = getCameraBoxSize(0.38, 260, 400, cameraAspect, SESSION_CONTENT_PADDING);
 
     return (
         <ScrollView

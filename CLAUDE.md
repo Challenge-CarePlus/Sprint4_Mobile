@@ -278,9 +278,8 @@ câmera é o elemento principal da tela (quase em espelho), com o feedback **sob
 em vez de caixas de texto separadas ao lado. `ExerciseSessionScreen.tsx` foi redesenhado nessa
 linha:
 
-- A câmera agora ocupa a maior parte da tela (altura calculada como fração da altura da janela
-  via `getCameraHeight`, não mais um `height: 280` fixo), com a tela inteira dentro de um
-  `ScrollView` (antes era uma `View` com `flex: 1`, sem rolagem).
+- A câmera agora ocupa a maior parte da tela (altura calculada como fração da altura da janela),
+  com a tela inteira dentro de um `ScrollView` (antes era uma `View` com `flex: 1`, sem rolagem).
 - `FaceTrackingCamera`/`FaceTrackingCamera.web.tsx` ganharam uma prop `borderColor` — o contorno
   da câmera muda de cor conforme o feedback (`getFeedbackColor`): azul-marinho aguardando,
   azul claro segurando, verde ao concluir repetição/exercício.
@@ -292,17 +291,18 @@ linha:
   mostrar por cima.
 - A caixa da câmera não usa mais altura fixa com largura total — isso deixava tarja preta nas
   laterais (desktop) ou em cima/embaixo (celular) sempre que a proporção real da webcam (lida
-  do próprio `<video>` via `onLoadedMetadata`, nova prop `onAspectRatioChange` em
-  `FaceTrackingCamera.web.tsx`) não batia com a proporção da caixa. `getCameraBoxSize` em
-  `ExerciseSessionScreen.tsx` calcula largura e altura juntas a partir dessa proporção real, e
-  encolhe as duas junto quando a tela é estreita — sem isso, uma caixa larga em desktop (ex.
-  1800×450) sobre uma webcam 4:3 sobrava tarja enorme nas laterais com `contentFit: "contain"`.
-  Resolvido sem usar `"cover"` (que cortaria o rosto, o mesmo problema já corrigido antes no
-  vídeo de demonstração).
-- `CalibrationScreen.tsx` **não foi alterado** — continua com a câmera no tamanho original
-  (280px), decisão deliberada pra não arriscar o layout dela (não usa `ScrollView`, tem
-  título+subtítulo+anel de progresso abaixo da câmera; aumentar a câmera ali sem rolagem podia
-  cortar o anel de progresso em telas baixas).
+  do próprio `<video>` via `onLoadedMetadata`, prop `onAspectRatioChange` em
+  `FaceTrackingCamera.web.tsx`) não batia com a proporção da caixa. `vision/cameraBoxSize.ts`
+  (`getCameraBoxSize`) calcula largura e altura juntas a partir dessa proporção real, e encolhe
+  as duas junto quando a tela é estreita — sem isso, uma caixa larga em desktop (ex. 1800×450)
+  sobre uma webcam 4:3 sobrava tarja enorme nas laterais com `contentFit: "contain"`. Resolvido
+  sem usar `"cover"` (que cortaria o rosto, o mesmo problema já corrigido antes no vídeo de
+  demonstração).
+- **`CalibrationScreen.tsx` recebeu o mesmo tratamento depois** — o usuário relatou a câmera
+  "abrindo em tela cheia" ali; a tela tinha ficado de fora da primeira passada (altura fixa de
+  280px, `View` sem rolagem) e usava uma caixa só largura-total sem considerar a proporção real
+  da câmera. Agora usa `getCameraBoxSize` também, dentro de um `ScrollView` — mesmo mecanismo
+  das outras telas, sem caixa especial.
 
 ## Como testar
 

@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import CircularProgress from "../../components/CircularProgress";
 import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
+import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
-import { colors, fonts } from "../../theme/tokens";
+import { colors, fonts, radii } from "../../theme/tokens";
 
 type RouteParams = {
     trackId: string;
     exerciseIndex: number;
 };
+
+const CALIBRATION_CONTENT_PADDING = 56; // paddingHorizontal: 28 dos dois lados
 
 export default function CalibrationScreen() {
     const navigation = useNavigation();
@@ -31,6 +34,7 @@ export default function CalibrationScreen() {
     const [progress, setProgress] = useState(0);
     const [collecting, setCollecting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [cameraAspect, setCameraAspect] = useState<number | null>(null);
 
     const finishCalibration = useCallback(() => {
         if (hasFinishedRef.current) {
@@ -83,19 +87,29 @@ export default function CalibrationScreen() {
         [collecting]
     );
 
+    const cameraBox = getCameraBoxSize(0.42, 280, 440, cameraAspect, CALIBRATION_CONTENT_PADDING);
+
     return (
-        <View style={styles.container}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+        >
             <Text style={styles.title}>Calibração</Text>
             <Text style={styles.subtitle}>
                 Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto.
             </Text>
 
-            <FaceTrackingCamera
-                isActive
-                onReading={handleReading}
-                onStatusChange={setStatus}
-                onError={setErrorMessage}
-            />
+            <View style={[styles.cameraWrapper, cameraBox]}>
+                <FaceTrackingCamera
+                    isActive
+                    onReading={handleReading}
+                    onStatusChange={setStatus}
+                    onError={setErrorMessage}
+                    onAspectRatioChange={setCameraAspect}
+                    cameraStyle={styles.cameraFill}
+                />
+            </View>
 
             {status === "ready" && (
                 <CircularProgress
@@ -105,7 +119,7 @@ export default function CalibrationScreen() {
             )}
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
-        </View>
+        </ScrollView>
     );
 }
 
@@ -113,10 +127,23 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,
+    },
+    content: {
         paddingHorizontal: 28,
         paddingTop: 40,
+        paddingBottom: 40,
         gap: 20,
         alignItems: "center",
+    },
+    cameraWrapper: {
+        alignSelf: "center",
+        borderRadius: radii.lg,
+        overflow: "hidden",
+    },
+    cameraFill: {
+        width: "100%",
+        height: "100%",
+        borderRadius: radii.lg,
     },
     title: {
         fontFamily: "Montserrat_700Bold",

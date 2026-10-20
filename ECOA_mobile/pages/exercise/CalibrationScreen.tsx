@@ -143,7 +143,7 @@ export default function CalibrationScreen() {
     const cameraLoading = status !== "ready" && !errorMessage;
     const remainingSeconds = (1 - progress) * (CALIBRATION_DURATION_MS / 1000);
 
-    const cameraBox = getCameraBoxSize(0.42, 280, 440, cameraAspect, CALIBRATION_CONTENT_PADDING);
+    const cameraBox = getCameraBoxSize(0.42, 280, 440, cameraAspect ?? 4 / 3, CALIBRATION_CONTENT_PADDING);
 
     return (
         <ScrollView

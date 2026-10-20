@@ -43,6 +43,22 @@ export default function CalibrationScreen() {
     const [cameraAspect, setCameraAspect] = useState<number | null>(null);
     const [attempt, setAttempt] = useState(0);
     const [noFace, setNoFace] = useState(false);
+    // Diagnóstico visível: quadros analisados e quadros com rosto (refs, pra não re-renderizar a 60fps).
+    const framesRef = useRef(0);
+    const faceFramesRef = useRef(0);
+    const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [diagnostics, setDiagnostics] = useState({ frames: 0, faceFrames: 0 });
+
+    useEffect(() => {
+        const id = setInterval(
+            () => setDiagnostics({ frames: framesRef.current, faceFrames: faceFramesRef.current }),
+            500
+        );
+        return () => {
+            clearInterval(id);
+            if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+        };
+    }, []);
 
     const finishCalibration = useCallback(() => {
         if (hasFinishedRef.current) {
@@ -52,12 +68,15 @@ export default function CalibrationScreen() {
         if (collectorRef.current.sampleCount < MIN_CALIBRATION_SAMPLES) {
             // Sem rosto detectado: baseline vazio deixaria a detecção sem referência.
             collectorRef.current = new CalibrationCollector();
-            hasStartedRef.current = false;
             setNoFace(true);
             setProgress(0);
             setSecondsRemaining(Math.ceil(CALIBRATION_DURATION_MS / 1000));
             speak("Não vimos seu rosto. Fique de frente para a câmera.");
-            setAttempt((n) => n + 1);
+            // Pausa antes de tentar de novo: sem ela a mensagem piscava e sumia.
+            retryTimeoutRef.current = setTimeout(() => {
+                hasStartedRef.current = false;
+                setAttempt((n) => n + 1);
+            }, 3000);
             return;
         }
 
@@ -102,7 +121,11 @@ export default function CalibrationScreen() {
 
     const handleReading = useCallback(
         (blendshapes: Blendshape[]) => {
-            if (collecting) {
+            framesRef.current += 1;
+            if (blendshapes.length > 0) {
+                faceFramesRef.current += 1;
+            }
+            if (collecting && blendshapes.length > 0) {
                 setNoFace(false);
                 collectorRef.current.addSample(blendshapes);
             }
@@ -144,9 +167,15 @@ export default function CalibrationScreen() {
                 />
             )}
 
-            {noFace && !collecting && (
+            {noFace && (
                 <Text style={[styles.error, { color: trail.text }]}>
                     Não vimos seu rosto. Fique de frente para a câmera, com boa luz — vamos tentar de novo.
+                </Text>
+            )}
+
+            {status === "ready" && (
+                <Text style={[styles.diagnostics, { color: trail.textMuted }]}>
+                    Quadros analisados: {diagnostics.frames} · com rosto: {diagnostics.faceFrames}
                 </Text>
             )}
 
@@ -188,6 +217,10 @@ const styles = StyleSheet.create({
         color: colors.inkMuted,
         textAlign: "center",
         lineHeight: 20,
+    },
+    diagnostics: {
+        fontSize: 12,
+        textAlign: "center",
     },
     error: {
         color: colors.danger,

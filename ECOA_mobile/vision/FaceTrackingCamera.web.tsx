@@ -250,18 +250,27 @@ async function createFaceLandmarker(): Promise<FaceLandmarkerType> {
     await modelAsset.downloadAsync();
 
     const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/wasm"
     );
 
-    return FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-            modelAssetPath: modelAsset.uri ?? modelAsset.localUri ?? "",
-            delegate: "GPU",
-        },
-        outputFaceBlendshapes: true,
-        runningMode: "VIDEO",
-        numFaces: 1,
-    });
+    const create = (delegate: "GPU" | "CPU") =>
+        FaceLandmarker.createFromOptions(vision, {
+            baseOptions: {
+                modelAssetPath: modelAsset.uri ?? modelAsset.localUri ?? "",
+                delegate,
+            },
+            outputFaceBlendshapes: true,
+            runningMode: "VIDEO",
+            numFaces: 1,
+        });
+
+    // GPU (WebGL) falha ou devolve vazio em alguns navegadores/placas: cai pra CPU.
+    try {
+        return await create("GPU");
+    } catch (error) {
+        console.warn("[ECOA] FaceLandmarker GPU indisponível, usando CPU", error);
+        return create("CPU");
+    }
 }
 
 const styles = StyleSheet.create({

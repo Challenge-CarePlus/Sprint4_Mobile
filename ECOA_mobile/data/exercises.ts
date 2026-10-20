@@ -178,6 +178,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "jawOpen", repetitions: 8 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-jaw-open-close.mp4",
+        demoVideoAsset: require("../assets/videos/elderly-jaw-open-close.mp4"),
     },
     {
         id: "elderly-pucker-hold",
@@ -194,6 +195,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "mouthPucker", repetitions: 5, holdDurationMs: 3000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-pucker-hold.mp4",
+        demoVideoAsset: require("../assets/videos/elderly-pucker-hold.mp4"),
     },
     {
         id: "elderly-smile-hold",
@@ -210,6 +212,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "mouthSmile", repetitions: 5, holdDurationMs: 3000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-smile-hold.mp4",
+        demoVideoAsset: require("../assets/videos/elderly-smile-hold.mp4"),
     },
     {
         id: "elderly-tongue-elevation",
@@ -226,6 +229,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "guiado",
         professionalGuidanceRecommended: true,
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-tongue-elevation.mp4",
+        demoVideoAsset: require("../assets/videos/elderly-tongue-elevation.mp4"),
     },
     {
         id: "elderly-effortful-swallow",

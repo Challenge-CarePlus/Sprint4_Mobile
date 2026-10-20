@@ -301,7 +301,8 @@ com ícone de play só quando nenhum dos dois estiver resolvido.
   `ExerciseVideo` de `"cover"` para `"contain"` — mesmo raciocínio já aplicado antes na câmera
   (`FaceTrackingCamera.web.tsx`), prioriza nunca cortar o rosto mesmo que um vídeo futuro venha
   numa proporção diferente de 16:9.
-- **Pendente**: os outros 10 (trilhas infantil e idosos). Plano combinado com o usuário: a
+- **Idosos (4 de 5)**: `elderly-jaw-open-close`, `pucker-hold`, `smile-hold`, `tongue-elevation` ligados em `assets/videos/elderly-*.mp4` (20/10). Faltam `elderly-effortful-swallow` e a trilha infantil inteira (5). **Atenção ao tamanho**: `pucker-hold` tem ~17MB e `smile-hold` ~10MB (os de adultos têm ~1MB) — comprimir (H.264, 1024x576) antes de produção.
+- **Pendente**: os outros 6 (trilhas infantil e idosos). Plano combinado com o usuário: a
   trilha adulta era o primeiro lote, agora validada — próximo passo é gerar as outras duas.
   Reaproveitamento entre trilhas é limitado — só "Alongamento de mandíbula" tem um par visual
   parecido na trilha de idosos (abertura e fechamento de boca); os outros 4 exercícios da trilha

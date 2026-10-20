@@ -94,6 +94,23 @@ define tema escuro, mas o app não tem nenhuma infraestrutura de tema (sem conte
 - **Validado**: `npx tsc --noEmit` limpo, os 14 testes unitários passando, captura de tela no
   navegador confirmando fontes e cores aplicadas (ver "Como testar").
 
+### Identidade por trilha (sub-marca "Projeto Ecoa" do DS)
+
+O DS oficial também define a sub-marca Ecoa, com paleta própria por trilha — decisão com o usuário:
+aplicar só nas telas do fluxo de exercício (as que sabem a trilha); login, Home e menu continuam
+no núcleo Care Plus mono-azul. Fonte de verdade: `theme/trailThemes.ts` (`getTrailTheme(ageGroup)`),
+usado por Preview, Calibração, Sessão e Resumo.
+
+- **Adultos**: fundo `ecoa-mist`, chips `ecoa-navy`, botão `ecoa-teal-strong`.
+- **Infantil**: fundo `kids-blue`, títulos `kids-yellow`, botão amarelo com texto `kids-deep`.
+- **Idosos**: fundo `idoso-cream`, texto `idoso-ink` sem tom "muted", botão `idoso-coral`.
+- Títulos e botões em **Barlow Condensed 800 caixa-alta** (`trailFont`, carregada em `App.tsx`).
+  `GradientButton` ganhou `fill`/`textColor`/`fontFamily` — botão sólido, como o DS especifica.
+- Alvo de toque dos adultos subiu de 44 para 48px (DS). Texto do idoso ≥18px via `fontScale` 1.3.
+- **Pendências**: as cores Ecoa do DS foram tiradas de um JPEG pequeno (o próprio DS avisa) —
+  trocar pelos valores exatos quando houver Figma. `TrackSelectScreen` ainda usa o núcleo Care Plus.
+  Validado: `tsc`, 14 testes, `expo export --platform web`; **sem captura de tela** ainda.
+
 ## Design system (componentes reutilizáveis)
 
 A pedido do usuário ("mais moderno, sofisticado, que cause impacto"), a interface inteira foi

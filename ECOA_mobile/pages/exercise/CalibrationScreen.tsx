@@ -9,7 +9,9 @@ import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
+import { TRACKS } from "../../data/tracks";
 import { colors, fonts, radii } from "../../theme/tokens";
+import { getTrailTheme, trailFont } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -17,11 +19,15 @@ type RouteParams = {
 };
 
 const CALIBRATION_CONTENT_PADDING = 56; // paddingHorizontal: 28 dos dois lados
+const MIN_CALIBRATION_SAMPLES = 5;
 
 export default function CalibrationScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
+
+    const track = TRACKS.find((t) => t.id === trackId);
+    const trail = getTrailTheme(track?.ageGroup ?? "adults");
 
     const collectorRef = useRef(new CalibrationCollector());
     const hasStartedRef = useRef(false);
@@ -35,9 +41,23 @@ export default function CalibrationScreen() {
     const [collecting, setCollecting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [cameraAspect, setCameraAspect] = useState<number | null>(null);
+    const [attempt, setAttempt] = useState(0);
+    const [noFace, setNoFace] = useState(false);
 
     const finishCalibration = useCallback(() => {
         if (hasFinishedRef.current) {
+            return;
+        }
+
+        if (collectorRef.current.sampleCount < MIN_CALIBRATION_SAMPLES) {
+            // Sem rosto detectado: baseline vazio deixaria a detecção sem referência.
+            collectorRef.current = new CalibrationCollector();
+            hasStartedRef.current = false;
+            setNoFace(true);
+            setProgress(0);
+            setSecondsRemaining(Math.ceil(CALIBRATION_DURATION_MS / 1000));
+            speak("Não vimos seu rosto. Fique de frente para a câmera.");
+            setAttempt((n) => n + 1);
             return;
         }
 
@@ -54,7 +74,9 @@ export default function CalibrationScreen() {
         }
 
         hasStartedRef.current = true;
-        speak("Relaxe o rosto. Vamos calibrar por 3 segundos.");
+        if (attempt === 0) {
+            speak("Relaxe o rosto. Vamos calibrar por 3 segundos.");
+        }
         setCollecting(true);
 
         const startedAt = Date.now();
@@ -76,11 +98,12 @@ export default function CalibrationScreen() {
             clearInterval(tickInterval);
             clearTimeout(finishTimeout);
         };
-    }, [status, finishCalibration]);
+    }, [status, attempt, finishCalibration]);
 
     const handleReading = useCallback(
         (blendshapes: Blendshape[]) => {
             if (collecting) {
+                setNoFace(false);
                 collectorRef.current.addSample(blendshapes);
             }
         },
@@ -91,12 +114,12 @@ export default function CalibrationScreen() {
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: trail.background }]}
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={styles.title}>Calibração</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: trail.title }]}>Calibração</Text>
+            <Text style={[styles.subtitle, { color: trail.textMuted }]}>
                 Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto.
             </Text>
 
@@ -114,8 +137,17 @@ export default function CalibrationScreen() {
             {status === "ready" && (
                 <CircularProgress
                     progress={progress}
+                    color={trail.cta}
+                    trackColor={trail.chipBackground}
+                    labelColor={trail.text}
                     label={collecting ? `${secondsRemaining}s` : "Pronto!"}
                 />
+            )}
+
+            {noFace && !collecting && (
+                <Text style={[styles.error, { color: trail.text }]}>
+                    Não vimos seu rosto. Fique de frente para a câmera, com boa luz — vamos tentar de novo.
+                </Text>
             )}
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
@@ -146,8 +178,10 @@ const styles = StyleSheet.create({
         borderRadius: radii.lg,
     },
     title: {
-        fontFamily: "Montserrat_700Bold",
-        fontSize: 26,
+        fontFamily: trailFont,
+        fontWeight: "400",
+        textTransform: "uppercase",
+        fontSize: 34,
         color: colors.ink,
     },
     subtitle: {

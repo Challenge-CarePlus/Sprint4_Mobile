@@ -20,6 +20,12 @@ type Props = {
     icon?: keyof typeof MaterialIcons.glyphMap;
     iconPosition?: "left" | "right";
     gradient?: GradientName;
+    /** Cor sólida que substitui o gradiente (botões das trilhas, ver theme/trailThemes.ts). */
+    fill?: string;
+    /** Cor do rótulo e do ícone; padrão branco. */
+    textColor?: string;
+    /** Fonte do rótulo; quando passada, o rótulo vira caixa-alta (estilo Ecoa). */
+    fontFamily?: string;
     disabled?: boolean;
     loading?: boolean;
     minHeight?: number;
@@ -40,6 +46,9 @@ export default function GradientButton({
     icon,
     iconPosition = "right",
     gradient = "primary",
+    fill,
+    textColor = colors.white,
+    fontFamily,
     disabled = false,
     loading = false,
     minHeight = 52,
@@ -51,7 +60,7 @@ export default function GradientButton({
     const isDisabled = disabled || loading;
 
     const iconElement = icon ? (
-        <MaterialIcons name={icon} size={22} color={colors.white} style={styles.icon} />
+        <MaterialIcons name={icon} size={22} color={textColor} style={styles.icon} />
     ) : null;
 
     return (
@@ -69,17 +78,28 @@ export default function GradientButton({
             ]}
         >
             <LinearGradient
-                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : gradients[gradient]}
+                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : fill ? [fill, fill] : gradients[gradient]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.gradient, { minHeight }, !isDisabled && shadow.sm]}
             >
                 {loading ? (
-                    <ActivityIndicator color={colors.white} />
+                    <ActivityIndicator color={textColor} />
                 ) : (
                     <>
                         {icon && iconPosition === "left" ? iconElement : null}
-                        <Text style={[styles.text, { fontSize }, textStyle]}>{title}</Text>
+                        <Text
+                            style={[
+                                styles.text,
+                                { fontSize, color: textColor },
+                                fontFamily
+                                    ? { fontFamily, fontWeight: "400", textTransform: "uppercase" }
+                                    : null,
+                                textStyle,
+                            ]}
+                        >
+                            {title}
+                        </Text>
                         {icon && iconPosition === "right" ? iconElement : null}
                     </>
                 )}

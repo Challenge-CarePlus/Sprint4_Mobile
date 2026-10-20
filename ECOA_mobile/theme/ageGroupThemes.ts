@@ -25,7 +25,7 @@ export const AGE_GROUP_PRESENTATIONS: Record<AgeGroup, AgeGroupPresentation> = {
         highContrast: false,
         gamified: false,
         metricsFocused: true,
-        minTouchTarget: 44,
+        minTouchTarget: 48,
     },
     elderly: {
         fontScale: 1.3,

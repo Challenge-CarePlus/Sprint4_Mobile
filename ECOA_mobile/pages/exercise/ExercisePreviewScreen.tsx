@@ -9,6 +9,7 @@ import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
+import { getTrailTheme, trailFont } from "../../theme/trailThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
 
 type RouteParams = {
@@ -34,6 +35,7 @@ export default function ExercisePreviewScreen() {
     }
 
     const presentation = getPresentation(track.ageGroup);
+    const trail = getTrailTheme(track.ageGroup);
     const calibrated = hasCalibration(trackId);
 
     function handleStart() {
@@ -53,12 +55,12 @@ export default function ExercisePreviewScreen() {
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: trail.background }]}
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <View style={styles.progressPill}>
-                <Text style={styles.progress}>
+            <View style={[styles.progressPill, { backgroundColor: trail.chipBackground }]}>
+                <Text style={[styles.progress, { color: trail.chipText }]}>
                     Exercício {exerciseIndex + 1} de {track.exerciseIds.length} · {track.name}
                 </Text>
             </View>
@@ -82,17 +84,26 @@ export default function ExercisePreviewScreen() {
                 </LinearGradient>
             )}
 
-            <Text style={[styles.title, { fontSize: 26 * presentation.fontScale }]}>
+            <Text
+                style={[
+                    styles.title,
+                    {
+                        fontFamily: trailFont,
+                        fontWeight: "400",
+                        textTransform: "uppercase",
+                        color: trail.title,
+                        fontSize: 34 * presentation.fontScale,
+                        lineHeight: 36 * presentation.fontScale,
+                    },
+                ]}
+            >
                 {exercise.name}
             </Text>
 
             <Text
                 style={[
                     styles.goal,
-                    {
-                        fontSize: 15 * presentation.fontScale,
-                        color: presentation.highContrast ? colors.ink : colors.inkMuted,
-                    },
+                    { fontSize: 15 * presentation.fontScale, color: trail.textMuted },
                 ]}
             >
                 {exercise.therapeuticGoal}
@@ -110,13 +121,17 @@ export default function ExercisePreviewScreen() {
             <View style={styles.instructionsBox}>
                 {exercise.instructions.map((instruction, index) => (
                     <View key={index} style={styles.instructionRow}>
-                        <LinearGradient
-                            colors={gradients.accent}
-                            style={styles.instructionNumber}
+                        <View style={[styles.instructionNumber, { backgroundColor: trail.accent }]}>
+                            <Text style={[styles.instructionNumberText, { color: trail.onAccent }]}>
+                                {index + 1}
+                            </Text>
+                        </View>
+                        <Text
+                            style={[
+                                styles.instructionText,
+                                { fontSize: 15 * presentation.fontScale, color: trail.text },
+                            ]}
                         >
-                            <Text style={styles.instructionNumberText}>{index + 1}</Text>
-                        </LinearGradient>
-                        <Text style={[styles.instructionText, { fontSize: 15 * presentation.fontScale }]}>
                             {instruction}
                         </Text>
                     </View>
@@ -124,9 +139,9 @@ export default function ExercisePreviewScreen() {
             </View>
 
             {repetitionLabel ? (
-                <View style={styles.repetitionPill}>
-                    <MaterialIcons name="repeat" size={16} color={colors.brand} />
-                    <Text style={styles.repetitionLabel}>{repetitionLabel}</Text>
+                <View style={[styles.repetitionPill, { backgroundColor: trail.chipBackground }]}>
+                    <MaterialIcons name="repeat" size={16} color={trail.chipText} />
+                    <Text style={[styles.repetitionLabel, { color: trail.chipText }]}>{repetitionLabel}</Text>
                 </View>
             ) : null}
 
@@ -136,7 +151,10 @@ export default function ExercisePreviewScreen() {
                     onPress={handleStart}
                     icon="arrow-forward"
                     minHeight={presentation.minTouchTarget}
-                    fontSize={16 * presentation.fontScale}
+                    fontSize={20 * presentation.fontScale}
+                    fill={trail.cta}
+                    textColor={trail.onCta}
+                    fontFamily={trailFont}
                 />
             </View>
         </ScrollView>
@@ -169,8 +187,8 @@ const styles = StyleSheet.create({
     },
     videoPlaceholder: {
         width: "100%",
-        maxWidth: 320,
-        aspectRatio: 1,
+        maxWidth: 560,
+        aspectRatio: 16 / 9,
         alignSelf: "center",
         borderRadius: radii.lg,
         alignItems: "center",

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -9,7 +8,8 @@ import { TRACKS } from "../../data/tracks";
 import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
-import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, radii, shadow } from "../../theme/tokens";
+import { getTrailTheme, trailFont } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -81,21 +81,21 @@ export default function CycleSummaryScreen() {
         );
     }
 
+    const trail = getTrailTheme(track.ageGroup);
+
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <LinearGradient
-                colors={gradients.success}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.hero, shadow.md]}
-            >
+        <ScrollView
+            style={[styles.container, { backgroundColor: trail.background }]}
+            contentContainerStyle={styles.content}
+        >
+            <View style={[styles.hero, shadow.md, { backgroundColor: trail.hero }]}>
                 <View style={styles.trophyBadge}>
-                    <MaterialIcons name="emoji-events" size={44} color={colors.brand} />
+                    <MaterialIcons name="emoji-events" size={44} color={trail.accent} />
                 </View>
 
-                <Text style={styles.title}>Ciclo concluído!</Text>
-                <Text style={styles.subtitle}>{track.name}</Text>
-            </LinearGradient>
+                <Text style={[styles.title, { color: trail.onHero }]}>Ciclo concluído!</Text>
+                <Text style={[styles.subtitle, { color: trail.onHero }]}>{track.name}</Text>
+            </View>
 
             <View style={styles.statsGrid}>
                 <StatTile
@@ -113,7 +113,15 @@ export default function CycleSummaryScreen() {
             </View>
 
             <View style={styles.buttonSpacer}>
-                <GradientButton title="Voltar ao início" onPress={handleBackToHome} icon="home" />
+                <GradientButton
+                    title="Voltar ao início"
+                    onPress={handleBackToHome}
+                    icon="home"
+                    fontSize={20}
+                    fill={trail.cta}
+                    textColor={trail.onCta}
+                    fontFamily={trailFont}
+                />
             </View>
         </ScrollView>
     );
@@ -149,14 +157,15 @@ const styles = StyleSheet.create({
         ...shadow.md,
     },
     title: {
-        fontFamily: "Montserrat_700Bold",
-        fontSize: 26,
+        fontFamily: trailFont,
+        fontWeight: "400",
+        textTransform: "uppercase",
+        fontSize: 36,
         color: colors.onBrand,
         textAlign: "center",
     },
     subtitle: {
         fontSize: 15,
-        color: "rgba(255,255,255,0.9)",
         fontFamily: fonts.bodySemiBold,
         fontWeight: "600",
         textAlign: "center",

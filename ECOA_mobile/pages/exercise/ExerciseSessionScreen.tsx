@@ -17,6 +17,7 @@ import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
 import { colors, fonts, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
+import { getTrailTheme, trailFont, TrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -89,10 +90,14 @@ function RepetitionProgress({
     done,
     total,
     gamified,
+    filledColor,
+    emptyColor,
 }: {
     done: number;
     total: number;
     gamified: boolean;
+    filledColor: string;
+    emptyColor: string;
 }) {
     const icon = gamified ? "star" : "radio-button-checked";
     const iconOutline = gamified ? "star-border" : "radio-button-unchecked";
@@ -104,7 +109,7 @@ function RepetitionProgress({
                     key={index}
                     name={index < done ? icon : iconOutline}
                     size={gamified ? 28 : 20}
-                    color={index < done ? colors.brand : colors.lineStrong}
+                    color={index < done ? filledColor : emptyColor}
                 />
             ))}
         </View>
@@ -114,6 +119,7 @@ function RepetitionProgress({
 function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: SessionProps) {
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
+    const trail = getTrailTheme(track.ageGroup);
     // exercise é tipado como Exercise (a union completa) aqui porque é passado
     // via props — a narrowing do pai não atravessa a fronteira do componente,
     // então reconfirma em runtime em vez de usar `!`. Com data/types.ts como
@@ -133,6 +139,13 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const [sessionActive, setSessionActive] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [cameraAspect, setCameraAspect] = useState<number | null>(null);
+    const [faceVisible, setFaceVisible] = useState(true);
+    const faceVisibleRef = useRef(true);
+
+    const handleFaceVisibilityChange = useCallback((visible: boolean) => {
+        faceVisibleRef.current = visible;
+        setFaceVisible(visible);
+    }, []);
 
     useEffect(() => {
         resetSpeechDedup();
@@ -177,6 +190,11 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                 return;
             }
 
+            // Sem rosto o aviso da câmera é a única orientação; evita "Abra mais a boca" junto.
+            if (!faceVisibleRef.current) {
+                return;
+            }
+
             const feedback = detectorRef.current.processReading(blendshapes, timestamp);
             setFeedbackKind(feedback.kind);
 
@@ -213,18 +231,35 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: trail.background }]}
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.header}>
-                <View style={styles.progressPill}>
-                    <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                <View style={[styles.progressPill, { backgroundColor: trail.chipBackground }]}>
+                    <Text
+                        style={[
+                            styles.progressLabel,
+                            { fontSize: 13 * presentation.fontScale, color: trail.chipText },
+                        ]}
+                    >
                         Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
                     </Text>
                 </View>
 
-                <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
+                <Text
+                    style={[
+                        styles.exerciseName,
+                        {
+                            fontFamily: trailFont,
+                            fontWeight: "400",
+                            textTransform: "uppercase",
+                            color: trail.title,
+                            fontSize: 30 * presentation.fontScale,
+                            lineHeight: 32 * presentation.fontScale,
+                        },
+                    ]}
+                >
                     {exercise.name}
                 </Text>
             </View>
@@ -235,8 +270,9 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                     onReading={handleReading}
                     onError={setErrorMessage}
                     onAspectRatioChange={setCameraAspect}
+                    onFaceVisibilityChange={handleFaceVisibilityChange}
                     cameraStyle={styles.cameraFill}
-                    borderColor={getFeedbackColor(feedbackKind)}
+                    borderColor={getFeedbackColor(feedbackKind, trail)}
                 />
 
                 <LinearGradient
@@ -247,13 +283,15 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
                 <View style={styles.cameraOverlay} pointerEvents="none">
                     <Text style={[styles.overlayMessage, { fontSize: 15 * presentation.fontScale }]}>
-                        {message}
+                        {faceVisible ? message : ""}
                     </Text>
 
                     <RepetitionProgress
                         done={repsDone}
                         total={targetReps}
                         gamified={presentation.gamified}
+                        filledColor={colors.white}
+                        emptyColor="rgba(255,255,255,0.5)"
                     />
 
                     {presentation.metricsFocused && (
@@ -272,6 +310,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: SessionProps) {
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
+    const trail = getTrailTheme(track.ageGroup);
     const targetReps = exercise.repetitions ?? 1;
 
     const hasFinishedRef = useRef(false);
@@ -316,18 +355,35 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: trail.background }]}
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.header}>
-                <View style={styles.progressPill}>
-                    <Text style={[styles.progressLabel, { fontSize: 13 * presentation.fontScale }]}>
+                <View style={[styles.progressPill, { backgroundColor: trail.chipBackground }]}>
+                    <Text
+                        style={[
+                            styles.progressLabel,
+                            { fontSize: 13 * presentation.fontScale, color: trail.chipText },
+                        ]}
+                    >
                         Exercício {exerciseIndex + 1} de {track.exerciseIds.length}
                     </Text>
                 </View>
 
-                <Text style={[styles.exerciseName, { fontSize: 22 * presentation.fontScale }]}>
+                <Text
+                    style={[
+                        styles.exerciseName,
+                        {
+                            fontFamily: trailFont,
+                            fontWeight: "400",
+                            textTransform: "uppercase",
+                            color: trail.title,
+                            fontSize: 30 * presentation.fontScale,
+                            lineHeight: 32 * presentation.fontScale,
+                        },
+                    ]}
+                >
                     {exercise.name}
                 </Text>
             </View>
@@ -351,9 +407,19 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
 
             {!showSelfAssessment ? (
                 <>
-                    <View style={styles.instructionsBox}>
+                    <View style={[styles.instructionsBox, { backgroundColor: trail.card }]}>
                         {exercise.instructions.map((instruction, index) => (
-                            <Text key={index} style={styles.guidedInstruction}>
+                            <Text
+                                key={index}
+                                style={[
+                                    styles.guidedInstruction,
+                                    {
+                                        color: trail.cardText,
+                                        fontSize: 14 * presentation.fontScale,
+                                        lineHeight: 19 * presentation.fontScale,
+                                    },
+                                ]}
+                            >
                                 {index + 1}. {instruction}
                             </Text>
                         ))}
@@ -363,6 +429,8 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                         done={repsDone}
                         total={targetReps}
                         gamified={presentation.gamified}
+                        filledColor={trail.cta}
+                        emptyColor={trail.chipBackground}
                     />
 
                     <GradientButton
@@ -371,12 +439,15 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                         icon="check"
                         iconPosition="left"
                         minHeight={presentation.minTouchTarget}
-                        fontSize={16 * presentation.fontScale}
+                        fontSize={20 * presentation.fontScale}
+                        fill={trail.cta}
+                        textColor={trail.onCta}
+                        fontFamily={trailFont}
                     />
                 </>
             ) : (
                 <View style={styles.assessmentBox}>
-                    <Text style={styles.assessmentTitle}>Você conseguiu realizar o exercício?</Text>
+                    <Text style={[styles.assessmentTitle, { color: trail.text }]}>Você conseguiu realizar o exercício?</Text>
 
                     <View style={styles.assessmentRow}>
                         <Pressable
@@ -421,14 +492,14 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
     );
 }
 
-function getFeedbackColor(kind: DetectorFeedback["kind"] | null): string {
+function getFeedbackColor(kind: DetectorFeedback["kind"] | null, trail: TrailTheme): string {
     if (kind === "waiting-release" || kind === "repetition-complete" || kind === "exercise-complete") {
         return colors.success;
     }
     if (kind === "holding") {
-        return colors.brandStrong;
+        return trail.ringHolding;
     }
-    return colors.brand;
+    return trail.ringIdle;
 }
 
 const styles = StyleSheet.create({

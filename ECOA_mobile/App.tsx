@@ -1,4 +1,5 @@
 import { useFonts, Montserrat_600SemiBold, Montserrat_700Bold } from "@expo-google-fonts/montserrat";
+import { BarlowCondensed_800ExtraBold } from "@expo-google-fonts/barlow-condensed";
 import { OpenSans_400Regular, OpenSans_600SemiBold } from "@expo-google-fonts/open-sans";
 import { ActivityIndicator, View } from "react-native";
 
@@ -8,6 +9,7 @@ import { colors } from "./theme/tokens";
 
 export default function App() {
     const [fontsLoaded] = useFonts({
+        BarlowCondensed_800ExtraBold,
         Montserrat_600SemiBold,
         Montserrat_700Bold,
         OpenSans_400Regular,

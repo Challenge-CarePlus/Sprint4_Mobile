@@ -13,6 +13,7 @@ type Props = {
     strokeWidth?: number;
     color?: string;
     trackColor?: string;
+    labelColor?: string;
     label?: string;
 };
 
@@ -26,6 +27,7 @@ export default function CircularProgress({
     strokeWidth = 10,
     color = colors.brand,
     trackColor = colors.brandSoft,
+    labelColor = colors.ink,
     label,
 }: Props) {
     const animatedProgress = useRef(new Animated.Value(progress)).current;
@@ -73,7 +75,7 @@ export default function CircularProgress({
 
             {label ? (
                 <View style={styles.labelContainer} pointerEvents="none">
-                    <Text style={styles.label}>{label}</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
                 </View>
             ) : null}
         </View>

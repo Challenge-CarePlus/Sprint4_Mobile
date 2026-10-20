@@ -117,8 +117,10 @@ Regra do usuário: funcionar em celulares de qualquer modelo, tablets e monitore
 notebooks o app é exibido **como tablet**: coluna centralizada de no máximo 768px
 (`theme/layout.ts`, `MAX_APP_WIDTH`; aplicada em `App.tsx`, com o resto da janela em `line`).
 `getCameraBoxSize` usa essa largura, não a da janela. Validado no navegador (Chromium) em 360, 768
-e 1440px nas telas de Login e Home: sem rolagem horizontal. **Telas do fluxo de exercício ainda
-não foram conferidas** nessas resoluções (exigem consentimento e câmera).
+e 1440px nas telas de Login e Home: sem rolagem horizontal. Fluxo de exercício das 3 trilhas (escolha de
+trilha, prévia, calibração) também conferido nas 3 resoluções, com webcam simulada: sem estouro e com o
+tema por trilha aplicado. **Não conferidas visualmente**: Sessão e Resumo do ciclo (a webcam simulada
+não tem rosto, então a calibração corretamente não avança — precisa de rosto real ou foto).
 
 ## Design system (componentes reutilizáveis)
 

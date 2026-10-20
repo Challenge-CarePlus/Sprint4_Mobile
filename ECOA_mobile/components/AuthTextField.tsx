@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useState } from "react";
 import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import { colors, fonts, radii, shadow } from "../theme/tokens";
@@ -8,13 +9,23 @@ type Props = TextInputProps & {
 };
 
 /** Campo de texto padrão das telas de login/cadastro — usado nas duas para ficarem idênticas. */
-export default function AuthTextField({ icon, style, ...rest }: Props) {
+export default function AuthTextField({ icon, style, onFocus, onBlur, ...rest }: Props) {
+    const [focused, setFocused] = useState(false);
+
     return (
-        <View style={styles.wrapper}>
+        <View style={[styles.wrapper, focused && styles.wrapperFocused]}>
             <MaterialIcons name={icon} size={20} color={colors.brand} />
             <TextInput
                 placeholderTextColor={colors.lineStrong}
                 style={[styles.input, style]}
+                onFocus={(e) => {
+                    setFocused(true);
+                    onFocus?.(e);
+                }}
+                onBlur={(e) => {
+                    setFocused(false);
+                    onBlur?.(e);
+                }}
                 {...rest}
             />
         </View>
@@ -31,7 +42,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         height: 52,
         gap: 10,
+        borderWidth: 2,
+        borderColor: "transparent",
         ...shadow.sm,
+    },
+    // Foco visível em `brand` (DS) no lugar do contorno preto padrão do navegador.
+    wrapperFocused: {
+        borderColor: colors.brand,
     },
     input: {
         flex: 1,
@@ -39,5 +56,7 @@ const styles = StyleSheet.create({
         fontFamily: fonts.body,
         fontWeight: "500",
         fontSize: 15,
+        // Remove o contorno preto do navegador; o foco aparece no wrapper.
+        outlineWidth: 0,
     },
 });

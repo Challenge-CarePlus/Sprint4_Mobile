@@ -1,7 +1,21 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ReactNode, useEffect, useRef } from "react";
+import {
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    Easing,
+    Image,
+    Pressable,
+    ScrollView,
+    StyleProp,
+    StyleSheet,
+    Text,
+    View,
+    ViewStyle,
+} from "react-native";
+import Svg, { Circle, Defs, Ellipse, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 
 import { colors, fonts, gradients, kidsColors, kidsFonts, radii, shadow } from "../theme/tokens";
 
@@ -93,7 +107,15 @@ export function MenuCard({
                 ) : null}
             </View>
 
-            {!disabled && <MaterialIcons name="chevron-right" size={22} color={colors.inkMuted} />}
+            {disabled ? (
+                <View style={styles.soon}>
+                    <Text style={styles.soonText}>Em breve</Text>
+                </View>
+            ) : (
+                <View style={styles.arrowSoft}>
+                    <MaterialIcons name="arrow-forward" size={18} color={colors.brandInk} />
+                </View>
+            )}
         </Pressable>
     );
 }
@@ -191,7 +213,734 @@ export function RepChip({ children, kids = false }: { children: ReactNode; kids?
     );
 }
 
+/* ------------------------------------------------------------------ */
+/* Botão (cp-btn): pílula 52px, primário marinho sólido                */
+/* ------------------------------------------------------------------ */
+
+export function Button({
+    title,
+    onPress,
+    variant = "primary",
+    icon,
+    loading = false,
+    disabled = false,
+    minHeight,
+    block = true,
+}: {
+    title: string;
+    onPress: () => void;
+    variant?: "primary" | "secondary" | "ghost";
+    icon?: IconName;
+    loading?: boolean;
+    disabled?: boolean;
+    /** Trilha Idoso: 56px. */
+    minHeight?: number;
+    block?: boolean;
+}) {
+    const off = disabled || loading;
+    const fg =
+        variant === "primary" ? colors.onHero : variant === "ghost" ? colors.brandInk : colors.ink;
+
+    return (
+        <Pressable
+            onPress={onPress}
+            disabled={off}
+            accessibilityRole="button"
+            accessibilityLabel={title}
+            accessibilityState={{ disabled: off, busy: loading }}
+            style={({ pressed }) => [
+                styles.btn,
+                { minHeight: minHeight ?? (variant === "ghost" ? 44 : 52) },
+                block && variant !== "ghost" && styles.btnBlock,
+                variant === "primary" && { backgroundColor: pressed ? colors.heroEnd : colors.brandDeep },
+                variant === "secondary" && {
+                    backgroundColor: colors.surfaceRaised,
+                    borderColor: pressed ? colors.lineStrong : colors.line,
+                },
+                variant === "ghost" && { paddingHorizontal: 8 },
+                off && !loading && { backgroundColor: colors.line, borderColor: "transparent" },
+            ]}
+        >
+            {loading ? (
+                <ActivityIndicator color={fg} />
+            ) : (
+                <>
+                    {icon ? (
+                        <MaterialIcons name={icon} size={18} color={disabled ? colors.inkMuted : fg} />
+                    ) : null}
+                    <Text style={[styles.btnText, { color: disabled ? colors.inkMuted : fg }]}>{title}</Text>
+                </>
+            )}
+        </Pressable>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/* Estrutura de tela: AppBar, NavDrawer, HeroHeader, Sheet             */
+/* ------------------------------------------------------------------ */
+
+export const APPBAR_HEIGHT = 64;
+
+function SmallIconButton({
+    icon,
+    label,
+    tone,
+    onPress,
+    expanded,
+}: {
+    icon: IconName;
+    label: string;
+    tone: "flat" | "soft";
+    onPress?: () => void;
+    expanded?: boolean;
+}) {
+    return (
+        <Pressable
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityState={expanded == null ? undefined : { expanded }}
+            hitSlop={6}
+            style={({ pressed }) => [
+                styles.ibSm,
+                tone === "soft" && { backgroundColor: colors.brandSoft },
+                pressed && { opacity: 0.7 },
+            ]}
+        >
+            <MaterialIcons name={icon} size={18} color={colors.brandInk} />
+        </Pressable>
+    );
+}
+
+/** Barra branca de 64px com logo e botão de menu (cp-appbar). */
+export function AppBar({
+    onBack,
+    onMenu,
+    menuOpen = false,
+}: {
+    onBack?: () => void;
+    onMenu?: () => void;
+    menuOpen?: boolean;
+}) {
+    return (
+        <View style={styles.appbar}>
+            {onBack ? <SmallIconButton icon="arrow-back" label="Voltar" tone="flat" onPress={onBack} /> : null}
+            <View style={styles.appbarLogo}>
+                <Image
+                    source={require("../assets/ECOA.png")}
+                    style={styles.logoImg}
+                    resizeMode="contain"
+                    accessibilityLabel="Ecoa"
+                />
+            </View>
+            {onMenu ? (
+                <SmallIconButton
+                    icon={menuOpen ? "close" : "menu"}
+                    label={menuOpen ? "Fechar menu" : "Abrir menu"}
+                    tone="soft"
+                    onPress={onMenu}
+                    expanded={menuOpen}
+                />
+            ) : null}
+        </View>
+    );
+}
+
+export type NavDrawerItem = {
+    id: string;
+    label: string;
+    icon: IconName;
+    separated?: boolean;
+    onPress: () => void;
+};
+
+/**
+ * Painel marinho que cai da AppBar, com véu escuro por trás (cp-scrim +
+ * cp-drawer). Posicionado em relação ao wrapper de 64px da AppBar.
+ */
+export function NavDrawer({
+    items,
+    activeId,
+    onClose,
+}: {
+    items: NavDrawerItem[];
+    activeId?: string;
+    onClose: () => void;
+}) {
+    return (
+        <>
+            <Pressable
+                onPress={onClose}
+                accessibilityLabel="Fechar menu"
+                style={[styles.scrim, { height: Dimensions.get("window").height }]}
+            />
+            <LinearGradient
+                colors={gradients.hero}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.drawer, shadow.hero]}
+                accessibilityLabel="Menu"
+            >
+                {items.map((item) => (
+                    <Pressable
+                        key={item.id}
+                        onPress={item.onPress}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: item.id === activeId }}
+                        style={({ pressed }) => [
+                            styles.drawerItem,
+                            item.separated && styles.drawerSep,
+                            (item.id === activeId || pressed) && { backgroundColor: "rgba(255,255,255,0.12)" },
+                        ]}
+                    >
+                        <MaterialIcons
+                            name={item.icon}
+                            size={20}
+                            color={item.separated ? colors.onHeroMuted : colors.onHero}
+                        />
+                        <Text
+                            style={[
+                                styles.drawerText,
+                                { color: item.separated ? colors.onHeroMuted : colors.onHero },
+                            ]}
+                        >
+                            {item.label}
+                        </Text>
+                    </Pressable>
+                ))}
+            </LinearGradient>
+        </>
+    );
+}
+
+/** Cabeçalho marinho de página (cp-hhead, sem barra): cantos retos, a Sheet sobe por cima. */
+export function HeroHeader({
+    eyebrow,
+    title,
+    subtitle,
+}: {
+    eyebrow?: string;
+    title: string[];
+    subtitle?: string;
+}) {
+    return (
+        <LinearGradient
+            colors={gradients.hero}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hhead}
+        >
+            {eyebrow ? <Text style={styles.hheadEyebrow}>{eyebrow}</Text> : null}
+            <View style={eyebrow ? { marginTop: -8 } : undefined}>
+                <Text style={styles.hheadTitle} accessibilityRole="header">
+                    {title[0]}
+                </Text>
+                {title.slice(1).map((line) => (
+                    <Text key={line} style={[styles.hheadTitle, { color: colors.onHeroMuted }]}>
+                        {line}
+                    </Text>
+                ))}
+            </View>
+            {subtitle ? <Text style={styles.hheadSub}>{subtitle}</Text> : null}
+        </LinearGradient>
+    );
+}
+
+/** Folha clara que sobe 24px sobre o HeroHeader, com os cards dentro (cp-sheet). */
+export function Sheet({ children }: { children: ReactNode }) {
+    return <View style={styles.sheet}>{children}</View>;
+}
+
+/* ------------------------------------------------------------------ */
+/* AuthLayout: logo em círculo, título, formulário sobre as ondas      */
+/* ------------------------------------------------------------------ */
+
+function AuthWaves({ compact }: { compact: boolean }) {
+    // Elipses do protótipo (.cp-auth-wave-1/2) em coordenadas relativas ao contêiner.
+    const w1 = compact ? { cy: 120, ry: 26 } : { cy: 112, ry: 26 };
+    const w2 = compact ? { cy: 117, ry: 23 } : { cy: 107, ry: 23 };
+
+    return (
+        <Svg
+            style={StyleSheet.absoluteFill}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            pointerEvents="none"
+        >
+            <Defs>
+                <SvgGradient id="wave1" x1="0" y1="0" x2="1" y2="1">
+                    <Stop offset="0" stopColor={colors.brandDeep} />
+                    <Stop offset="0.45" stopColor={colors.brandDeep} />
+                    <Stop offset="1" stopColor={colors.heroEnd} />
+                </SvgGradient>
+                <SvgGradient id="wave2" x1="0" y1="0" x2="1" y2="1">
+                    <Stop offset="0" stopColor={colors.heroEnd} />
+                    <Stop offset="1" stopColor={colors.tonalStart} />
+                </SvgGradient>
+            </Defs>
+            <Ellipse cx={50} cy={w1.cy} rx={85} ry={w1.ry} fill="url(#wave1)" />
+            <Ellipse cx={97.5} cy={w2.cy} rx={62.5} ry={w2.ry} fill="url(#wave2)" opacity={0.55} />
+        </Svg>
+    );
+}
+
+export function AuthLayout({
+    title,
+    subtitle,
+    compact = false,
+    footer,
+    children,
+}: {
+    title: string;
+    subtitle?: string;
+    compact?: boolean;
+    footer?: ReactNode;
+    children: ReactNode;
+}) {
+    const logo = compact ? 80 : 112;
+
+    return (
+        <View style={styles.auth}>
+            <AuthWaves compact={compact} />
+            <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={[
+                    styles.authScroll,
+                    compact ? { paddingTop: 24, paddingBottom: 72 } : { paddingTop: 32, paddingBottom: 180 },
+                ]}
+            >
+                <View style={styles.authInner}>
+                    <View
+                        style={[
+                            styles.authLogo,
+                            { width: logo, height: logo, marginBottom: compact ? 4 : 12 },
+                            shadow.float,
+                        ]}
+                    >
+                        <Image
+                            source={require("../assets/icon.png")}
+                            style={{ width: logo - 16, height: logo - 16, borderRadius: radii.pill }}
+                            accessibilityLabel="Ecoa"
+                        />
+                    </View>
+                    <Text
+                        style={[styles.authTitle, compact && { fontSize: 22, lineHeight: 28 }]}
+                        accessibilityRole="header"
+                    >
+                        {title}
+                    </Text>
+                    {subtitle ? <Text style={styles.authSub}>{subtitle}</Text> : null}
+                    <View style={styles.authForm}>{children}</View>
+                    {footer ? <View style={styles.authFoot}>{footer}</View> : null}
+                </View>
+            </ScrollView>
+        </View>
+    );
+}
+
+/** Link de texto (cp-link): 14px 600 brandInk. */
+export function TextLink({ title, onPress }: { title: string; onPress: () => void }) {
+    return (
+        <Pressable onPress={onPress} accessibilityRole="link" hitSlop={8} style={styles.link}>
+            <Text style={styles.linkText}>{title}</Text>
+        </Pressable>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/* Calibração: CameraFrame (carregando) e CountdownRing                */
+/* ------------------------------------------------------------------ */
+
+function Spinner() {
+    const spin = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        const loop = Animated.loop(
+            Animated.timing(spin, {
+                toValue: 1,
+                duration: 900,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        );
+        loop.start();
+        return () => loop.stop();
+    }, [spin]);
+
+    return (
+        <Animated.View
+            style={[
+                styles.spin,
+                { transform: [{ rotate: spin.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) }] },
+            ]}
+        />
+    );
+}
+
+/**
+ * Estado "carregando" do CameraFrame (cp-cam-loading): fundo marinho, anel
+ * girando e mensagem, sobre a caixa da câmera enquanto ela inicializa.
+ */
+export function CameraLoading({
+    message = "Preparando a câmera…",
+    kids = false,
+    style,
+}: {
+    message?: string;
+    kids?: boolean;
+    style?: StyleProp<ViewStyle>;
+}) {
+    return (
+        <View
+            style={[styles.camLoading, kids && { backgroundColor: kidsColors.indigo }, style]}
+            accessibilityRole="progressbar"
+            accessibilityLabel={message}
+        >
+            <Spinner />
+            <Text style={[styles.camMsg, kids && { fontFamily: kidsFonts.bold }]}>{message}</Text>
+        </View>
+    );
+}
+
+/** Anel da contagem (cp-count): esvazia conforme os segundos passam. */
+export function CountdownRing({
+    value,
+    total,
+    label,
+    kids = false,
+    large = false,
+    size = 120,
+}: {
+    /** Segundos restantes (contínuo, para o anel esvaziar suave). */
+    value: number;
+    total: number;
+    label?: string;
+    kids?: boolean;
+    large?: boolean;
+    size?: number;
+}) {
+    const sw = 8;
+    const rad = (size - sw) / 2;
+    const c = 2 * Math.PI * rad;
+    const v = Math.max(0, Math.min(total, value));
+    const shown = Math.ceil(v);
+
+    return (
+        <View style={styles.count}>
+            <View
+                style={{ width: size, height: size }}
+                accessibilityRole="timer"
+                accessibilityLabel={`${shown} segundos`}
+            >
+                <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
+                    <Circle
+                        cx={size / 2}
+                        cy={size / 2}
+                        r={rad}
+                        fill="none"
+                        strokeWidth={sw}
+                        stroke={kids ? kidsColors.track : colors.brandSoft}
+                    />
+                    <Circle
+                        cx={size / 2}
+                        cy={size / 2}
+                        r={rad}
+                        fill="none"
+                        strokeWidth={sw}
+                        strokeLinecap="round"
+                        stroke={kids ? kidsColors.green : colors.brandDeep}
+                        strokeDasharray={c}
+                        strokeDashoffset={c * (1 - v / total)}
+                    />
+                </Svg>
+                <View style={styles.countNumBox}>
+                    <Text
+                        style={[
+                            styles.countNum,
+                            large && { fontSize: 36 },
+                            kids && { fontFamily: kidsFonts.display, color: kidsColors.indigo },
+                        ]}
+                    >
+                        {shown}s
+                    </Text>
+                </View>
+            </View>
+            {label ? (
+                <Text
+                    style={[
+                        styles.countLabel,
+                        large && { fontSize: 17 },
+                        kids && { color: kidsColors.inkMuted, fontFamily: kidsFonts.body },
+                    ]}
+                >
+                    {label}
+                </Text>
+            ) : null}
+        </View>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/* OptionGroup (cp-opts): radio cards                                  */
+/* ------------------------------------------------------------------ */
+
+export type Option<T extends string | number> = {
+    value: T;
+    title: string;
+    description?: string;
+    icon: IconName;
+};
+
+export function OptionGroup<T extends string | number>({
+    label,
+    options,
+    value,
+    onChange,
+}: {
+    label: string;
+    options: Option<T>[];
+    value: T;
+    onChange: (value: T) => void;
+}) {
+    return (
+        <View style={styles.opts}>
+            <Text style={styles.optsTitle} accessibilityRole="header">
+                {label}
+            </Text>
+            <View style={styles.optsList} accessibilityRole="radiogroup" accessibilityLabel={label}>
+                {options.map((o) => {
+                    const on = o.value === value;
+
+                    return (
+                        <Pressable
+                            key={o.value}
+                            onPress={() => onChange(o.value)}
+                            accessibilityRole="radio"
+                            accessibilityState={{ checked: on }}
+                            accessibilityLabel={o.description ? `${o.title}. ${o.description}` : o.title}
+                            style={[styles.opt, on ? styles.optOn : shadow.card]}
+                        >
+                            {on ? (
+                                <LinearGradient
+                                    colors={gradients.hero}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.optIcon}
+                                >
+                                    <MaterialIcons name={o.icon} size={22} color={colors.onHero} />
+                                </LinearGradient>
+                            ) : (
+                                <View style={[styles.optIcon, { backgroundColor: colors.surface }]}>
+                                    <MaterialIcons name={o.icon} size={22} color={colors.ink} />
+                                </View>
+                            )}
+                            <View style={styles.optText}>
+                                <Text style={styles.optTitle}>{o.title}</Text>
+                                {o.description ? <Text style={styles.optSub}>{o.description}</Text> : null}
+                            </View>
+                            <MaterialIcons
+                                name="check-circle"
+                                size={22}
+                                color={colors.brand}
+                                style={{ opacity: on ? 1 : 0 }}
+                            />
+                        </Pressable>
+                    );
+                })}
+            </View>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
+    btn: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        paddingHorizontal: 24,
+        borderRadius: radii.pill,
+        borderWidth: 1.5,
+        borderColor: "transparent",
+    },
+    btnBlock: { alignSelf: "stretch" },
+    btnText: { fontFamily: fonts.bodySemiBold, fontSize: 15, lineHeight: 20 },
+
+    ibSm: {
+        width: 36,
+        height: 36,
+        borderRadius: radii.pill,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    appbar: {
+        height: APPBAR_HEIGHT,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 16,
+        backgroundColor: colors.surfaceRaised,
+        zIndex: 4,
+        ...shadow.card,
+    },
+    appbarLogo: { flex: 1, flexDirection: "row", alignItems: "center" },
+    logoImg: { width: 84, height: 28 },
+    scrim: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: APPBAR_HEIGHT,
+        zIndex: 2,
+        backgroundColor: "rgba(6,27,56,0.45)",
+    },
+    drawer: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: APPBAR_HEIGHT,
+        zIndex: 3,
+        paddingTop: 12,
+        paddingHorizontal: 12,
+        paddingBottom: 16,
+        gap: 2,
+        borderBottomLeftRadius: radii.xl,
+        borderBottomRightRadius: radii.xl,
+    },
+    drawerItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        minHeight: 52,
+        paddingHorizontal: 16,
+        borderRadius: radii.md,
+    },
+    drawerSep: {
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: "rgba(255,255,255,0.14)",
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+    },
+    drawerText: { fontFamily: fonts.bodySemiBold, fontSize: 15 },
+
+    hhead: {
+        paddingTop: 24,
+        paddingHorizontal: 16,
+        paddingBottom: 56,
+        gap: 16,
+    },
+    hheadEyebrow: {
+        fontFamily: fonts.bodySemiBold,
+        fontSize: 12,
+        lineHeight: 16,
+        letterSpacing: 1.44,
+        color: colors.onHeroMuted,
+    },
+    hheadTitle: {
+        fontFamily: fonts.medium,
+        fontSize: 26,
+        lineHeight: 32,
+        letterSpacing: -0.26,
+        color: colors.onHero,
+    },
+    hheadSub: {
+        marginTop: -8,
+        fontFamily: fonts.body,
+        fontSize: 14,
+        lineHeight: 20,
+        color: colors.onHeroMuted,
+    },
+    sheet: {
+        marginTop: -24,
+        padding: 16,
+        gap: 16,
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radii.xl,
+        borderTopRightRadius: radii.xl,
+    },
+
+    auth: { flex: 1, backgroundColor: colors.surface, overflow: "hidden" },
+    authScroll: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 24 },
+    authInner: { gap: 12 },
+    authLogo: {
+        alignSelf: "center",
+        borderRadius: radii.pill,
+        backgroundColor: colors.surfaceRaised,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    authTitle: {
+        fontFamily: fonts.displaySemiBold,
+        fontSize: 24,
+        lineHeight: 30,
+        letterSpacing: -0.24,
+        color: colors.ink,
+        textAlign: "center",
+    },
+    authSub: {
+        marginTop: -4,
+        marginBottom: 8,
+        fontFamily: fonts.body,
+        fontSize: 14,
+        lineHeight: 20,
+        color: colors.inkMuted,
+        textAlign: "center",
+    },
+    authForm: { gap: 12 },
+    authFoot: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 8 },
+    link: { minHeight: 24, justifyContent: "center" },
+    linkText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.brandInk },
+
+    spin: {
+        width: 32,
+        height: 32,
+        borderRadius: radii.pill,
+        borderWidth: 3,
+        borderColor: "rgba(255,255,255,0.25)",
+        borderTopColor: colors.onHero,
+    },
+    camLoading: {
+        ...StyleSheet.absoluteFillObject,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+        padding: 16,
+        backgroundColor: colors.brandDeep,
+    },
+    camMsg: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.onHero, textAlign: "center" },
+
+    count: { alignItems: "center", gap: 8 },
+    countNumBox: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
+    countNum: { fontFamily: fonts.displaySemiBold, fontSize: 30, letterSpacing: -0.6, color: colors.ink },
+    countLabel: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.inkMuted },
+
+    opts: { gap: 12 },
+    optsTitle: { fontFamily: fonts.displaySemiBold, fontSize: 17, lineHeight: 22, color: colors.ink },
+    optsList: { gap: 8 },
+    opt: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderWidth: 2,
+        borderColor: "transparent",
+        borderRadius: radii.md,
+        backgroundColor: colors.surfaceRaised,
+    },
+    optOn: { backgroundColor: colors.brandSoft, borderColor: colors.brand },
+    optIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: radii.pill,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    optText: { flex: 1, gap: 2 },
+    optTitle: { fontFamily: fonts.bodySemiBold, fontSize: 15, lineHeight: 20, color: colors.ink },
+    optSub: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.inkMuted },
+
     intro: { alignItems: "center", gap: 8, paddingHorizontal: 8 },
     introIcon: {
         width: 72,
@@ -244,6 +993,21 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     mcardIconOff: { backgroundColor: colors.surfaceRaised },
+    arrowSoft: {
+        width: 36,
+        height: 36,
+        borderRadius: radii.pill,
+        backgroundColor: colors.brandSoft,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    soon: {
+        borderRadius: radii.pill,
+        backgroundColor: colors.surface,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+    },
+    soonText: { fontFamily: fonts.bodySemiBold, fontSize: 12, lineHeight: 16, color: colors.ink },
     mcardText: { flex: 1, gap: 2 },
     mcardTitle: { fontFamily: fonts.displaySemiBold, fontSize: 16, lineHeight: 22, color: colors.ink },
     mcardSubtitle: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.inkMuted },

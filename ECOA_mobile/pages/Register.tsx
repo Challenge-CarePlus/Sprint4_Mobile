@@ -1,18 +1,47 @@
-import React, { useState } from "react";
-import {
-    View,
-    Image,
-    Text,
-    StyleSheet,
-    StatusBar,
-} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StatusBar, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
-import { Alert } from "../components/ds";
-import GradientButton from "../components/GradientButton";
-import { colors, fonts, radii, shadow } from "../theme/tokens";
+import { Alert, AuthLayout, Button, TextLink } from "../components/ds";
+import { colors, fonts } from "../theme/tokens";
+
+// O backend exige 6–72 caracteres na senha.
+const PASSWORD_MIN = 6;
+const PASSWORD_MAX = 72;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FieldErrors = {
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+};
+
+function validate(name: string, email: string, password: string, confirmPassword: string): FieldErrors {
+    const errors: FieldErrors = {};
+
+    if (!name.trim()) {
+        errors.name = "Conte como podemos te chamar.";
+    }
+
+    if (!EMAIL_PATTERN.test(email.trim())) {
+        errors.email = "Digite um e-mail, como nome@email.com.";
+    }
+
+    if (password.length < PASSWORD_MIN) {
+        errors.password = `Mínimo de ${PASSWORD_MIN} caracteres.`;
+    } else if (password.length > PASSWORD_MAX) {
+        errors.password = `Máximo de ${PASSWORD_MAX} caracteres.`;
+    }
+
+    if (confirmPassword !== password) {
+        errors.confirmPassword = "As senhas não coincidem.";
+    }
+
+    return errors;
+}
 
 export default function Register() {
     const { register } = useAuth();
@@ -27,40 +56,42 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+    const redirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (redirectRef.current) clearTimeout(redirectRef.current);
+        };
+    }, []);
 
     async function handleRegister() {
         setError("");
         setSuccess("");
 
-        if (password !== confirmPassword) {
-            setError("As senhas não coincidem");
+        const errors = validate(name, email, password, confirmPassword);
+        setFieldErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
+            setError("Preencha nome, e-mail e senha para continuar.");
             return;
         }
 
         setLoading(true);
 
-        const result = await register(
-            name,
-            email,
-            password
-        );
+        const result = await register(name.trim(), email.trim(), password);
 
         if (!result.success) {
-            setError(
-                result.message ||
-                "Erro ao cadastrar usuário"
-            );
+            setError(result.message || "Erro ao cadastrar usuário");
         } else {
-            setSuccess(
-                "Usuário cadastrado com sucesso!"
-            );
+            setSuccess("Usuário cadastrado com sucesso!");
 
             setName("");
             setEmail("");
             setPassword("");
             setConfirmPassword("");
 
-            setTimeout(() => {
+            redirectRef.current = setTimeout(() => {
                 navigation.navigate("LOGIN" as never);
             }, 2000);
         }
@@ -69,152 +100,72 @@ export default function Register() {
     }
 
     return (
-        <View style={styles.container}>
+        <>
             <StatusBar hidden />
+            <AuthLayout
+                compact
+                title="Criar conta"
+                footer={
+                    <>
+                        <Text style={styles.footerText}>Já tem conta? </Text>
+                        <TextLink title="Entrar" onPress={() => navigation.navigate("LOGIN" as never)} />
+                    </>
+                }
+            >
+                {error !== "" && <Alert tone="danger">{error}</Alert>}
+                {success !== "" && <Alert tone="success">{success}</Alert>}
 
-            <Image
-                source={require("./../assets/waves1.png")}
-                style={styles.waves}
-            />
-
-            <View style={styles.loginContainer}>
-                <View style={styles.iconWrapper}>
-                    <Image
-                        source={require("./../assets/icon.png")}
-                        style={styles.iconImage}
-                    />
-                </View>
-
-                <View style={styles.fieldsContainer}>
-                    <AuthTextField icon="person-outline" placeholder="Nome" value={name} onChangeText={setName} />
-
-                    <AuthTextField
-                        icon="mail-outline"
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-
-                    <AuthTextField
-                        icon="lock-outline"
-                        placeholder="Senha"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-
-                    <AuthTextField
-                        icon="lock-outline"
-                        placeholder="Confirmar senha"
-                        secureTextEntry
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                    />
-                </View>
-
-                <GradientButton
-                    title="Cadastrar"
-                    onPress={handleRegister}
-                    loading={loading}
-                    style={styles.registerButton}
+                <AuthTextField
+                    icon="person-outline"
+                    placeholder="Nome"
+                    autoComplete="name"
+                    value={name}
+                    onChangeText={setName}
+                    error={fieldErrors.name}
                 />
 
-                {error !== "" && (
-                    <View>
-                        <Alert tone="danger">{error}</Alert>
-                    </View>
-                )}
+                <AuthTextField
+                    icon="mail-outline"
+                    placeholder="E-mail"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
+                    value={email}
+                    onChangeText={setEmail}
+                    error={fieldErrors.email}
+                />
 
-                {success !== "" && (
-                    <View style={styles.successBanner}>
-                        <Text style={styles.successText}>{success}</Text>
-                    </View>
-                )}
-            </View>
-        </View>
+                <AuthTextField
+                    icon="lock-outline"
+                    placeholder="Senha"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    value={password}
+                    onChangeText={setPassword}
+                    error={fieldErrors.password}
+                    help={`Mínimo de ${PASSWORD_MIN} caracteres.`}
+                />
+
+                <AuthTextField
+                    icon="lock-outline"
+                    placeholder="Confirmar senha"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    onSubmitEditing={handleRegister}
+                    error={fieldErrors.confirmPassword}
+                />
+
+                <View style={styles.submit}>
+                    <Button title="Criar conta" onPress={handleRegister} loading={loading} />
+                </View>
+            </AuthLayout>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: colors.surface,
-    },
-
-    waves: {
-        position: "absolute",
-        bottom: 0,
-        width: "100%",
-        zIndex: 0,
-    },
-
-    loginContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        width: "80%",
-        gap: 14,
-        top: -30,
-    },
-
-    iconWrapper: {
-        width: 120,
-        height: 120,
-        borderRadius: radii.pill,
-        backgroundColor: colors.surfaceRaised,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 16,
-        ...shadow.lg,
-    },
-
-    iconImage: {
-        width: 98,
-        height: 98,
-        borderRadius: radii.pill,
-    },
-
-    fieldsContainer: {
-        width: "100%",
-        gap: 12,
-    },
-
-    registerButton: {
-        marginTop: 12,
-    },
-
-    errorBanner: {
-        marginTop: 4,
-        backgroundColor: colors.dangerSoft,
-        borderRadius: radii.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-    },
-
-    errorText: {
-        color: colors.danger,
-        fontFamily: fonts.bodySemiBold,
-        fontWeight: "600",
-        textAlign: "center",
-        fontSize: 13,
-    },
-
-    successBanner: {
-        marginTop: 4,
-        backgroundColor: colors.successSoft,
-        borderRadius: radii.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-    },
-
-    successText: {
-        color: colors.success,
-        fontFamily: fonts.bodySemiBold,
-        fontWeight: "600",
-        textAlign: "center",
-        fontSize: 13,
-    },
+    submit: { marginTop: 8 },
+    footerText: { fontFamily: fonts.body, fontSize: 14, color: colors.inkMuted },
 });

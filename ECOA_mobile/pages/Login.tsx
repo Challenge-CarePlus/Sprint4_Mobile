@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import {
-    View,
-    Image,
-    TouchableOpacity,
-    Text,
-    StyleSheet,
-    StatusBar,
-} from "react-native";
+import { Alert as NativeAlert, Platform, StatusBar, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
-import GradientButton from "../components/GradientButton";
-import { Alert } from "../components/ds";
-import { colors, fonts, radii, shadow } from "../theme/tokens";
+import { Alert, AuthLayout, Button, TextLink } from "../components/ds";
+import { colors, fonts } from "../theme/tokens";
+
+// Alert.alert do React Native não faz nada na web.
+function showSoon(title: string, message: string) {
+    if (Platform.OS === "web") {
+        window.alert(`${title}\n${message}`);
+    } else {
+        NativeAlert.alert(title, message);
+    }
+}
 
 export default function Login() {
     const { login } = useAuth();
@@ -31,16 +32,10 @@ export default function Login() {
             setError("");
             setLoading(true);
 
-            const result = await login(
-                email.trim(),
-                password
-            );
+            const result = await login(email.trim(), password);
 
             if (!result.success) {
-                setError(
-                    result.message ||
-                    "Erro ao realizar login"
-                );
+                setError(result.message || "Erro ao realizar login");
             }
         } catch {
             setError("Erro ao conectar com o servidor");
@@ -50,164 +45,57 @@ export default function Login() {
     }
 
     return (
-        <View style={styles.container}>
+        <>
             <StatusBar hidden />
-
-            <Image
-                source={require("./../assets/waves1.png")}
-                style={styles.waves}
-            />
-
-            <View style={styles.loginContainer}>
-                <View style={styles.iconWrapper}>
-                    <Image
-                        source={require("./../assets/icon.png")}
-                        style={styles.iconImage}
-                    />
-                </View>
-
-                <Text style={styles.title}>Bem-vindo de volta</Text>
-                <Text style={styles.subtitle}>Entre para continuar seus exercícios</Text>
-
-                <View style={styles.fieldsContainer}>
-                    <AuthTextField
-                        icon="mail-outline"
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-
-                    <AuthTextField
-                        icon="lock-outline"
-                        placeholder="Senha"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-                </View>
-
+            <AuthLayout
+                title="Bem-vindo de volta"
+                subtitle="Entre para continuar seus exercícios"
+                footer={
+                    <>
+                        <Text style={styles.footerText}>Ainda não tem conta? </Text>
+                        <TextLink title="Criar conta" onPress={() => navigation.navigate("REGISTER" as never)} />
+                    </>
+                }
+            >
                 {error !== "" && <Alert tone="danger">{error}</Alert>}
 
-                <GradientButton
-                    title="Entrar"
-                    onPress={handleLogin}
-                    loading={loading}
-                    style={styles.loginButton}
+                <AuthTextField
+                    icon="mail-outline"
+                    placeholder="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
                 />
 
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Ainda não tem conta? </Text>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate("REGISTER" as never)}
-                        accessibilityRole="button"
-                    >
-                        <Text style={styles.link}>Criar conta</Text>
-                    </TouchableOpacity>
+                <AuthTextField
+                    icon="lock-outline"
+                    placeholder="Senha"
+                    secureTextEntry
+                    autoComplete="current-password"
+                    value={password}
+                    onChangeText={setPassword}
+                    onSubmitEditing={handleLogin}
+                />
+
+                <View style={styles.forgotRow}>
+                    <TextLink
+                        title="Esqueci minha senha"
+                        onPress={() => showSoon("Em breve", "A recuperação de senha ainda não está disponível.")}
+                    />
                 </View>
-            </View>
-        </View>
+
+                <View style={styles.submit}>
+                    <Button title="Entrar" onPress={handleLogin} loading={loading} />
+                </View>
+            </AuthLayout>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: colors.surface,
-    },
-
-    waves: {
-        position: "absolute",
-        bottom: 0,
-        width: "100%",
-        zIndex: 0,
-    },
-
-    loginContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        width: "80%",
-        gap: 14,
-        top: -40,
-    },
-
-    iconWrapper: {
-        width: 140,
-        height: 140,
-        borderRadius: radii.pill,
-        backgroundColor: colors.surfaceRaised,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 20,
-        ...shadow.lg,
-    },
-
-    iconImage: {
-        width: 116,
-        height: 116,
-        borderRadius: radii.pill,
-    },
-
-    title: {
-        fontFamily: fonts.displaySemiBold,
-        fontSize: 24,
-        lineHeight: 30,
-        color: colors.ink,
-        textAlign: "center",
-    },
-
-    subtitle: {
-        fontFamily: fonts.body,
-        fontSize: 14,
-        color: colors.inkMuted,
-        textAlign: "center",
-        marginTop: -6,
-        marginBottom: 6,
-    },
-
-    footer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    footerText: {
-        fontFamily: fonts.body,
-        fontSize: 14,
-        color: colors.inkMuted,
-    },
-
-    fieldsContainer: {
-        width: "100%",
-        gap: 12,
-    },
-
-    link: {
-        color: colors.brandInk,
-        fontFamily: fonts.bodySemiBold,
-        fontWeight: "700",
-    },
-
-    loginButton: {
-        marginTop: 12,
-    },
-
-    errorBanner: {
-        marginTop: 8,
-        backgroundColor: colors.dangerSoft,
-        borderRadius: radii.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-    },
-
-    errorText: {
-        color: colors.danger,
-        fontFamily: fonts.bodySemiBold,
-        fontWeight: "600",
-        textAlign: "center",
-        fontSize: 13,
-    },
+    forgotRow: { alignItems: "flex-end" },
+    submit: { marginTop: 8 },
+    footerText: { fontFamily: fonts.body, fontSize: 14, color: colors.inkMuted },
 });

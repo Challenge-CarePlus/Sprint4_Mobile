@@ -22,9 +22,11 @@ porque é a referência visual do paciente antes de começar.
   exercícios.
 - **Enquadramento**: plano fechado, do ombro pra cima, pessoa centralizada, olhando direto pra
   câmera (exceções anotadas nos arquivos de idosos, onde o movimento é mais difícil de ver).
-- **Cenário**: fundo liso cinza-claro, iluminação de estúdio suave e uniforme, sem sombras
-  fortes — estilo documental, como referência real de exercício de fonoaudiologia, não
-  publicidade.
+- **Cenário**: fundo liso, iluminação de estúdio suave e uniforme, sem sombras fortes — estilo
+  documental, como referência real de exercício de fonoaudiologia, não publicidade. **Trilhas
+  adulta e idosos**: cinza-claro, neutro, seguindo o núcleo azul-marinho do app. **Trilha
+  infantil**: off-white quente com fitas coloridas do kit "Ecoa · Hábitos Sustentáveis" ao
+  fundo — ver nota na pasta `infantil/`.
 - **Sem fala, sem música, sem corte de câmera** — só o movimento, devagar e anatomicamente
   claro.
 - **Duração**: 8 segundos, em loop perfeito (o player do app toca em loop sem parar).

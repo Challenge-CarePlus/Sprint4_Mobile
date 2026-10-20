@@ -14,13 +14,18 @@ ESTILO: Vídeo fotorrealista, filmado com câmera de verdade — não é renderi
 ilustração, não é desenho animado.
 
 PESSOA: Um adulto com tom lúdico e brincalhão, expressão animada, como quem está brincando com
-uma criança (sem criança real no vídeo — ver nota de autorização de imagem no README da pasta).
+uma criança (sem criança real no vídeo — ver nota de autorização de imagem no README da
+pasta), vestindo uma blusa lisa numa cor viva do kit infantil (laranja ou amarelo).
 
 ENQUADRAMENTO: Plano fechado, do ombro para cima, pessoa centralizada no quadro, olhando
 diretamente para a câmera, lábios bem visíveis e iluminados. Proporção 16:9 (horizontal).
 
-CENÁRIO: Fundo liso cinza-claro, iluminação de estúdio suave e uniforme, sem sombras fortes,
-textura de pele natural. Vídeo de demonstração educacional em estilo documental.
+CENÁRIO: Fundo liso num off-white quente (bege bem claro, nunca cinza), com fitas largas e
+desfocadas nas cores verde, laranja, amarelo e azul passando suavemente bem ao fundo, longe do
+rosto — referência discreta ao kit "Ecoa · Hábitos Sustentáveis" da trilha infantil do app, sem
+competir com o movimento. Iluminação de estúdio suave, uniforme e calorosa, sem sombras
+fortes, textura de pele natural. Vídeo de demonstração educacional em estilo documental, mais
+colorido e lúdico que o das outras trilhas (que seguem o núcleo azul-marinho do app).
 
 AÇÃO (siga esta sequência de tempo exatamente, não resuma nem generalize):
 - 0.0–1.0s: boca fechada, relaxada, lábios na posição neutra normal.

@@ -1,22 +1,13 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRoute } from "@react-navigation/native";
 import { useState } from "react";
-import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { StatusBar, StyleSheet, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { hasConsent } from "../services/consentStorage";
-import { colors, fonts, gradients, radii, shadow } from "../theme/tokens";
+import { APPBAR_HEIGHT, AppBar, NavDrawer, NavDrawerItem } from "./ds";
 
-type MenuItem = {
-    key: string;
-    label: string;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    onPress: () => void;
-    separated?: boolean;
-};
-
+/** Cabeçalho fixo das telas logadas: AppBar de 64px + NavDrawer marinho com véu. */
 export default function Menu() {
     const [menuOpen, setMenuOpen] = useState(false);
     const navigation = useNavigation();
@@ -38,15 +29,18 @@ export default function Menu() {
     }
 
     // Item da tela atual fica marcado no painel.
-    const isCurrent = (key: string) =>
-        (key === "home" && route.name === "MAIN") ||
-        (key === "settings" && route.name === "SETTINGS") ||
-        (key === "exercise" && route.name.includes("EXERCISE")) ||
-        (key === "exercise" && route.name === "TRACK_SELECT");
+    const activeId =
+        route.name === "MAIN"
+            ? "home"
+            : route.name === "SETTINGS"
+              ? "settings"
+              : route.name.includes("EXERCISE") || route.name === "TRACK_SELECT"
+                ? "exercise"
+                : undefined;
 
-    const items: MenuItem[] = [
+    const items: NavDrawerItem[] = [
         {
-            key: "home",
+            id: "home",
             label: "Página inicial",
             icon: "home",
             onPress: () => {
@@ -54,9 +48,9 @@ export default function Menu() {
                 navigation.navigate("MAIN" as never);
             },
         },
-        { key: "exercise", label: "Exercício", icon: "fitness-center", onPress: handleOpenExercises },
+        { id: "exercise", label: "Exercícios", icon: "fitness-center", onPress: handleOpenExercises },
         {
-            key: "settings",
+            id: "settings",
             label: "Configurações",
             icon: "settings",
             onPress: () => {
@@ -64,167 +58,29 @@ export default function Menu() {
                 navigation.navigate("SETTINGS" as never);
             },
         },
-        { key: "logout", label: "Sair", icon: "logout", onPress: handleLogout, separated: true },
+        { id: "logout", label: "Sair", icon: "logout", onPress: handleLogout, separated: true },
     ];
 
     return (
-        <View style={styles.fullMenu}>
+        <View style={styles.wrapper}>
             <StatusBar hidden />
 
-            <View style={styles.menuContainer}>
-                <View style={styles.menu}>
-                    <View style={styles.leftSection}>
-                        {canGoBack && (
-                            <Pressable
-                                onPress={() => navigation.goBack()}
-                                style={({ pressed }) => [
-                                    styles.backButton,
-                                    pressed && styles.menuButtonPressed,
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel="Voltar"
-                            >
-                                <MaterialIcons name="arrow-back" size={22} color={colors.brand} />
-                            </Pressable>
-                        )}
+            <AppBar
+                onBack={canGoBack ? () => navigation.goBack() : undefined}
+                onMenu={() => setMenuOpen(!menuOpen)}
+                menuOpen={menuOpen}
+            />
 
-                        <Image source={require("./../assets/ECOA.png")} style={styles.logo} />
-                    </View>
-
-                    <Pressable
-                        onPress={() => setMenuOpen(!menuOpen)}
-                        style={({ pressed }) => [styles.menuButton, pressed && styles.menuButtonPressed]}
-                        accessibilityRole="button"
-                        accessibilityLabel="Abrir menu"
-                    >
-                        <MaterialIcons name={menuOpen ? "close" : "menu"} size={26} color={colors.brand} />
-                    </Pressable>
-                </View>
-            </View>
-
-            {menuOpen && (
-                <LinearGradient
-                    colors={gradients.primary}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.dropDown}
-                >
-                    {items.map((item) => (
-                        <Pressable
-                            key={item.key}
-                            onPress={item.onPress}
-                            accessibilityRole="button"
-                            style={({ pressed }) => [
-                                styles.menuItem,
-                                item.separated && styles.menuItemSeparated,
-                                isCurrent(item.key) && styles.menuItemPressed,
-                                pressed && styles.menuItemPressed,
-                            ]}
-                        >
-                            <MaterialIcons name={item.icon} size={20} color={colors.white} />
-                            <Text style={styles.menuText}>{item.label}</Text>
-                        </Pressable>
-                    ))}
-                </LinearGradient>
-            )}
+            {menuOpen && <NavDrawer items={items} activeId={activeId} onClose={() => setMenuOpen(false)} />}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    fullMenu: {
+    // Reserva a altura da barra; painel e véu são absolutos a partir daqui.
+    wrapper: {
         width: "100%",
-        height: 70,
+        height: APPBAR_HEIGHT,
         zIndex: 1,
-    },
-
-    menuContainer: {
-        position: "absolute",
-        top: 0,
-        width: "100%",
-        height: 70,
-        backgroundColor: colors.surfaceRaised,
-        justifyContent: "center",
-        paddingHorizontal: 25,
-        ...shadow.sm,
-    },
-
-    menu: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-
-    leftSection: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-
-    backButton: {
-        width: 36,
-        height: 36,
-        borderRadius: radii.pill,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-
-    logo: {
-        width: 64,
-        height: 24,
-        resizeMode: "contain",
-    },
-
-    menuButton: {
-        width: 40,
-        height: 40,
-        borderRadius: radii.pill,
-        backgroundColor: colors.brandSoft,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    menuButtonPressed: {
-        opacity: 0.7,
-    },
-
-    dropDown: {
-        position: "absolute",
-        top: 0,
-        marginTop: 70,
-
-        width: "100%",
-
-        paddingVertical: 12,
-        paddingHorizontal: 18,
-        gap: 4,
-
-        borderBottomLeftRadius: radii.lg,
-        borderBottomRightRadius: radii.lg,
-        ...shadow.lg,
-    },
-
-    menuItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-        borderRadius: radii.sm,
-    },
-    menuItemSeparated: {
-        marginTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(255,255,255,0.14)",
-        borderRadius: 0,
-    },
-    menuItemPressed: {
-        backgroundColor: "rgba(255,255,255,0.12)",
-    },
-
-    menuText: {
-        color: colors.white,
-        fontFamily: fonts.bodySemiBold,
-        fontSize: 16,
-        fontWeight: "600",
     },
 });

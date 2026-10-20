@@ -109,6 +109,7 @@ export function MenuCard({
 
             {disabled ? (
                 <View style={styles.soon}>
+                    <View style={styles.soonDot} />
                     <Text style={styles.soonText}>Em breve</Text>
                 </View>
             ) : (
@@ -462,6 +463,8 @@ function AuthWaves({ compact }: { compact: boolean }) {
 
     return (
         <Svg
+            width="100%"
+            height="100%"
             style={StyleSheet.absoluteFill}
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
@@ -1001,7 +1004,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
+    soonDot: { width: 6, height: 6, borderRadius: radii.pill, backgroundColor: colors.ink },
     soon: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
         borderRadius: radii.pill,
         backgroundColor: colors.surface,
         paddingHorizontal: 10,

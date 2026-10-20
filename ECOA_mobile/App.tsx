@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from "react-native";
 
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/AppRouter";
+import { MAX_APP_WIDTH } from "./theme/layout";
 import { colors } from "./theme/tokens";
 
 export default function App() {
@@ -25,8 +26,12 @@ export default function App() {
     }
 
     return (
-        <AuthProvider>
-            <AppRouter />
-        </AuthProvider>
+        <View style={{ flex: 1, alignItems: "center", backgroundColor: colors.line }}>
+            <View style={{ flex: 1, width: "100%", maxWidth: MAX_APP_WIDTH, backgroundColor: colors.surface }}>
+                <AuthProvider>
+                    <AppRouter />
+                </AuthProvider>
+            </View>
+        </View>
     );
 }

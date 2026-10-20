@@ -111,6 +111,15 @@ usado por Preview, Calibração, Sessão e Resumo.
   trocar pelos valores exatos quando houver Figma. `TrackSelectScreen` ainda usa o núcleo Care Plus.
   Validado: `tsc`, 14 testes, `expo export --platform web`; **sem captura de tela** ainda.
 
+### Responsividade
+
+Regra do usuário: funcionar em celulares de qualquer modelo, tablets e monitores. Em monitores e
+notebooks o app é exibido **como tablet**: coluna centralizada de no máximo 768px
+(`theme/layout.ts`, `MAX_APP_WIDTH`; aplicada em `App.tsx`, com o resto da janela em `line`).
+`getCameraBoxSize` usa essa largura, não a da janela. Validado no navegador (Chromium) em 360, 768
+e 1440px nas telas de Login e Home: sem rolagem horizontal. **Telas do fluxo de exercício ainda
+não foram conferidas** nessas resoluções (exigem consentimento e câmera).
+
 ## Design system (componentes reutilizáveis)
 
 A pedido do usuário ("mais moderno, sofisticado, que cause impacto"), a interface inteira foi

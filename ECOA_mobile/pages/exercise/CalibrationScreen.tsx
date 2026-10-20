@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import CircularProgress from "../../components/CircularProgress";
-import { Alert, PageIntro } from "../../components/ds";
+import { Alert, Button, CameraLoading, CountdownRing, PageIntro } from "../../components/ds";
 import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
 import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
@@ -12,7 +11,7 @@ import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/cali
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
 import { TRACKS } from "../../data/tracks";
-import { colors, fonts, radii } from "../../theme/tokens";
+import { colors, fonts, kidsColors, radii, shadow } from "../../theme/tokens";
 import { getTrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
@@ -20,7 +19,7 @@ type RouteParams = {
     exerciseIndex: number;
 };
 
-const CALIBRATION_CONTENT_PADDING = 56; // paddingHorizontal: 28 dos dois lados
+const CALIBRATION_CONTENT_PADDING = 32; // paddingHorizontal: 16 dos dois lados
 const MIN_CALIBRATION_SAMPLES = 5;
 
 export default function CalibrationScreen() {
@@ -139,6 +138,10 @@ export default function CalibrationScreen() {
     );
 
     const faceFound = diagnostics.faceFrames > 0 && !noFace;
+    const kids = track?.ageGroup === "children";
+    const senior = track?.ageGroup === "elderly";
+    const cameraLoading = status !== "ready" && !errorMessage;
+    const remainingSeconds = (1 - progress) * (CALIBRATION_DURATION_MS / 1000);
 
     const cameraBox = getCameraBoxSize(0.42, 280, 440, cameraAspect, CALIBRATION_CONTENT_PADDING);
 
@@ -148,12 +151,19 @@ export default function CalibrationScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-                        <PageIntro
+            <PageIntro
                 title="Calibração"
                 subtitle="Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto."
             />
 
-            <View style={[styles.cameraWrapper, cameraBox]}>
+            <View
+                style={[
+                    styles.cameraWrapper,
+                    cameraBox,
+                    { borderColor: kids ? kidsColors.green : colors.brand },
+                    kids ? shadow.kids : shadow.hero,
+                ]}
+            >
                 <FaceTrackingCamera
                     isActive
                     onReading={handleReading}
@@ -168,9 +178,9 @@ export default function CalibrationScreen() {
                         <View style={styles.guide} pointerEvents="none" />
                         <View style={styles.statusChip} pointerEvents="none">
                             <MaterialIcons
-                                name={faceFound ? "check-circle" : "search"}
+                                name={faceFound ? "check-circle" : "face"}
                                 size={16}
-                                color={faceFound ? colors.success : colors.inkMuted}
+                                color={faceFound ? colors.success : colors.ink}
                             />
                             <Text style={[styles.statusText, { color: faceFound ? colors.success : colors.ink }]}>
                                 {faceFound ? "Rosto encontrado" : "Procurando seu rosto…"}
@@ -178,23 +188,21 @@ export default function CalibrationScreen() {
                         </View>
                     </>
                 )}
+
+                {cameraLoading && <CameraLoading kids={kids} />}
             </View>
 
             {status === "ready" && (
-                <CircularProgress
-                    progress={progress}
-                    color={trail.cta}
-                    trackColor={trail.progressTrack}
-                    labelColor={trail.text}
-                    label={collecting ? `${secondsRemaining}s` : "Pronto!"}
+                <CountdownRing
+                    value={remainingSeconds}
+                    total={CALIBRATION_DURATION_MS / 1000}
+                    label="Fique parado, falta pouco"
+                    kids={kids}
+                    large={senior}
                 />
             )}
 
-            {status === "ready" && collecting && (
-                <Text style={[styles.hint, { color: trail.textMuted }]}>Fique parado, falta pouco</Text>
-            )}
-
-            {status !== "ready" && !errorMessage && (
+            {cameraLoading && (
                 <Alert tone="info">Dica: fique num lugar bem iluminado, com o rosto inteiro na tela.</Alert>
             )}
 
@@ -204,7 +212,7 @@ export default function CalibrationScreen() {
                 </Alert>
             )}
 
-            {status === "ready" && (
+            {__DEV__ && status === "ready" && (
                 <Text style={[styles.diagnostics, { color: trail.textMuted }]}>
                     Quadros analisados: {diagnostics.frames} · com rosto: {diagnostics.faceFrames}
                 </Text>
@@ -212,13 +220,12 @@ export default function CalibrationScreen() {
 
             {errorMessage && <Alert tone="danger">{errorMessage}</Alert>}
 
-            <Pressable
+            <Button
+                variant="ghost"
+                title="Cancelar"
+                minHeight={senior ? 56 : undefined}
                 onPress={() => navigation.goBack()}
-                accessibilityRole="button"
-                style={styles.cancel}
-            >
-                <Text style={styles.cancelText}>Cancelar</Text>
-            </Pressable>
+            />
         </ScrollView>
     );
 }
@@ -228,34 +235,25 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.surface,
     },
+    // Protótipo (.cp-phone-pad-sm): 16 / 16 / 24, gap 16.
     content: {
-        paddingHorizontal: 28,
-        paddingTop: 40,
-        paddingBottom: 40,
-        gap: 20,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 24,
+        gap: 16,
         alignItems: "center",
     },
+    // Anel de 3px em volta da câmera (box-shadow 0 0 0 3px brand do protótipo).
     cameraWrapper: {
         alignSelf: "center",
         borderRadius: radii.lg,
+        borderWidth: 3,
         overflow: "hidden",
+        backgroundColor: colors.brandDeep,
     },
     cameraFill: {
         width: "100%",
         height: "100%",
-        borderRadius: radii.lg,
-    },
-    title: {
-        fontWeight: "400",
-        fontSize: 28,
-        color: colors.ink,
-    },
-    subtitle: {
-        fontSize: 15,
-        fontFamily: fonts.body,
-        color: colors.inkMuted,
-        textAlign: "center",
-        lineHeight: 20,
     },
     guide: {
         position: "absolute",
@@ -279,31 +277,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 999,
         backgroundColor: colors.surfaceRaised,
+        ...shadow.float,
     },
     statusText: {
         fontFamily: fonts.bodySemiBold,
         fontSize: 12,
     },
-    hint: {
-        fontFamily: fonts.body,
-        fontSize: 14,
-    },
-    cancel: {
-        minHeight: 44,
-        paddingHorizontal: 16,
-        justifyContent: "center",
-    },
-    cancelText: {
-        fontFamily: fonts.bodySemiBold,
-        fontSize: 14,
-        color: colors.brandInk,
-    },
     diagnostics: {
         fontSize: 12,
-        textAlign: "center",
-    },
-    error: {
-        color: colors.danger,
         textAlign: "center",
     },
 });

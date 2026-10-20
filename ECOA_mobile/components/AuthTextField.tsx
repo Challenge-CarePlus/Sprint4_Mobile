@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { Platform, StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import { colors, fonts, radii, shadow } from "../theme/tokens";
 
@@ -17,7 +17,7 @@ export default function AuthTextField({ icon, style, onFocus, onBlur, ...rest }:
             <MaterialIcons name={icon} size={20} color={colors.brand} />
             <TextInput
                 placeholderTextColor={colors.lineStrong}
-                style={[styles.input, style]}
+                style={[styles.input, noOutline, style]}
                 onFocus={(e) => {
                     setFocused(true);
                     onFocus?.(e);
@@ -31,6 +31,10 @@ export default function AuthTextField({ icon, style, onFocus, onBlur, ...rest }:
         </View>
     );
 }
+
+// Na web, `outline-style: none` (RN não tipa o valor, por isso o cast) tira o contorno
+// preto do navegador; o foco aparece no wrapper. No nativo não existe contorno.
+const noOutline = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0 } as object) : null;
 
 const styles = StyleSheet.create({
     wrapper: {
@@ -56,7 +60,5 @@ const styles = StyleSheet.create({
         fontFamily: fonts.body,
         fontWeight: "500",
         fontSize: 15,
-        // Remove o contorno preto do navegador; o foco aparece no wrapper.
-        outlineWidth: 0,
     },
 });

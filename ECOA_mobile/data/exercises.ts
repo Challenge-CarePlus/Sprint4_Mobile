@@ -245,6 +245,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "guiado",
         professionalGuidanceRecommended: true,
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-effortful-swallow.mp4",
+        demoVideoAsset: require("../assets/videos/elderly-effortful-swallow.mp4"),
     },
 ];
 

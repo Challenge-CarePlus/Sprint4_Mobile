@@ -17,7 +17,29 @@ app.set("trust proxy", 1);
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
-app.use(cors(allowedOrigins?.length ? { origin: allowedOrigins } : undefined));
+// Cada deploy da Vercel tem uma URL própria (care-plus-<hash>-<time>.vercel.app),
+// impossível de listar em CORS_ORIGIN. Além da lista, aceita as URLs de deploy
+// do nosso projeto na Vercel (https, ancoradas no slug do time); outro
+// padrão pode ser definido em CORS_ORIGIN_REGEX.
+const vercelDeployPattern = new RegExp(
+    process.env.CORS_ORIGIN_REGEX ??
+        "^https://care-plus[a-z0-9-]*-isabelabarcellos0812-6004s-projects\.vercel\.app$"
+);
+
+app.use(
+    cors(
+        allowedOrigins?.length
+            ? {
+                  origin: (origin, callback) =>
+                      // Sem Origin = chamada fora do navegador (curl, health check).
+                      callback(
+                          null,
+                          !origin || allowedOrigins.includes(origin) || vercelDeployPattern.test(origin)
+                      ),
+              }
+            : undefined
+    )
+);
 // Só auth trafega aqui: 5mb era folga de quando o backend recebia frames.
 app.use(express.json({ limit: "10kb" }));
 

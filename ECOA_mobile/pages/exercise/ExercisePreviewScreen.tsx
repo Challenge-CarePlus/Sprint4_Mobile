@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 
 import { ActionBar, RepChip, StepBadge } from "../../components/ds";
 import ExerciseVideo from "../../components/ExerciseVideo";
@@ -55,8 +56,9 @@ export default function ExercisePreviewScreen() {
         .filter(Boolean)
         .join(" · ");
 
-    // Idosos: título 28px e texto 18px (DS); demais: escala da faixa etária.
-    const titleSize = senior ? 28 : trail.titleSize * presentation.fontScale;
+    // Protótipo (.cp-ex-title): 24/30 em todas as trilhas; Idosos 28/34 e texto 18px.
+    const titleSize = senior ? 28 : 24;
+    const titleLine = senior ? 34 : 30;
 
     return (
         <View style={[styles.container, { backgroundColor: trail.background }]}>
@@ -71,12 +73,23 @@ export default function ExercisePreviewScreen() {
                     </View>
                 ) : (
                     <LinearGradient
-                        colors={kids ? gradients.kidsPrimary : gradients.hero}
+                        colors={kids ? [kidsColors.indigo, kidsColors.indigo] : gradients.hero}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        style={[styles.video, styles.videoPlaceholder, shadow.hero]}
+                        style={[
+                            styles.video,
+                            styles.videoPlaceholder,
+                            kids ? [{ borderRadius: radii.md }, shadow.kids] : shadow.hero,
+                        ]}
                         accessibilityLabel="Vídeo de demonstração"
                     >
+                        {kids && (
+                            <Svg width={170} height={170} style={styles.kidsRings} pointerEvents="none">
+                                <Circle cx={85} cy={85} r={41} stroke={kidsColors.green} strokeWidth={10} fill="none" />
+                                <Circle cx={85} cy={85} r={57} stroke={kidsColors.yellow} strokeWidth={10} fill="none" />
+                                <Circle cx={85} cy={85} r={73} stroke={kidsColors.orange} strokeWidth={10} fill="none" />
+                            </Svg>
+                        )}
                         <View style={styles.playButton}>
                             <MaterialIcons
                                 name="play-arrow"
@@ -97,7 +110,7 @@ export default function ExercisePreviewScreen() {
                             fontFamily: trail.titleFont,
                             color: trail.title,
                             fontSize: titleSize,
-                            lineHeight: titleSize * 1.25,
+                            lineHeight: titleLine,
                         },
                     ]}
                     accessibilityRole="header"
@@ -159,7 +172,12 @@ export default function ExercisePreviewScreen() {
                 {repetitionLabel ? <RepChip kids={kids}>{repetitionLabel}</RepChip> : null}
             </ScrollView>
 
-            <View style={styles.dock} pointerEvents="box-none">
+            <LinearGradient
+                colors={[`${trail.background}00`, trail.background]}
+                locations={[0, 0.45]}
+                style={styles.dock}
+                pointerEvents="box-none"
+            >
                 <ActionBar
                     title={calibrated ? "Iniciar exercício" : "Começar calibração"}
                     subtitle={calibrated ? "Tudo pronto para começar" : "Próximo passo: ajustar a câmera"}
@@ -167,7 +185,7 @@ export default function ExercisePreviewScreen() {
                     kids={kids}
                     large={senior}
                 />
-            </View>
+            </LinearGradient>
         </View>
     );
 }
@@ -179,8 +197,8 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 16,
-        paddingTop: 24,
-        paddingBottom: 132,
+        paddingTop: 16,
+        paddingBottom: 112,
         gap: 16,
         alignItems: "stretch",
     },
@@ -193,6 +211,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         backgroundColor: colors.brandDeep,
     },
+    kidsRings: { position: "absolute", right: -50, top: -50 },
     videoPlaceholder: {
         alignItems: "center",
         justifyContent: "center",
@@ -220,7 +239,7 @@ const styles = StyleSheet.create({
     subtitle: {
         fontFamily: fonts.body,
         textAlign: "center",
-        marginTop: -8,
+        marginTop: -12,
     },
     guidanceBanner: {
         flexDirection: "row",
@@ -252,6 +271,7 @@ const styles = StyleSheet.create({
     stepNumber: {
         width: 26,
         height: 26,
+        marginTop: -2,
         borderRadius: radii.pill,
         alignItems: "center",
         justifyContent: "center",
@@ -275,7 +295,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         paddingHorizontal: 16,
         paddingBottom: 16,
-        paddingTop: 24,
+        paddingTop: 32,
     },
     paragraph: {
         padding: 24,

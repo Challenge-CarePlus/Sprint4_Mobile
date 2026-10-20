@@ -67,6 +67,6 @@ export default function TrackSelectScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.surface },
-    content: { paddingHorizontal: 16, paddingVertical: 24, gap: 20 },
+    content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 16 },
     list: { gap: 12 },
 });

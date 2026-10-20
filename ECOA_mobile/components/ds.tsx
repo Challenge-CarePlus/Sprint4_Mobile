@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
     optTitle: { fontFamily: fonts.bodySemiBold, fontSize: 15, lineHeight: 20, color: colors.ink },
     optSub: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.inkMuted },
 
-    intro: { alignItems: "center", gap: 8, paddingHorizontal: 8 },
+    intro: { alignItems: "center", gap: 8, paddingTop: 8, paddingHorizontal: 8 },
     introIcon: {
         width: 72,
         height: 72,

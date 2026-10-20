@@ -62,6 +62,10 @@ export default function FaceTrackingCamera({
     const landmarkerRef = useRef<FaceLandmarkerType | null>(null);
     const noFaceStreakRef = useRef(0);
     const isActiveRef = useRef(isActive);
+    // O laço roda num efeito de [isActive, preferredFacing]; sem o ref ele ficaria
+    // preso ao onReading do primeiro render (closure obsoleta).
+    const onReadingRef = useRef(onReading);
+    onReadingRef.current = onReading;
 
     const [status, setStatus] = useState<FaceTrackingStatus>("initializing");
     const [noFaceWarning, setNoFaceWarning] = useState(false);
@@ -150,7 +154,7 @@ export default function FaceTrackingCamera({
                     }
                 }
 
-                onReading?.(blendshapes, timestamp);
+                onReadingRef.current?.(blendshapes, timestamp);
             }
 
             rafRef.current = requestAnimationFrame(loop);

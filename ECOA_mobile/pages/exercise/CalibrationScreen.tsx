@@ -41,6 +41,7 @@ export default function CalibrationScreen() {
     );
     const [progress, setProgress] = useState(0);
     const [collecting, setCollecting] = useState(false);
+    const collectingRef = useRef(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [cameraAspect, setCameraAspect] = useState<number | null>(null);
     const [attempt, setAttempt] = useState(0);
@@ -98,6 +99,7 @@ export default function CalibrationScreen() {
         if (attempt === 0) {
             speak("Relaxe o rosto. Vamos calibrar por 3 segundos.");
         }
+        collectingRef.current = true;
         setCollecting(true);
 
         const startedAt = Date.now();
@@ -109,6 +111,7 @@ export default function CalibrationScreen() {
         }, 100);
 
         const finishTimeout = setTimeout(() => {
+            collectingRef.current = false;
             setCollecting(false);
             setProgress(1);
             clearInterval(tickInterval);
@@ -127,12 +130,12 @@ export default function CalibrationScreen() {
             if (blendshapes.length > 0) {
                 faceFramesRef.current += 1;
             }
-            if (collecting && blendshapes.length > 0) {
+            if (collectingRef.current && blendshapes.length > 0) {
                 setNoFace(false);
                 collectorRef.current.addSample(blendshapes);
             }
         },
-        [collecting]
+        []
     );
 
     const faceFound = diagnostics.faceFrames > 0 && !noFace;

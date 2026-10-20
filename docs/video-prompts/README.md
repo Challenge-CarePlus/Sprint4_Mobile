@@ -33,6 +33,25 @@ porque é a referência visual do paciente antes de começar.
 - Assim que um vídeo sair bom, **baixe e guarde na hora** — ferramentas de geração costumam
   limpar o histórico ou expirar o link depois de um tempo.
 
+## Se o vídeo sair parecido com outro, ou genérico
+
+Ações sutis (língua, garganta, bochechas) são as que mais frequentemente saem parecidas com
+"a cara padrão" do modelo — um rosto neutro ou sorrindo, em vez do movimento pedido. Por isso
+cada prompt desta pasta tem duas seções a mais, pensadas especificamente pra isso:
+
+- **AÇÃO com sequência de tempo** (ex. "0.0–1.0s: ...", "1.0–2.0s: ...") em vez de uma
+  descrição solta — modelos de vídeo seguem uma instrução "roteirizada" por tempo bem melhor
+  do que um parágrafo corrido pedindo a mesma coisa.
+- **"O QUE NÃO PODE ACONTECER"** — diz explicitamente que o vídeo não pode cair num sorriso ou
+  expressão neutra genérica, e qual é o único evento visual que precisa estar lá. Isso reduz
+  (não elimina) a chance do modelo "escorregar" pro resultado seguro de sempre.
+
+Se mesmo assim o vídeo sair errado: tente gerar de novo primeiro (o mesmo prompt pode dar
+resultados bem diferentes em tentativas diferentes) antes de reescrever o prompt. Os
+exercícios de `elderly-effortful-swallow` (deglutição) e `elderly-tongue-elevation` (língua)
+são os mais arriscados das 15 — pode valer gerar esses dois por último, depois de já ter
+prática com os outros.
+
 ## Reaproveitamento entre trilhas
 
 Comparando os 15 exercícios, só **"Alongamento de mandíbula"** (adultos) e **"Abertura e

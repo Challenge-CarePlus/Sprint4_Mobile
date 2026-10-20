@@ -18,17 +18,27 @@ PESSOA: Um adulto com tom lúdico e brincalhão, expressão animada, como quem e
 uma criança (sem criança real no vídeo — ver nota de autorização de imagem no README da pasta).
 
 ENQUADRAMENTO: Plano fechado, do ombro para cima, pessoa centralizada no quadro, olhando
-diretamente para a câmera. Proporção 16:9 (horizontal).
+diretamente para a câmera, boca bem visível e iluminada. Proporção 16:9 (horizontal).
 
 CENÁRIO: Fundo liso cinza-claro, iluminação de estúdio suave e uniforme, sem sombras fortes,
 textura de pele natural. Vídeo de demonstração educacional em estilo documental.
 
-AÇÃO: A boca da pessoa fica levemente aberta e a língua estala ritmicamente contra o céu da
-boca, num ritmo constante de tique-taque, como um relógio, repetido cerca de 6 vezes num ritmo
-uniforme.
+AÇÃO (siga esta sequência de tempo exatamente, não resuma nem generalize): a boca fica
+levemente aberta o vídeo inteiro, mostrando os dentes de cima. A cada ciclo de
+aproximadamente 1 segundo: a ponta da língua sobe e encosta no céu da boca (logo atrás dos
+dentes de cima), e desce de volta pro assoalho da boca num movimento rápido e nítido, como o
+ponteiro de um relógio. Repita esse ciclo de subida-e-descida continuamente, num ritmo
+constante, por cerca de 7 repetições ao longo dos 8 segundos.
 
-RESTRIÇÕES: Sem fala, sem música de fundo, sem movimento de câmera, sem cortes. Movimento
-suave e anatomicamente claro, fácil de copiar só de olhar.
+O QUE NÃO PODE ACONTECER: o vídeo não pode mostrar a boca fechada o tempo todo, ou a língua
+parada sem subir e descer visivelmente — o movimento de bater a ponta da língua no céu da boca
+precisa se repetir de forma clara e rítmica do início ao fim, sem pausas longas. Não troque
+por nenhum outro gesto facial.
 
-DURAÇÃO: 8 segundos, em loop perfeito.
+RESTRIÇÕES: Sem fala, sem música de fundo, sem movimento de câmera, sem cortes, sem texto na
+tela. Movimento suave e anatomicamente claro, fácil de copiar só de olhar.
+
+DURAÇÃO: 8 segundos, em loop perfeito — como é um movimento contínuo e repetitivo, o quadro
+final deve estar no mesmo ponto do ciclo que o quadro inicial, pra o loop não ter um "salto"
+visível.
 ```

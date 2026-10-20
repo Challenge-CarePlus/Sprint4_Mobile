@@ -18,17 +18,29 @@ PESSOA: Um adulto com tom lúdico e brincalhão, expressão animada, como quem e
 uma criança (sem criança real no vídeo — ver nota de autorização de imagem no README da pasta).
 
 ENQUADRAMENTO: Plano fechado, do ombro para cima, pessoa centralizada no quadro, olhando
-diretamente para a câmera. Proporção 16:9 (horizontal).
+diretamente para a câmera, boca bem visível e iluminada. Proporção 16:9 (horizontal).
 
 CENÁRIO: Fundo liso cinza-claro, iluminação de estúdio suave e uniforme, sem sombras fortes,
 textura de pele natural. Vídeo de demonstração educacional em estilo documental.
 
-AÇÃO: A boca da pessoa abre levemente e a língua se estica para fora, reta e achatada (não
-pontuda), segura por cerca de 2 segundos, depois a língua recolhe e a boca fecha. Repita o
-ciclo completo duas vezes.
+AÇÃO (siga esta sequência de tempo exatamente, não resuma nem generalize):
+- 0.0–1.0s: boca fechada, relaxada, neutra.
+- 1.0–2.0s: a boca abre levemente e a língua sai inteira pra fora da boca, esticada, reta e
+  achatada (não enrolada, não pontuda, não só a ponta) — a língua projeta visivelmente além
+  dos lábios.
+- 2.0–4.0s: mantém a língua esticada pra fora, parada e reta.
+- 4.0–5.0s: recolhe a língua totalmente pra dentro da boca e fecha os lábios.
+- 5.0–8.0s: repete a sequência inteira (língua pra fora, segurar, recolher) mais uma vez, de
+  forma idêntica à primeira.
 
-RESTRIÇÕES: Sem fala, sem música de fundo, sem movimento de câmera, sem cortes. Movimento
-suave e anatomicamente claro, fácil de copiar só de olhar.
+O QUE NÃO PODE ACONTECER: o vídeo não pode mostrar a pessoa só com a boca entreaberta sem a
+língua pra fora, ou a língua aparecendo só um pouquinho por dentro dos lábios — a língua
+precisa sair visivelmente além da linha dos lábios e ficar reta e parada durante o tempo de
+segurar. Não troque por nenhum outro gesto facial (sorriso, bico).
 
-DURAÇÃO: 8 segundos, em loop perfeito.
+RESTRIÇÕES: Sem fala, sem música de fundo, sem movimento de câmera, sem cortes, sem texto na
+tela. Movimento suave e anatomicamente claro, fácil de copiar só de olhar.
+
+DURAÇÃO: 8 segundos, em loop perfeito — o quadro final deve ser idêntico ao quadro inicial
+(boca fechada, neutra) pra o loop não ter um "salto" visível.
 ```

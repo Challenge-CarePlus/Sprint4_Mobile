@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     },
 
     titleText: {
-        fontFamily: "Montserrat_700Bold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 30,
         color: colors.ink,
         textAlign: "center",
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     },
 
     sectionTitle: {
-        fontFamily: "Montserrat_600SemiBold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 20,
         color: colors.ink,
     },
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 
     optionTitle: {
         color: colors.ink,
-        fontFamily: "Montserrat_600SemiBold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 17,
     },
 

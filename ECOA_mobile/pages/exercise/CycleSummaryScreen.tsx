@@ -9,7 +9,7 @@ import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
 import { colors, fonts, radii, shadow } from "../../theme/tokens";
-import { getTrailTheme, trailFont } from "../../theme/trailThemes";
+import { getTrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -93,7 +93,7 @@ export default function CycleSummaryScreen() {
                     <MaterialIcons name="emoji-events" size={44} color={trail.accent} />
                 </View>
 
-                <Text style={[styles.title, { color: trail.onHero }]}>Ciclo concluído!</Text>
+                <Text style={[styles.title, { color: trail.onHero, fontFamily: trail.titleFont }]}>Ciclo concluído!</Text>
                 <Text style={[styles.subtitle, { color: trail.onHero }]}>{track.name}</Text>
             </View>
 
@@ -117,10 +117,10 @@ export default function CycleSummaryScreen() {
                     title="Voltar ao início"
                     onPress={handleBackToHome}
                     icon="home"
-                    fontSize={20}
-                    fill={trail.cta}
+                    fontSize={trail.ctaSize}
+                    fillGradient={trail.ctaGradient}
                     textColor={trail.onCta}
-                    fontFamily={trailFont}
+                    fontFamily={trail.ctaFont}
                 />
             </View>
         </ScrollView>
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     },
     hero: {
         width: "100%",
-        borderRadius: radii.xxl,
+        borderRadius: radii.xl,
         paddingVertical: 32,
         paddingHorizontal: 24,
         alignItems: "center",
@@ -157,10 +157,8 @@ const styles = StyleSheet.create({
         ...shadow.md,
     },
     title: {
-        fontFamily: trailFont,
         fontWeight: "400",
-        textTransform: "uppercase",
-        fontSize: 36,
+        fontSize: 28,
         color: colors.onBrand,
         textAlign: "center",
     },

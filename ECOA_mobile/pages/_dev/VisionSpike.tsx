@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     title: {
-        fontFamily: "Montserrat_700Bold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 20,
         color: colors.ink,
     },

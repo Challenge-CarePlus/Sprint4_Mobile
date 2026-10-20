@@ -24,6 +24,22 @@ imagem sai do dispositivo. Risco técnico principal: latência da ponte WebView 
 código implementado e validado estaticamente (typecheck, testes, bundle), mas **não validado
 em device físico neste ambiente** (sem `adb`/emulador disponível). Ver "Como testar" abaixo.
 
+## DS v2 (atual, 20/10) — SUBSTITUI a paleta e as trilhas descritas abaixo
+
+O usuário atualizou o DS (artifact Ttcaqk6QNXVrPd1zQ7wZ2D, versão de 20/10). Regra nova: **todo o app
+segue o núcleo** — marinho `brandDeep #061B38` → `heroEnd #173A66` (hero, botão primário, item ativo),
+tonal `#C6D8F6`→`#E6EEFA`, cards brancos sobre `surface #F3F4F7`, `brand #0079C8` só como **acento**
+(foco, links, gráficos), **Plus Jakarta Sans** 400–600 em frase normal, raios 12/20/24/32, sombras largas
+e suaves, hierarquia por camadas (sem bordas). **Só a Trilha Infantil tem cores próprias**: kit
+"Ecoa · Hábitos Sustentáveis" (`kidsColors`: verde `#00CC7A`, laranja, amarelo, azul, índigo `#2A2867`,
+fundo `#F6F6EC`), **Figtree**, títulos em frase normal, botão em gradiente verde→laranja, texto sobre
+as cores vivas **sempre índigo**. Trilha Idoso = núcleo + texto 18px+ e alvos 56px. Os tokens `ecoa-*`,
+`idoso-*` e Barlow Condensed são **legado do DS: não usar**. Implementação: `theme/tokens.ts`,
+`theme/trailThemes.ts` (Adultos/Idosos = núcleo; Infantil = kit). As seções "Paleta", "Migração" e
+"Identidade por trilha" abaixo descrevem a versão anterior (histórico). Validado: `tsc`, export web,
+capturas em 360 e 1440px (Home, prévia e calibração). Não migrado ainda: componentes novos do DS
+(ArrowButton, MetricPanel, BottomNav…), tema escuro, ícones chapados multicoloridos do kit infantil.
+
 ## Paleta (design tokens)
 
 Arquivo central: `ECOA_mobile/theme/tokens.ts`. **v2 da paleta** — substituiu a navy+coral das

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     color: colors.ink,
-    fontFamily: "Montserrat_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   subtitle: {
     fontSize: 14,

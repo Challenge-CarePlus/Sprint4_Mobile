@@ -17,7 +17,7 @@ import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
 import { colors, fonts, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
-import { getTrailTheme, trailFont, TrailTheme } from "../../theme/trailThemes";
+import { getTrailTheme, TrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -251,12 +251,11 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                     style={[
                         styles.exerciseName,
                         {
-                            fontFamily: trailFont,
+                            fontFamily: trail.titleFont,
                             fontWeight: "400",
-                            textTransform: "uppercase",
                             color: trail.title,
-                            fontSize: 30 * presentation.fontScale,
-                            lineHeight: 32 * presentation.fontScale,
+                            fontSize: (trail.titleSize - 4) * presentation.fontScale,
+                            lineHeight: (trail.titleSize - 4) * 1.25 * presentation.fontScale,
                         },
                     ]}
                 >
@@ -375,12 +374,11 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                     style={[
                         styles.exerciseName,
                         {
-                            fontFamily: trailFont,
+                            fontFamily: trail.titleFont,
                             fontWeight: "400",
-                            textTransform: "uppercase",
                             color: trail.title,
-                            fontSize: 30 * presentation.fontScale,
-                            lineHeight: 32 * presentation.fontScale,
+                            fontSize: (trail.titleSize - 4) * presentation.fontScale,
+                            lineHeight: (trail.titleSize - 4) * 1.25 * presentation.fontScale,
                         },
                     ]}
                 >
@@ -430,7 +428,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                         total={targetReps}
                         gamified={presentation.gamified}
                         filledColor={trail.cta}
-                        emptyColor={trail.chipBackground}
+                        emptyColor={trail.progressTrack}
                     />
 
                     <GradientButton
@@ -439,10 +437,10 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
                         icon="check"
                         iconPosition="left"
                         minHeight={presentation.minTouchTarget}
-                        fontSize={20 * presentation.fontScale}
-                        fill={trail.cta}
+                        fontSize={trail.ctaSize * presentation.fontScale}
+                        fillGradient={trail.ctaGradient}
                         textColor={trail.onCta}
-                        fontFamily={trailFont}
+                        fontFamily={trail.ctaFont}
                     />
                 </>
             ) : (
@@ -541,7 +539,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     exerciseName: {
-        fontFamily: "Montserrat_700Bold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         color: colors.ink,
         textAlign: "center",
     },
@@ -632,7 +630,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     assessmentTitle: {
-        fontFamily: "Montserrat_600SemiBold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 18,
         color: colors.ink,
         textAlign: "center",

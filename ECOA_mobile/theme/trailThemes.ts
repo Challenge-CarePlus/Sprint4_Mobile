@@ -1,103 +1,100 @@
 import { AgeGroup } from "../data/types";
+import { colors, fonts, gradients, kidsColors, kidsFonts } from "./tokens";
 
 /**
- * Identidade visual de cada trilha, tirada da sub-marca "Projeto Ecoa" do
- * design system Care Plus (tokens `ecoa-*`, `kids-*`, `idoso-*`). O DS avisa
- * que essas cores foram extraídas de um JPEG pequeno — trocar pelos valores
- * exatos quando houver o arquivo de design.
- *
- * As telas do Ecoa são sempre claras (não seguem o tema escuro do app). O
- * restante do app (login, Home, menu) continua no núcleo Care Plus de
- * `tokens.ts`; só as telas do fluxo de exercício, que sabem a trilha, usam
- * este tema.
+ * Tema das telas do fluxo de exercício, por trilha. Regra do DS (Projeto
+ * Ecoa): tudo segue o NÚCLEO do app (marinho, tonal, cards brancos, Plus
+ * Jakarta Sans) — Adultos e Idosos —, com a Trilha Idoso só com
+ * acessibilidade reforçada (texto 18px+, alvos de 56px, via
+ * `ageGroupThemes`). A ÚNICA trilha com cores próprias é a Infantil: kit
+ * "Ecoa · Hábitos Sustentáveis" (verde/laranja/amarelo/azul/índigo, Figtree,
+ * títulos em frase normal). Texto sobre as cores vivas é sempre índigo,
+ * nunca branco.
  */
 export type TrailTheme = {
     background: string;
-    /** Texto corrido sobre `background`. */
     text: string;
     textMuted: string;
-    /** Título da tela, em Barlow Condensed caixa-alta. */
     title: string;
-    /** Fundo e texto dos chips (progresso, repetições). */
+    titleFont: string;
+    /** Tamanho base do título da tela (antes do `fontScale` da faixa etária). */
+    titleSize: number;
     chipBackground: string;
     chipText: string;
-    /** Cards e caixas de instrução; sempre com `cardText` por cima. */
     card: string;
     cardText: string;
-    /** Botão primário: preenchimento sólido (o DS não usa gradiente em botão). */
+    /** Botão primário: gradiente marinho no núcleo, verde→laranja no infantil. */
+    ctaGradient: readonly [string, string];
+    /** Cor única do botão, para ícones e marcadores de progresso. */
     cta: string;
     onCta: string;
-    /** Número das instruções, ícones de destaque. */
+    ctaFont: string;
+    ctaSize: number;
     accent: string;
     onAccent: string;
-    /** Contorno da câmera aguardando / segurando o movimento. */
+    progressTrack: string;
     ringIdle: string;
     ringHolding: string;
-    /** Hero do resumo do ciclo. */
     hero: string;
     onHero: string;
 };
 
+const core: TrailTheme = {
+    background: colors.surface,
+    text: colors.ink,
+    textMuted: colors.inkMuted,
+    title: colors.ink,
+    titleFont: fonts.display,
+    titleSize: 26,
+    chipBackground: colors.brandDeep,
+    chipText: colors.onHero,
+    card: colors.surfaceRaised,
+    cardText: colors.ink,
+    ctaGradient: gradients.primary,
+    cta: colors.brandDeep,
+    onCta: colors.onHero,
+    ctaFont: fonts.bodySemiBold,
+    ctaSize: 16,
+    accent: colors.brandDeep,
+    onAccent: colors.onHero,
+    progressTrack: colors.tonalEnd,
+    ringIdle: colors.brandDeep,
+    ringHolding: colors.brand,
+    hero: colors.brandDeep,
+    onHero: colors.onHero,
+};
+
 export const TRAIL_THEMES: Record<AgeGroup, TrailTheme> = {
-    adults: {
-        background: "#E3F5F3", // ecoa-mist
-        text: "#0E3B4F", // ecoa-ink
-        textMuted: "#4A6572", // ecoa-ink-muted
-        title: "#0E3B4F",
-        chipBackground: "#074A67", // ecoa-navy
-        chipText: "#FFFFFF",
-        card: "#FFFFFF", // ecoa-paper
-        cardText: "#0E3B4F",
-        cta: "#098273", // ecoa-teal-strong (texto branco)
-        onCta: "#FFFFFF",
-        accent: "#098273",
-        onAccent: "#FFFFFF",
-        ringIdle: "#074A67",
-        ringHolding: "#098273",
-        hero: "#074A67",
-        onHero: "#FFFFFF",
-    },
+    adults: core,
+    // Idosos: núcleo, sem tom "muted" (alto contraste); o resto da
+    // acessibilidade (fonte 18px+, alvos 56px) vem de ageGroupThemes.
+    elderly: { ...core, textMuted: colors.ink },
     children: {
-        background: "#0D7ABE", // kids-blue
-        text: "#FFFFFF",
-        textMuted: "#FFFFFF",
-        title: "#FFD52E", // kids-yellow
-        chipBackground: "#0A3F7A", // kids-deep
-        chipText: "#FFFFFF",
-        card: "#FFFFFF",
-        cardText: "#0E3B4F",
-        cta: "#FFD52E",
-        onCta: "#0A3F7A", // kids-deep sobre kids-yellow
-        accent: "#DB350D", // ecoa-red (texto branco)
-        onAccent: "#FFFFFF",
-        ringIdle: "#FFFFFF",
-        ringHolding: "#FFD52E",
-        hero: "#0A3F7A",
-        onHero: "#FFFFFF",
-    },
-    elderly: {
-        background: "#FBF3E1", // idoso-cream
-        text: "#183C3C", // idoso-ink
-        textMuted: "#183C3C", // alto contraste: sem tom mais claro para idosos
-        title: "#183C3C",
-        chipBackground: "#13565C", // idoso-teal
-        chipText: "#FFFFFF",
-        card: "#FFFFFF",
-        cardText: "#183C3C",
-        cta: "#C2463A", // idoso-coral (texto branco)
-        onCta: "#FFFFFF",
-        accent: "#A84E17", // idoso-rust
-        onAccent: "#FFFFFF",
-        ringIdle: "#13565C",
-        ringHolding: "#A84E17",
-        hero: "#13565C",
-        onHero: "#FFFFFF",
+        background: kidsColors.bg,
+        text: kidsColors.ink,
+        textMuted: kidsColors.inkMuted,
+        title: kidsColors.indigo,
+        titleFont: kidsFonts.display,
+        titleSize: 30,
+        chipBackground: kidsColors.indigo,
+        chipText: colors.white,
+        card: colors.white,
+        cardText: kidsColors.ink,
+        ctaGradient: gradients.kidsPrimary,
+        cta: kidsColors.green,
+        onCta: kidsColors.indigo,
+        ctaFont: kidsFonts.display,
+        ctaSize: 17,
+        accent: kidsColors.green,
+        onAccent: kidsColors.indigo,
+        progressTrack: kidsColors.track,
+        ringIdle: kidsColors.indigo,
+        ringHolding: kidsColors.blue,
+        hero: kidsColors.indigo,
+        onHero: colors.white,
     },
 };
 
 export function getTrailTheme(ageGroup: AgeGroup): TrailTheme {
     return TRAIL_THEMES[ageGroup];
 }
-
-/** Barlow Condensed 800 em caixa-alta: título, tile, pílula e botão do Ecoa. */
-export const trailFont = "BarlowCondensed_800ExtraBold";

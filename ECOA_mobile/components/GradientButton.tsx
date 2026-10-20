@@ -20,11 +20,13 @@ type Props = {
     icon?: keyof typeof MaterialIcons.glyphMap;
     iconPosition?: "left" | "right";
     gradient?: GradientName;
-    /** Cor sólida que substitui o gradiente (botões das trilhas, ver theme/trailThemes.ts). */
+    /** Cor sólida que substitui o gradiente. */
     fill?: string;
+    /** Gradiente de 2 cores que substitui o padrão (ex.: botão do kit infantil). */
+    fillGradient?: readonly [string, string];
     /** Cor do rótulo e do ícone; padrão branco. */
     textColor?: string;
-    /** Fonte do rótulo; quando passada, o rótulo vira caixa-alta (estilo Ecoa). */
+    /** Fonte do rótulo (ex.: Figtree na trilha infantil). */
     fontFamily?: string;
     disabled?: boolean;
     loading?: boolean;
@@ -47,6 +49,7 @@ export default function GradientButton({
     iconPosition = "right",
     gradient = "primary",
     fill,
+    fillGradient,
     textColor = colors.white,
     fontFamily,
     disabled = false,
@@ -78,7 +81,7 @@ export default function GradientButton({
             ]}
         >
             <LinearGradient
-                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : fill ? [fill, fill] : gradients[gradient]}
+                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : fillGradient ?? (fill ? [fill, fill] : gradients[gradient])}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.gradient, { minHeight }, !isDisabled && shadow.sm]}
@@ -92,9 +95,7 @@ export default function GradientButton({
                             style={[
                                 styles.text,
                                 { fontSize, color: textColor },
-                                fontFamily
-                                    ? { fontFamily, fontWeight: "400", textTransform: "uppercase" }
-                                    : null,
+                                fontFamily ? { fontFamily, fontWeight: "400" } : null,
                                 textStyle,
                             ]}
                         >

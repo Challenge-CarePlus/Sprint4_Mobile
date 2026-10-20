@@ -11,7 +11,7 @@ import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
 import { TRACKS } from "../../data/tracks";
 import { colors, fonts, radii } from "../../theme/tokens";
-import { getTrailTheme, trailFont } from "../../theme/trailThemes";
+import { getTrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -118,7 +118,7 @@ export default function CalibrationScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={[styles.title, { color: trail.title }]}>Calibração</Text>
+            <Text style={[styles.title, { color: trail.title, fontFamily: trail.titleFont }]}>Calibração</Text>
             <Text style={[styles.subtitle, { color: trail.textMuted }]}>
                 Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto.
             </Text>
@@ -138,7 +138,7 @@ export default function CalibrationScreen() {
                 <CircularProgress
                     progress={progress}
                     color={trail.cta}
-                    trackColor={trail.chipBackground}
+                    trackColor={trail.progressTrack}
                     labelColor={trail.text}
                     label={collecting ? `${secondsRemaining}s` : "Pronto!"}
                 />
@@ -178,10 +178,8 @@ const styles = StyleSheet.create({
         borderRadius: radii.lg,
     },
     title: {
-        fontFamily: trailFont,
         fontWeight: "400",
-        textTransform: "uppercase",
-        fontSize: 34,
+        fontSize: 28,
         color: colors.ink,
     },
     subtitle: {

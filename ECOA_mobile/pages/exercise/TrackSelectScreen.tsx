@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
         gap: 18,
     },
     title: {
-        fontFamily: "Montserrat_700Bold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 28,
         color: colors.ink,
         textAlign: "center",
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     trackTitle: {
-        fontFamily: "Montserrat_600SemiBold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         fontSize: 18,
         color: colors.ink,
     },

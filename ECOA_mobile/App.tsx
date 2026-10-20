@@ -1,6 +1,9 @@
-import { useFonts, Montserrat_600SemiBold, Montserrat_700Bold } from "@expo-google-fonts/montserrat";
-import { BarlowCondensed_800ExtraBold } from "@expo-google-fonts/barlow-condensed";
-import { OpenSans_400Regular, OpenSans_600SemiBold } from "@expo-google-fonts/open-sans";
+import { Figtree_500Medium, Figtree_700Bold, Figtree_800ExtraBold, useFonts } from "@expo-google-fonts/figtree";
+import {
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import { ActivityIndicator, View } from "react-native";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -10,11 +13,12 @@ import { colors } from "./theme/tokens";
 
 export default function App() {
     const [fontsLoaded] = useFonts({
-        BarlowCondensed_800ExtraBold,
-        Montserrat_600SemiBold,
-        Montserrat_700Bold,
-        OpenSans_400Regular,
-        OpenSans_600SemiBold,
+        PlusJakartaSans_400Regular,
+        PlusJakartaSans_500Medium,
+        PlusJakartaSans_600SemiBold,
+        Figtree_500Medium,
+        Figtree_700Bold,
+        Figtree_800ExtraBold,
     });
 
     if (!fontsLoaded) {

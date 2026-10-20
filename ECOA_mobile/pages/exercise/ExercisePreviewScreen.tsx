@@ -9,7 +9,7 @@ import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
 import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
-import { getTrailTheme, trailFont } from "../../theme/trailThemes";
+import { getTrailTheme } from "../../theme/trailThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
 
 type RouteParams = {
@@ -88,12 +88,11 @@ export default function ExercisePreviewScreen() {
                 style={[
                     styles.title,
                     {
-                        fontFamily: trailFont,
+                        fontFamily: trail.titleFont,
                         fontWeight: "400",
-                        textTransform: "uppercase",
                         color: trail.title,
-                        fontSize: 34 * presentation.fontScale,
-                        lineHeight: 36 * presentation.fontScale,
+                        fontSize: trail.titleSize * presentation.fontScale,
+                        lineHeight: trail.titleSize * 1.25 * presentation.fontScale,
                     },
                 ]}
             >
@@ -151,10 +150,10 @@ export default function ExercisePreviewScreen() {
                     onPress={handleStart}
                     icon="arrow-forward"
                     minHeight={presentation.minTouchTarget}
-                    fontSize={20 * presentation.fontScale}
-                    fill={trail.cta}
+                    fontSize={trail.ctaSize * presentation.fontScale}
+                    fillGradient={trail.ctaGradient}
                     textColor={trail.onCta}
-                    fontFamily={trailFont}
+                    fontFamily={trail.ctaFont}
                 />
             </View>
         </ScrollView>
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     title: {
-        fontFamily: "Montserrat_700Bold",
+        fontFamily: "PlusJakartaSans_600SemiBold",
         color: colors.ink,
         textAlign: "center",
     },

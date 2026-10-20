@@ -40,6 +40,17 @@ as cores vivas **sempre índigo**. Trilha Idoso = núcleo + texto 18px+ e alvos 
 capturas em 360 e 1440px (Home, prévia e calibração). Não migrado ainda: componentes novos do DS
 (ArrowButton, MetricPanel, BottomNav…), tema escuro, ícones chapados multicoloridos do kit infantil.
 
+### Atualização do DS (21/10) — protótipo "Telas do App Ecoa"
+
+Gradiente do kit infantil agora é **verde-água → azul** (sem laranja; o laranja fica só em ícones/anéis). As 11
+telas do protótipo (artifact AzXNgJF9S64Np44EjvER5k) foram aplicadas com componentes compartilhados em
+`components/ds.tsx` (PageIntro, MenuCard, Alert, ActionBar, StepBadge, RepChip): Login (título, mostrar/ocultar
+senha, "Criar conta" no rodapé, erro em Alert), Home (cards num Sheet sobre o hero, "Em breve" tracejado),
+Menu (item atual marcado, "Sair" separado), Escolha de trilha (MenuCard + chip "5 exercícios"), Prévia
+(vídeo 16:9, passos num card, ActionBar fixa no rodapé), Calibração (guia oval, status "Rosto encontrado",
+contagem, Cancelar, linha de diagnóstico de quadros). Pendente: tela de Consentimento, Sessão e Resumo não estão
+no protótipo e seguem o tema por trilha; erros por campo no Cadastro; "Esqueci minha senha" (sem backend).
+
 ## Paleta (design tokens)
 
 Arquivo central: `ECOA_mobile/theme/tokens.ts`. **v2 da paleta** — substituiu a navy+coral das

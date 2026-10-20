@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import CircularProgress from "../../components/CircularProgress";
+import { Alert, PageIntro } from "../../components/ds";
 import FaceTrackingCamera, { FaceTrackingStatus } from "../../vision/FaceTrackingCamera";
 import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
@@ -133,6 +135,8 @@ export default function CalibrationScreen() {
         [collecting]
     );
 
+    const faceFound = diagnostics.faceFrames > 0 && !noFace;
+
     const cameraBox = getCameraBoxSize(0.42, 280, 440, cameraAspect, CALIBRATION_CONTENT_PADDING);
 
     return (
@@ -141,10 +145,10 @@ export default function CalibrationScreen() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={[styles.title, { color: trail.title, fontFamily: trail.titleFont }]}>Calibração</Text>
-            <Text style={[styles.subtitle, { color: trail.textMuted }]}>
-                Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto.
-            </Text>
+                        <PageIntro
+                title="Calibração"
+                subtitle="Relaxe o rosto e olhe para a câmera. Isso ajusta a detecção ao seu rosto."
+            />
 
             <View style={[styles.cameraWrapper, cameraBox]}>
                 <FaceTrackingCamera
@@ -155,6 +159,22 @@ export default function CalibrationScreen() {
                     onAspectRatioChange={setCameraAspect}
                     cameraStyle={styles.cameraFill}
                 />
+
+                {status === "ready" && (
+                    <>
+                        <View style={styles.guide} pointerEvents="none" />
+                        <View style={styles.statusChip} pointerEvents="none">
+                            <MaterialIcons
+                                name={faceFound ? "check-circle" : "search"}
+                                size={16}
+                                color={faceFound ? colors.success : colors.inkMuted}
+                            />
+                            <Text style={[styles.statusText, { color: faceFound ? colors.success : colors.ink }]}>
+                                {faceFound ? "Rosto encontrado" : "Procurando seu rosto…"}
+                            </Text>
+                        </View>
+                    </>
+                )}
             </View>
 
             {status === "ready" && (
@@ -167,10 +187,18 @@ export default function CalibrationScreen() {
                 />
             )}
 
+            {status === "ready" && collecting && (
+                <Text style={[styles.hint, { color: trail.textMuted }]}>Fique parado, falta pouco</Text>
+            )}
+
+            {status !== "ready" && !errorMessage && (
+                <Alert tone="info">Dica: fique num lugar bem iluminado, com o rosto inteiro na tela.</Alert>
+            )}
+
             {noFace && (
-                <Text style={[styles.error, { color: trail.text }]}>
+                <Alert tone="danger">
                     Não vimos seu rosto. Fique de frente para a câmera, com boa luz — vamos tentar de novo.
-                </Text>
+                </Alert>
             )}
 
             {status === "ready" && (
@@ -179,7 +207,15 @@ export default function CalibrationScreen() {
                 </Text>
             )}
 
-            {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+            {errorMessage && <Alert tone="danger">{errorMessage}</Alert>}
+
+            <Pressable
+                onPress={() => navigation.goBack()}
+                accessibilityRole="button"
+                style={styles.cancel}
+            >
+                <Text style={styles.cancelText}>Cancelar</Text>
+            </Pressable>
         </ScrollView>
     );
 }
@@ -217,6 +253,47 @@ const styles = StyleSheet.create({
         color: colors.inkMuted,
         textAlign: "center",
         lineHeight: 20,
+    },
+    guide: {
+        position: "absolute",
+        left: "27%",
+        top: "14%",
+        width: "46%",
+        height: "72%",
+        borderRadius: 999,
+        borderWidth: 2.5,
+        borderStyle: "dashed",
+        borderColor: "rgba(255,255,255,0.75)",
+    },
+    statusChip: {
+        position: "absolute",
+        left: 12,
+        top: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        height: 30,
+        paddingHorizontal: 12,
+        borderRadius: 999,
+        backgroundColor: colors.surfaceRaised,
+    },
+    statusText: {
+        fontFamily: fonts.bodySemiBold,
+        fontSize: 12,
+    },
+    hint: {
+        fontFamily: fonts.body,
+        fontSize: 14,
+    },
+    cancel: {
+        minHeight: 44,
+        paddingHorizontal: 16,
+        justifyContent: "center",
+    },
+    cancelText: {
+        fontFamily: fonts.bodySemiBold,
+        fontSize: 14,
+        color: colors.brandInk,
     },
     diagnostics: {
         fontSize: 12,

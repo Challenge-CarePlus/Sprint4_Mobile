@@ -3,11 +3,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import GradientButton from "../../components/GradientButton";
+import { ActionBar, RepChip, StepBadge } from "../../components/ds";
 import ExerciseVideo from "../../components/ExerciseVideo";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
-import { colors, fonts, gradients, radii, shadow } from "../../theme/tokens";
+import { colors, fonts, gradients, kidsColors, kidsFonts, radii, shadow } from "../../theme/tokens";
 import { getPresentation } from "../../theme/ageGroupThemes";
 import { getTrailTheme } from "../../theme/trailThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
@@ -36,6 +36,8 @@ export default function ExercisePreviewScreen() {
 
     const presentation = getPresentation(track.ageGroup);
     const trail = getTrailTheme(track.ageGroup);
+    const kids = track.ageGroup === "children";
+    const senior = track.ageGroup === "elderly";
     const calibrated = hasCalibration(trackId);
 
     function handleStart() {
@@ -47,116 +49,126 @@ export default function ExercisePreviewScreen() {
     }
 
     const repetitionLabel = [
-        exercise.repetitions ? `${exercise.repetitions}x` : null,
-        exercise.durationSeconds ? `${exercise.durationSeconds}s por repetição` : null,
+        exercise.repetitions ? `${exercise.repetitions}×` : null,
+        exercise.durationSeconds ? `${exercise.durationSeconds} s cada` : null,
     ]
         .filter(Boolean)
         .join(" · ");
 
+    // Idosos: título 28px e texto 18px (DS); demais: escala da faixa etária.
+    const titleSize = senior ? 28 : trail.titleSize * presentation.fontScale;
+
     return (
-        <ScrollView
-            style={[styles.container, { backgroundColor: trail.background }]}
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
-        >
-            <View style={[styles.progressPill, { backgroundColor: trail.chipBackground }]}>
-                <Text style={[styles.progress, { color: trail.chipText }]}>
+        <View style={[styles.container, { backgroundColor: trail.background }]}>
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                <StepBadge kids={kids}>
                     Exercício {exerciseIndex + 1} de {track.exerciseIds.length} · {track.name}
-                </Text>
-            </View>
+                </StepBadge>
 
-            {exercise.demoVideoAsset ? (
-                <View style={[styles.videoPlaceholder, shadow.md]} accessibilityLabel="Vídeo de demonstração">
-                    <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} />
-                </View>
-            ) : (
-                <LinearGradient
-                    colors={gradients.primary}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={[styles.videoPlaceholder, shadow.md]}
-                    accessibilityLabel="Vídeo de demonstração"
-                >
-                    <View style={styles.playButton}>
-                        <MaterialIcons name="play-arrow" size={34} color={colors.ink} />
+                {exercise.demoVideoAsset ? (
+                    <View style={[styles.video, shadow.hero]} accessibilityLabel="Vídeo de demonstração">
+                        <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} />
                     </View>
-                    <Text style={styles.videoPlaceholderText}>Vídeo de demonstração</Text>
-                </LinearGradient>
-            )}
-
-            <Text
-                style={[
-                    styles.title,
-                    {
-                        fontFamily: trail.titleFont,
-                        fontWeight: "400",
-                        color: trail.title,
-                        fontSize: trail.titleSize * presentation.fontScale,
-                        lineHeight: trail.titleSize * 1.25 * presentation.fontScale,
-                    },
-                ]}
-            >
-                {exercise.name}
-            </Text>
-
-            <Text
-                style={[
-                    styles.goal,
-                    { fontSize: 15 * presentation.fontScale, color: trail.textMuted },
-                ]}
-            >
-                {exercise.therapeuticGoal}
-            </Text>
-
-            {exercise.professionalGuidanceRecommended && (
-                <View style={styles.guidanceBanner}>
-                    <MaterialIcons name="info" size={20} color={colors.warning} />
-                    <Text style={styles.guidanceText}>
-                        Recomendado com orientação do(a) fonoaudiólogo(a).
-                    </Text>
-                </View>
-            )}
-
-            <View style={styles.instructionsBox}>
-                {exercise.instructions.map((instruction, index) => (
-                    <View key={index} style={styles.instructionRow}>
-                        <View style={[styles.instructionNumber, { backgroundColor: trail.accent }]}>
-                            <Text style={[styles.instructionNumberText, { color: trail.onAccent }]}>
-                                {index + 1}
-                            </Text>
+                ) : (
+                    <LinearGradient
+                        colors={kids ? gradients.kidsPrimary : gradients.hero}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[styles.video, styles.videoPlaceholder, shadow.hero]}
+                        accessibilityLabel="Vídeo de demonstração"
+                    >
+                        <View style={styles.playButton}>
+                            <MaterialIcons
+                                name="play-arrow"
+                                size={34}
+                                color={kids ? kidsColors.indigo : colors.brandDeep}
+                            />
                         </View>
-                        <Text
-                            style={[
-                                styles.instructionText,
-                                { fontSize: 15 * presentation.fontScale, color: trail.text },
-                            ]}
-                        >
-                            {instruction}
+                        <Text style={[styles.videoLabel, { color: kids ? kidsColors.indigo : colors.onHero }]}>
+                            Vídeo de demonstração
+                        </Text>
+                    </LinearGradient>
+                )}
+
+                <Text
+                    style={[
+                        styles.title,
+                        {
+                            fontFamily: trail.titleFont,
+                            color: trail.title,
+                            fontSize: titleSize,
+                            lineHeight: titleSize * 1.25,
+                        },
+                    ]}
+                    accessibilityRole="header"
+                >
+                    {exercise.name}
+                </Text>
+
+                <Text
+                    style={[
+                        styles.subtitle,
+                        { color: trail.textMuted, fontSize: senior ? 17 : 14, lineHeight: senior ? 24 : 20 },
+                    ]}
+                >
+                    {exercise.therapeuticGoal}
+                </Text>
+
+                {exercise.professionalGuidanceRecommended && (
+                    <View style={styles.guidanceBanner}>
+                        <MaterialIcons name="info" size={20} color={colors.warning} />
+                        <Text style={styles.guidanceText}>
+                            Recomendado com orientação do(a) fonoaudiólogo(a).
                         </Text>
                     </View>
-                ))}
-            </View>
+                )}
 
-            {repetitionLabel ? (
-                <View style={[styles.repetitionPill, { backgroundColor: trail.chipBackground }]}>
-                    <MaterialIcons name="repeat" size={16} color={trail.chipText} />
-                    <Text style={[styles.repetitionLabel, { color: trail.chipText }]}>{repetitionLabel}</Text>
+                <View style={[styles.steps, kids ? shadow.kids : shadow.card, { backgroundColor: trail.card }]}>
+                    {exercise.instructions.map((instruction, index) => (
+                        <View key={index} style={styles.stepRow}>
+                            <View
+                                style={[
+                                    styles.stepNumber,
+                                    senior && styles.stepNumberLarge,
+                                    { backgroundColor: trail.accent },
+                                ]}
+                            >
+                                <Text
+                                    style={[
+                                        styles.stepNumberText,
+                                        { color: trail.onAccent, fontSize: senior ? 16 : 13 },
+                                        kids && { fontFamily: kidsFonts.display },
+                                    ]}
+                                >
+                                    {index + 1}
+                                </Text>
+                            </View>
+                            <Text
+                                style={[
+                                    styles.stepText,
+                                    { color: trail.cardText, fontSize: senior ? 18 : 15, lineHeight: senior ? 27 : 22 },
+                                    kids && { fontFamily: kidsFonts.body },
+                                ]}
+                            >
+                                {instruction}
+                            </Text>
+                        </View>
+                    ))}
                 </View>
-            ) : null}
 
-            <View style={styles.buttonSpacer}>
-                <GradientButton
+                {repetitionLabel ? <RepChip kids={kids}>{repetitionLabel}</RepChip> : null}
+            </ScrollView>
+
+            <View style={styles.dock} pointerEvents="box-none">
+                <ActionBar
                     title={calibrated ? "Iniciar exercício" : "Começar calibração"}
+                    subtitle={calibrated ? "Tudo pronto para começar" : "Próximo passo: ajustar a câmera"}
                     onPress={handleStart}
-                    icon="arrow-forward"
-                    minHeight={presentation.minTouchTarget}
-                    fontSize={trail.ctaSize * presentation.fontScale}
-                    fillGradient={trail.ctaGradient}
-                    textColor={trail.onCta}
-                    fontFamily={trail.ctaFont}
+                    kids={kids}
+                    large={senior}
                 />
             </View>
-        </ScrollView>
+        </View>
     );
 }
 
@@ -166,62 +178,49 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
     },
     content: {
-        paddingHorizontal: 28,
-        paddingVertical: 32,
+        paddingHorizontal: 16,
+        paddingTop: 24,
+        paddingBottom: 132,
         gap: 16,
+        alignItems: "stretch",
     },
-    progressPill: {
-        alignSelf: "center",
-        backgroundColor: colors.brandSoft,
-        borderRadius: radii.pill,
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-    },
-    progress: {
-        fontSize: 12,
-        fontFamily: fonts.bodySemiBold,
-        fontWeight: "700",
-        color: colors.ink,
-        textAlign: "center",
-    },
-    videoPlaceholder: {
+    video: {
         width: "100%",
         maxWidth: 560,
         aspectRatio: 16 / 9,
         alignSelf: "center",
         borderRadius: radii.lg,
+        overflow: "hidden",
+        backgroundColor: colors.brandDeep,
+    },
+    videoPlaceholder: {
         alignItems: "center",
         justifyContent: "center",
-        gap: 10,
-        overflow: "hidden",
-        backgroundColor: "#000",
+        gap: 8,
     },
     videoPlayer: {
         borderRadius: radii.lg,
     },
     playButton: {
-        width: 56,
-        height: 56,
+        width: 64,
+        height: 64,
         borderRadius: radii.pill,
-        backgroundColor: colors.surfaceRaised,
+        backgroundColor: colors.white,
         alignItems: "center",
         justifyContent: "center",
-        ...shadow.sm,
+        ...shadow.float,
     },
-    videoPlaceholderText: {
-        color: colors.white,
-        fontWeight: "700",
+    videoLabel: {
+        fontFamily: fonts.bodySemiBold,
+        fontSize: 13,
     },
     title: {
-        fontFamily: "PlusJakartaSans_600SemiBold",
-        color: colors.ink,
         textAlign: "center",
     },
-    goal: {
-        color: colors.inkMuted,
+    subtitle: {
         fontFamily: fonts.body,
         textAlign: "center",
-        lineHeight: 20,
+        marginTop: -8,
     },
     guidanceBanner: {
         flexDirection: "row",
@@ -235,54 +234,48 @@ const styles = StyleSheet.create({
         flex: 1,
         color: colors.warning,
         fontFamily: fonts.bodySemiBold,
-        fontWeight: "700",
         fontSize: 13,
     },
-    instructionsBox: {
-        gap: 14,
-    },
-    instructionRow: {
-        flexDirection: "row",
+    steps: {
+        width: "100%",
+        maxWidth: 560,
+        alignSelf: "center",
+        borderRadius: radii.md,
+        padding: 16,
         gap: 12,
-        alignItems: "flex-start",
     },
-    instructionNumber: {
+    stepRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: 12,
+    },
+    stepNumber: {
         width: 26,
         height: 26,
         borderRadius: radii.pill,
         alignItems: "center",
         justifyContent: "center",
     },
-    instructionNumberText: {
-        color: colors.white,
-        fontWeight: "700",
-        fontSize: 13,
+    stepNumberLarge: {
+        width: 32,
+        height: 32,
     },
-    instructionText: {
-        flex: 1,
-        color: colors.ink,
-        fontFamily: fonts.body,
-        lineHeight: 20,
-        marginTop: 3,
-    },
-    repetitionPill: {
-        alignSelf: "center",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        backgroundColor: colors.brandSoft,
-        borderRadius: radii.pill,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-    },
-    repetitionLabel: {
-        fontWeight: "700",
+    stepNumberText: {
         fontFamily: fonts.bodySemiBold,
-        color: colors.brandInk,
-        fontSize: 13,
     },
-    buttonSpacer: {
-        marginTop: 8,
+    stepText: {
+        flex: 1,
+        fontFamily: fonts.body,
+    },
+    // Ação fixa no rodapé do container.
+    dock: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        paddingTop: 24,
     },
     paragraph: {
         padding: 24,

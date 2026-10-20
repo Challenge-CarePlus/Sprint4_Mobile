@@ -12,6 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
 import GradientButton from "../components/GradientButton";
+import { Alert } from "../components/ds";
 import { colors, fonts, radii, shadow } from "../theme/tokens";
 
 export default function Login() {
@@ -65,6 +66,9 @@ export default function Login() {
                     />
                 </View>
 
+                <Text style={styles.title}>Bem-vindo de volta</Text>
+                <Text style={styles.subtitle}>Entre para continuar seus exercícios</Text>
+
                 <View style={styles.fieldsContainer}>
                     <AuthTextField
                         icon="mail-outline"
@@ -84,13 +88,7 @@ export default function Login() {
                     />
                 </View>
 
-                <TouchableOpacity
-                    onPress={() =>
-                        navigation.navigate("REGISTER" as never)
-                    }
-                >
-                    <Text style={styles.link}>Criar conta</Text>
-                </TouchableOpacity>
+                {error !== "" && <Alert tone="danger">{error}</Alert>}
 
                 <GradientButton
                     title="Entrar"
@@ -99,11 +97,15 @@ export default function Login() {
                     style={styles.loginButton}
                 />
 
-                {error !== "" && (
-                    <View style={styles.errorBanner}>
-                        <Text style={styles.errorText}>{error}</Text>
-                    </View>
-                )}
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Ainda não tem conta? </Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("REGISTER" as never)}
+                        accessibilityRole="button"
+                    >
+                        <Text style={styles.link}>Criar conta</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -147,6 +149,35 @@ const styles = StyleSheet.create({
         width: 116,
         height: 116,
         borderRadius: radii.pill,
+    },
+
+    title: {
+        fontFamily: fonts.displaySemiBold,
+        fontSize: 24,
+        lineHeight: 30,
+        color: colors.ink,
+        textAlign: "center",
+    },
+
+    subtitle: {
+        fontFamily: fonts.body,
+        fontSize: 14,
+        color: colors.inkMuted,
+        textAlign: "center",
+        marginTop: -6,
+        marginBottom: 6,
+    },
+
+    footer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    footerText: {
+        fontFamily: fonts.body,
+        fontSize: 14,
+        color: colors.inkMuted,
     },
 
     fieldsContainer: {

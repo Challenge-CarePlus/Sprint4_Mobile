@@ -10,6 +10,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
+import { Alert } from "../components/ds";
 import GradientButton from "../components/GradientButton";
 import { colors, fonts, radii, shadow } from "../theme/tokens";
 
@@ -121,8 +122,8 @@ export default function Register() {
                 />
 
                 {error !== "" && (
-                    <View style={styles.errorBanner}>
-                        <Text style={styles.errorText}>{error}</Text>
+                    <View>
+                        <Alert tone="danger">{error}</Alert>
                     </View>
                 )}
 

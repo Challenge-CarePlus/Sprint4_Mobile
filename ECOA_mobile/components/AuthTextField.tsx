@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Platform, StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { Platform, Pressable, StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
 import { colors, fonts, radii, shadow } from "../theme/tokens";
 
@@ -9,8 +9,9 @@ type Props = TextInputProps & {
 };
 
 /** Campo de texto padrão das telas de login/cadastro — usado nas duas para ficarem idênticas. */
-export default function AuthTextField({ icon, style, onFocus, onBlur, ...rest }: Props) {
+export default function AuthTextField({ icon, style, onFocus, onBlur, secureTextEntry, ...rest }: Props) {
     const [focused, setFocused] = useState(false);
+    const [visible, setVisible] = useState(false);
 
     return (
         <View style={[styles.wrapper, focused && styles.wrapperFocused]}>
@@ -26,8 +27,23 @@ export default function AuthTextField({ icon, style, onFocus, onBlur, ...rest }:
                     setFocused(false);
                     onBlur?.(e);
                 }}
+                secureTextEntry={secureTextEntry && !visible}
                 {...rest}
             />
+            {secureTextEntry ? (
+                <Pressable
+                    onPress={() => setVisible((v) => !v)}
+                    accessibilityRole="button"
+                    accessibilityLabel={visible ? "Ocultar senha" : "Mostrar senha"}
+                    hitSlop={10}
+                >
+                    <MaterialIcons
+                        name={visible ? "visibility-off" : "visibility"}
+                        size={20}
+                        color={colors.inkMuted}
+                    />
+                </Pressable>
+            ) : null}
         </View>
     );
 }

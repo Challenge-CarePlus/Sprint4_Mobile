@@ -23,7 +23,7 @@ export type TrailTheme = {
     chipText: string;
     card: string;
     cardText: string;
-    /** Botão primário: gradiente marinho no núcleo, verde→laranja no infantil. */
+    /** Botão primário: gradiente marinho no núcleo, verde→azul no infantil. */
     ctaGradient: readonly [string, string];
     /** Cor única do botão, para ícones e marcadores de progresso. */
     cta: string;

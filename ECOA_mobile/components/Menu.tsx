@@ -14,6 +14,7 @@ type MenuItem = {
     label: string;
     icon: keyof typeof MaterialIcons.glyphMap;
     onPress: () => void;
+    separated?: boolean;
 };
 
 export default function Menu() {
@@ -36,6 +37,13 @@ export default function Menu() {
         navigation.navigate((consented ? "TRACK_SELECT" : "CONSENT") as never);
     }
 
+    // Item da tela atual fica marcado no painel.
+    const isCurrent = (key: string) =>
+        (key === "home" && route.name === "MAIN") ||
+        (key === "settings" && route.name === "SETTINGS") ||
+        (key === "exercise" && route.name.includes("EXERCISE")) ||
+        (key === "exercise" && route.name === "TRACK_SELECT");
+
     const items: MenuItem[] = [
         {
             key: "home",
@@ -56,7 +64,7 @@ export default function Menu() {
                 navigation.navigate("SETTINGS" as never);
             },
         },
-        { key: "logout", label: "Sair", icon: "logout", onPress: handleLogout },
+        { key: "logout", label: "Sair", icon: "logout", onPress: handleLogout, separated: true },
     ];
 
     return (
@@ -105,7 +113,13 @@ export default function Menu() {
                         <Pressable
                             key={item.key}
                             onPress={item.onPress}
-                            style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+                            accessibilityRole="button"
+                            style={({ pressed }) => [
+                                styles.menuItem,
+                                item.separated && styles.menuItemSeparated,
+                                isCurrent(item.key) && styles.menuItemPressed,
+                                pressed && styles.menuItemPressed,
+                            ]}
                         >
                             <MaterialIcons name={item.icon} size={20} color={colors.white} />
                             <Text style={styles.menuText}>{item.label}</Text>
@@ -196,6 +210,12 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 8,
         borderRadius: radii.sm,
+    },
+    menuItemSeparated: {
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: "rgba(255,255,255,0.14)",
+        borderRadius: 0,
     },
     menuItemPressed: {
         backgroundColor: "rgba(255,255,255,0.12)",

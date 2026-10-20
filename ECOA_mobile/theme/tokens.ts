@@ -188,7 +188,7 @@ export const shadow = {
 /**
  * Gradientes: o hero marinho (`brandDeep` → `heroEnd`) é também o do botão
  * primário e do item ativo; o tonal é o dos painéis de dados. `kidsPrimary`
- * (verde → laranja) é a assinatura do kit infantil: só no botão principal.
+ * (verde-água → azul, como o "E" do logo) é a assinatura do kit infantil: só no botão principal.
  */
 export const gradients = {
     hero: [colors.brandDeep, colors.heroEnd] as const,
@@ -198,5 +198,5 @@ export const gradients = {
     success: [colors.success, "#124D30"] as const,
     surface: [colors.white, colors.brandSoft] as const,
     tonal: [colors.tonalStart, colors.tonalEnd] as const,
-    kidsPrimary: [kidsColors.green, kidsColors.orange] as const,
+    kidsPrimary: [kidsColors.green, kidsColors.blue] as const,
 } as const;

@@ -1,7 +1,7 @@
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import Card from "../components/Card";
+import { MenuCard } from "../components/ds";
 import { hasConsent } from "../services/consentStorage";
 import { colors, fonts, gradients, radii } from "../theme/tokens";
 
@@ -39,46 +39,30 @@ export default function Main() {
       </LinearGradient>
 
       <View style={styles.cardContainer}>
-        <Card
+        <MenuCard
+          icon="fitness-center"
           title="Exercícios"
           subtitle="Pratique agora"
-          iconName="fitness-center"
-          active
-          gradient="accent"
           onPress={handleOpenExercises}
         />
 
-        <Card
-          title="Treinos"
-          subtitle="Em breve"
-          iconName="record-voice-over"
-          active={false}
-          onPress={() => {}}
-        />
-
-        <Card
-          title="Evolução"
-          subtitle="Em breve"
-          iconName="analytics"
-          active={false}
-          onPress={() => {}}
-        />
-
-        <Card
+        <MenuCard
+          icon="settings"
           title="Configurações"
-          subtitle="Preferências"
-          iconName="settings"
-          active
+          subtitle="Câmera e frequência de captura"
           onPress={() => navigation.navigate("SETTINGS" as never)}
         />
 
+        <MenuCard icon="record-voice-over" title="Treinos" subtitle="Sequências guiadas" disabled />
+
+        <MenuCard icon="insights" title="Evolução" subtitle="Seu progresso semana a semana" disabled />
+
         {/* Fase 0 (spike técnico) — ferramenta de diagnóstico, nunca visível em produção. */}
         {__DEV__ && (
-          <Card
+          <MenuCard
+            icon="science"
             title="Spike (dev)"
             subtitle="Latência MediaPipe"
-            iconName="science"
-            active
             onPress={() => navigation.navigate("VISION_SPIKE" as never)}
           />
         )}
@@ -98,7 +82,7 @@ const styles = StyleSheet.create({
   hero: {
     paddingHorizontal: 28,
     paddingTop: 36,
-    paddingBottom: 44,
+    paddingBottom: 56,
     borderBottomLeftRadius: radii.xl,
     borderBottomRightRadius: radii.xl,
     overflow: "hidden",
@@ -127,15 +111,19 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   heroSubtitle: {
-    color: "rgba(255,255,255,0.88)",
-    fontFamily: fonts.bodySemiBold,
+    color: colors.onHeroMuted,
+    fontFamily: fonts.body,
     fontSize: 14,
-    fontWeight: "600",
     marginTop: 4,
   },
+  // Sheet: os cards sobem sobre o hero marinho.
   cardContainer: {
-    paddingHorizontal: 24,
-    marginTop: -20,
-    gap: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    marginTop: -24,
+    gap: 12,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
   },
 });

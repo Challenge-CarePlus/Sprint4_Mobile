@@ -1,6 +1,9 @@
-// Antes duplicado como uma string fixa em authRouter.ts e middleware/auth.ts
-// — qualquer um com acesso ao repo conseguia forjar um token válido. Agora
-// vem de env var (JWT_SECRET, configurado no painel do Render em produção);
-// o valor antigo continua como fallback só pra não quebrar quem já rodava
-// localmente sem configurar nada.
-export const JWT_SECRET = process.env.JWT_SECRET ?? "ecoafono_secret";
+// Vem de env var (JWT_SECRET; o Render gera um valor aleatório via
+// render.yaml). O fallback fixo só existe fora de produção, para rodar
+// localmente sem configurar nada — em produção sem a variável o servidor
+// não sobe, em vez de aceitar tokens forjáveis por quem lê o repositório.
+if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET não definido (obrigatório em produção)");
+}
+
+export const JWT_SECRET = process.env.JWT_SECRET ?? "ecoafono_secret_dev_only";

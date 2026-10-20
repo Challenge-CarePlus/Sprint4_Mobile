@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 
 import { JWT_SECRET } from "../config/jwt";
 
+export type AuthPayload = { id: number; email: string; access: string };
+
 export function auth(
   req: Request,
   res: Response,
@@ -20,7 +22,7 @@ export function auth(
   const [, token] = authHeader.split(" ");
 
   try {
-    jwt.verify(token, JWT_SECRET);
+    res.locals.user = jwt.verify(token, JWT_SECRET) as AuthPayload;
 
     next();
   } catch {

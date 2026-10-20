@@ -1,9 +1,14 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 
 import authRouter from "./routes/authRouter";
 
 const app = express();
+
+app.disable("x-powered-by");
+// Atrás do proxy do Render, sem isso todo cliente aparece com o mesmo IP.
+app.set("trust proxy", 1);
 
 // Sem CORS_ORIGIN definido, aceita qualquer origem (como antes). Em
 // produção, configura com as URLs do front-end hospedado — aceita mais de
@@ -13,7 +18,19 @@ const allowedOrigins = process.env.CORS_ORIGIN?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
 app.use(cors(allowedOrigins?.length ? { origin: allowedOrigins } : undefined));
-app.use(express.json({ limit: "5mb" }));
+// Só auth trafega aqui: 5mb era folga de quando o backend recebia frames.
+app.use(express.json({ limit: "10kb" }));
+
+// Limita tentativas por IP em login/cadastro (força bruta e spam de contas).
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "Muitas tentativas. Tente novamente em alguns minutos." },
+});
+app.use("/auth/login", authLimiter);
+app.use("/auth/register", authLimiter);
 
 app.use("/auth", authRouter);
 
@@ -26,6 +43,19 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => {
     res.json({
         status: "ok",
+    });
+});
+
+// Último middleware: JSON malformado, payload grande etc. viram resposta JSON
+// limpa em vez da página HTML do Express com stack trace.
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err?.status && err.status >= 400 && err.status < 600 ? err.status : 500;
+    if (status === 500) {
+        console.error(err);
+    }
+    res.status(status).json({
+        success: false,
+        message: status === 500 ? "Erro interno" : "Requisição inválida"
     });
 });
 

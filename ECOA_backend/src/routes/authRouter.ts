@@ -1,26 +1,24 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import fs from "fs";
-import { Access, Login } from "../models/login";
+import { Access } from "../models/login";
 import { JWT_SECRET } from "../config/jwt";
+import { auth, AuthPayload } from "../middleware/auth";
+import { createUser, findByEmail, findById } from "../db/userStore";
 
 const router = Router();
 
-function lerUsuarios(): Login[] {
-    const dados = fs.readFileSync(
-        "./src/db/users.json",
-        "utf-8"
-    );
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_MIN = 6;
+// bcrypt só considera os primeiros 72 bytes; acima disso senhas diferentes colidem.
+const PASSWORD_MAX = 72;
 
-    return JSON.parse(dados);
-}
+// Hash usado quando o e-mail não existe, pra o login gastar o mesmo tempo de
+// bcrypt nos dois casos (senão o tempo de resposta revela se a conta existe).
+const DUMMY_HASH = bcrypt.hashSync("ecoa-dummy-password", 10);
 
-function salvarUsuarios(users: Login[]) {
-    fs.writeFileSync(
-        "./src/db/users.json",
-        JSON.stringify(users, null, 2)
-    );
+function normalizeEmail(value: unknown): string | null {
+    return typeof value === "string" ? value.trim().toLowerCase() : null;
 }
 
 router.get("/", (req, res) => {
@@ -29,46 +27,51 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register",async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, password } = req.body ?? {};
+        const email = normalizeEmail(req.body?.email);
 
-        if (!name || !email || !password) {
+        if (
+            typeof name !== "string" || !name.trim() ||
+            !email ||
+            typeof password !== "string" || !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Nome, email e senha são obrigatórios"
             });
         }
 
-        const users = lerUsuarios();
+        if (!EMAIL_REGEX.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Email inválido"
+            });
+        }
 
-        const userExists = users.find(
-            user => user.email === email
-        );
+        if (password.length < PASSWORD_MIN || password.length > PASSWORD_MAX) {
+            return res.status(400).json({
+                success: false,
+                message: `A senha deve ter entre ${PASSWORD_MIN} e ${PASSWORD_MAX} caracteres`
+            });
+        }
 
-        if (userExists) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const novoUsuario = await createUser({
+            name: name.trim(),
+            email,
+            password: hashedPassword,
+            access: Access.USER
+        });
+
+        if (!novoUsuario) {
             return res.status(409).json({
                 success: false,
                 message: "Email já cadastrado"
             });
         }
-
-        const hashedPassword = await bcrypt.hash(
-            password,
-            10
-        );
-
-        const novoUsuario: Login = {
-            id: Date.now(),
-            name,
-            email,
-            password: hashedPassword,
-            access: Access.USER
-        };
-
-        users.push(novoUsuario);
-
-        salvarUsuarios(users);
 
         return res.status(201).json({
             success: true,
@@ -80,7 +83,8 @@ router.post("/register", async (req, res) => {
                 access: novoUsuario.access
             }
         });
-    } catch {
+    } catch (error) {
+        console.error("register:", error);
         return res.status(500).json({
             success: false,
             message: "Erro interno"
@@ -88,32 +92,29 @@ router.post("/register", async (req, res) => {
     }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login",async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const email = normalizeEmail(req.body?.email);
+        const password = req.body?.password;
 
-        const users = lerUsuarios();
-
-        const user = users.find(
-            u => u.email === email
-        );
-
-        if (!user) {
-            return res.status(401).json({
+        if (!email || typeof password !== "string" || !password) {
+            return res.status(400).json({
                 success: false,
-                message: "Usuário não encontrado"
+                message: "Email e senha são obrigatórios"
             });
         }
 
+        const user = await findByEmail(email);
+
         const validPassword = await bcrypt.compare(
             password,
-            user.password
+            user?.password ?? DUMMY_HASH
         );
 
-        if (!validPassword) {
+        if (!user || !validPassword) {
             return res.status(401).json({
                 success: false,
-                message: "Senha inválida"
+                message: "Credenciais inválidas"
             });
         }
 
@@ -133,12 +134,37 @@ router.post("/login", async (req, res) => {
             success: true,
             token
         });
-    } catch {
+    } catch (error) {
+        console.error("login:", error);
         return res.status(500).json({
             success: false,
             message: "Erro interno"
         });
     }
+});
+
+// Valida o token e devolve o usuário — o front usa pra descartar sessão
+// expirada/inválida ao abrir o app (F1 do QA).
+router.get("/me", auth, async (_req, res) => {
+    const payload = res.locals.user as AuthPayload;
+    const user = await findById(payload.id);
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            message: "Token inválido"
+        });
+    }
+
+    return res.json({
+        success: true,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            access: user.access
+        }
+    });
 });
 
 export default router;

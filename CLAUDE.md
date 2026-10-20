@@ -246,9 +246,10 @@ com ícone de play só quando nenhum dos dois estiver resolvido.
 - **Feito**: trilha adulta inteira (5 de 5) — todos gerados pelo usuário via prompt de IA.
   Arquivos em `assets/videos/adults-*.mp4`: `jaw-stretch`, `vowel-overarticulation`,
   `smile-pucker`, `lip-trill`, `diaphragmatic-breathing`. Todos 1024×576 (16:9).
-- **`docs/video-prompts.md`** traz os 15 prompts prontos pro Gemini (um por exercício, nas três
-  trilhas), cada um com o contexto do projeto embutido e o texto exato exibido no app pra cada
-  exercício — substitui o artifact publicado na conversa, que não ficava versionado no repo.
+- **`docs/video-prompts/`** traz os 15 prompts prontos pro Gemini — uma pasta por faixa etária
+  (`infantil/`, `adultos/`, `idosos/`), um arquivo por exercício dentro dela, cada um com o
+  contexto do projeto embutido e o texto exato exibido no app pra aquele exercício. Substitui
+  o artifact publicado na conversa, que não ficava versionado no repo.
 - **Bug corrigido**: a caixa de preview tinha `height: 180` fixo com largura total — numa tela
   larga isso dá uma proporção bem mais "esticada" que 16:9, e com `contentFit="cover"` o vídeo
   era escalado e cortado verticalmente (só aparecia uma fatia central, ex. só olhos e nariz).

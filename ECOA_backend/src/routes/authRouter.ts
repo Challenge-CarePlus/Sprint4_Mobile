@@ -9,6 +9,7 @@ import { createUser, findByEmail, findById } from "../db/userStore";
 const router = Router();
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_MAX = 100;
 const PASSWORD_MIN = 6;
 // bcrypt só considera os primeiros 72 bytes; acima disso senhas diferentes colidem.
 const PASSWORD_MAX = 72;
@@ -43,7 +44,14 @@ router.post("/register",async (req, res) => {
             });
         }
 
-        if (!EMAIL_REGEX.test(email)) {
+        if (name.trim().length > NAME_MAX) {
+            return res.status(400).json({
+                success: false,
+                message: `O nome deve ter até ${NAME_MAX} caracteres`
+            });
+        }
+
+        if (email.length > 254 || !EMAIL_REGEX.test(email)) {
             return res.status(400).json({
                 success: false,
                 message: "Email inválido"

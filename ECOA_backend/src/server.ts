@@ -46,6 +46,11 @@ app.get("/health", (_req, res) => {
     });
 });
 
+// Rota inexistente: JSON em vez do HTML padrão do Express.
+app.use((_req, res) => {
+    res.status(404).json({ success: false, message: "Rota não encontrada" });
+});
+
 // Último middleware: JSON malformado, payload grande etc. viram resposta JSON
 // limpa em vez da página HTML do Express com stack trace.
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

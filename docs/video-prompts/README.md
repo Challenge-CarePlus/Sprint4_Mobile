@@ -32,6 +32,13 @@ porque é a referência visual do paciente antes de começar.
   estranho em português, vale tentar traduzir só esse prompt pro inglês.
 - Assim que um vídeo sair bom, **baixe e guarde na hora** — ferramentas de geração costumam
   limpar o histórico ou expirar o link depois de um tempo.
+- **Um prompt por conversa nova no Gemini.** Mandar vários prompts seguidos na mesma conversa
+  faz o modelo usar os vídeos anteriores como contexto — na prática, o vídeo do 3º exercício
+  sai mostrando o movimento do 1º, depois o do 2º, depois só então o do 3º, em vez de só o
+  terceiro do início ao fim. Abra um chat novo pra cada exercício. Se precisar continuar na
+  mesma conversa por algum motivo, comece o prompt com algo como *"Ignore completamente todos
+  os vídeos e instruções anteriores desta conversa. Este é um pedido novo e independente:"*
+  antes de colar o prompt normal.
 
 ## Se o vídeo sair parecido com outro, ou genérico
 

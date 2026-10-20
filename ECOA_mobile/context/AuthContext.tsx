@@ -6,7 +6,8 @@ import React, {
     useState,
 } from "react";
 
-import api from "../services/api";
+import api, { setUnauthorizedHandler } from "../services/api";
+import { isTokenExpired } from "../services/jwt";
 
 type LoginResponse = {
     success: boolean;
@@ -50,14 +51,21 @@ export const AuthProvider = ({
 
     useEffect(() => {
         loadStorage();
+        setUnauthorizedHandler(() => {
+            logout();
+        });
+
+        return () => setUnauthorizedHandler(null);
     }, []);
 
     async function loadStorage() {
         const tokenStorage =
             await AsyncStorage.getItem("@token");
 
-        if (tokenStorage) {
+        if (tokenStorage && !isTokenExpired(tokenStorage)) {
             setToken(tokenStorage);
+        } else if (tokenStorage) {
+            await AsyncStorage.removeItem("@token");
         }
 
         setLoading(false);

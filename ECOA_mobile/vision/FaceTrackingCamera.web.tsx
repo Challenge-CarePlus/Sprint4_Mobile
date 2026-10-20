@@ -25,6 +25,8 @@ type Props = {
     onReading?: (blendshapes: Blendshape[], timestamp: number) => void;
     onStatusChange?: (status: FaceTrackingStatus) => void;
     onError?: (message: string) => void;
+    /** `false` quando o aviso de "rosto não detectado" está ativo. */
+    onFaceVisibilityChange?: (visible: boolean) => void;
 };
 
 const NO_FACE_WARNING_FRAMES = 20;
@@ -52,6 +54,7 @@ export default function FaceTrackingCamera({
     onReading,
     onStatusChange,
     onError,
+    onFaceVisibilityChange,
 }: Props) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -62,6 +65,10 @@ export default function FaceTrackingCamera({
 
     const [status, setStatus] = useState<FaceTrackingStatus>("initializing");
     const [noFaceWarning, setNoFaceWarning] = useState(false);
+
+    useEffect(() => {
+        onFaceVisibilityChange?.(!noFaceWarning);
+    }, [noFaceWarning, onFaceVisibilityChange]);
     const [preferredFacing, setPreferredFacing] = useState<"user" | "environment">("user");
 
     useEffect(() => {

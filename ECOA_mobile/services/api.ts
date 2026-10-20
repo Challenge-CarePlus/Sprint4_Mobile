@@ -19,3 +19,25 @@ api.interceptors.request.use(
     return config;
   }
 );
+
+let onUnauthorized: (() => void) | null = null;
+
+/** Registrado pelo AuthContext: chamado quando o backend rejeita o token (401). */
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url: string = error?.config?.url ?? "";
+    const isAuthAttempt = url.includes("/auth/login") || url.includes("/auth/register");
+
+    // Login com senha errada também é 401, mas não é sessão expirada.
+    if (error?.response?.status === 401 && !isAuthAttempt) {
+      onUnauthorized?.();
+    }
+
+    return Promise.reject(error);
+  }
+);

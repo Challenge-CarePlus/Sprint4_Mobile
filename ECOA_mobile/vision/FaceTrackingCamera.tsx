@@ -41,6 +41,8 @@ type Props = {
     onReading?: (blendshapes: Blendshape[], timestamp: number) => void;
     onStatusChange?: (status: FaceTrackingStatus) => void;
     onError?: (message: string) => void;
+    /** `false` quando o aviso de "rosto não detectado" está ativo. */
+    onFaceVisibilityChange?: (visible: boolean) => void;
 };
 
 /**
@@ -56,6 +58,7 @@ export default function FaceTrackingCamera({
     onReading,
     onStatusChange,
     onError,
+    onFaceVisibilityChange,
 }: Props) {
     const isFocused = useIsFocused();
     const frontDevice = useCameraDevice("front");
@@ -72,6 +75,10 @@ export default function FaceTrackingCamera({
 
     const [bridgeReady, setBridgeReady] = useState(false);
     const [noFaceWarning, setNoFaceWarning] = useState(false);
+
+    useEffect(() => {
+        onFaceVisibilityChange?.(!noFaceWarning);
+    }, [noFaceWarning, onFaceVisibilityChange]);
     const [preferredCamera, setPreferredCamera] = useState(DEFAULT_SETTINGS.preferredCamera);
 
     const device = preferredCamera === "front" ? frontDevice ?? backDevice : backDevice ?? frontDevice;

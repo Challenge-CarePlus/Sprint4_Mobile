@@ -46,8 +46,11 @@ export default function CycleSummaryScreen() {
     // (resumo mostrava 0/5 mesmo com todos os exercícios feitos).
     const outcomesRef = useRef(getSessionOutcomes(trackId));
     const outcomes = outcomesRef.current;
-    const validatedCount = outcomes.filter((o) => o.validationType === "validado").length;
-    const guidedCount = outcomes.filter((o) => o.validationType === "guiado").length;
+    // Exercício pulado (travado na câmera) é registrado com success:false e não conta como concluído.
+    const completed = outcomes.filter((o) => o.success);
+    const skippedCount = outcomes.length - completed.length;
+    const validatedCount = completed.filter((o) => o.validationType === "validado").length;
+    const guidedCount = completed.filter((o) => o.validationType === "guiado").length;
 
     useEffect(() => {
         if (!track) return;
@@ -57,7 +60,7 @@ export default function CycleSummaryScreen() {
             ageGroup: track.ageGroup,
             completedAt: new Date().toISOString(),
             exercisesTotal: track.exerciseIds.length,
-            exercisesCompleted: outcomes.length,
+            exercisesCompleted: completed.length,
             validatedCompleted: validatedCount,
             guidedCompleted: guidedCount,
         }).then((history) => {
@@ -105,10 +108,10 @@ export default function CycleSummaryScreen() {
                 <StatTile
                     icon="check-circle"
                     label="Exercícios concluídos"
-                    value={`${outcomes.length}/${track.exerciseIds.length}`}
+                    value={`${completed.length}/${track.exerciseIds.length}`}
                 />
                 <StatTile icon="videocam" label="Validados pela câmera" value={validatedCount} />
-                <StatTile icon="visibility" label="Guiados (autoavaliação)" value={guidedCount} />
+                <StatTile icon="skip-next" label="Pulados" value={skippedCount} />
                 <StatTile
                     icon="military-tech"
                     label="Ciclos concluídos"

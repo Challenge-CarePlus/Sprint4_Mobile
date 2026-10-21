@@ -85,6 +85,7 @@ export const EXERCISES: Exercise[] = [
         repetitions: 10,
         validationType: "guiado",
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-tongue-click.mp4",
+        demoVideoAsset: require("../assets/videos/children-tongue-click.mp4"),
     },
 
     {

@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { useVideoPlayer, VideoSource, VideoView } from "expo-video";
 
-import { colors, radii, shadow } from "../theme/tokens";
+import { colors, kidsColors, radii, shadow } from "../theme/tokens";
 
 type Props = {
     source: VideoSource;
     style?: StyleProp<ViewStyle>;
+    /** Trilha infantil: botão de play e véu em índigo, como o resto do kit. */
+    kids?: boolean;
 };
 
 /**
@@ -22,7 +24,7 @@ type Props = {
  * elemento e, se o vídeo não começar sozinho, aparece um botão de play para
  * tocar com um toque.
  */
-export default function ExerciseVideo({ source, style }: Props) {
+export default function ExerciseVideo({ source, style, kids = false }: Props) {
     const player = useVideoPlayer(source, (p) => {
         p.loop = true;
         p.muted = true;
@@ -58,7 +60,17 @@ export default function ExerciseVideo({ source, style }: Props) {
             }
         }, 1800);
 
-        return () => clearTimeout(id);
+        // Se o vídeo começar depois do prazo (conexão lenta), o botão some sozinho.
+        const subscription = player.addListener("playingChange", ({ isPlaying }) => {
+            if (isPlaying) {
+                setNeedsTap(false);
+            }
+        });
+
+        return () => {
+            clearTimeout(id);
+            subscription.remove();
+        };
     }, [player]);
 
     function handleTap() {
@@ -85,10 +97,14 @@ export default function ExerciseVideo({ source, style }: Props) {
                     onPress={handleTap}
                     accessibilityRole="button"
                     accessibilityLabel="Tocar vídeo de demonstração"
-                    style={styles.tapOverlay}
+                    style={[styles.tapOverlay, kids && { backgroundColor: "rgba(42,40,103,0.35)" }]}
                 >
                     <View style={[styles.playButton, shadow.float]}>
-                        <MaterialIcons name="play-arrow" size={34} color={colors.brandDeep} />
+                        <MaterialIcons
+                            name="play-arrow"
+                            size={34}
+                            color={kids ? kidsColors.indigo : colors.brandDeep}
+                        />
                     </View>
                 </Pressable>
             )}

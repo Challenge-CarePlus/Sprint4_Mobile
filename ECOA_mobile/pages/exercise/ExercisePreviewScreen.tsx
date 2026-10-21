@@ -69,7 +69,7 @@ export default function ExercisePreviewScreen() {
 
                 {exercise.demoVideoAsset ? (
                     <View style={[styles.video, shadow.hero]} accessibilityLabel="Vídeo de demonstração">
-                        <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} />
+                        <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} kids={kids} />
                     </View>
                 ) : (
                     <LinearGradient

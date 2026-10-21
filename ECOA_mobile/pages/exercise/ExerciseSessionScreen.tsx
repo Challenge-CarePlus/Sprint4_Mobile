@@ -11,7 +11,9 @@ import { Exercise, Track } from "../../data/types";
 import FaceTrackingCamera from "../../vision/FaceTrackingCamera";
 import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
-import { DetectorFeedback, MovementDetector } from "../../vision/MovementDetector";
+import { DetectorFeedback } from "../../vision/MovementDetector";
+import { createDetector } from "../../vision/createDetector";
+import type { Detector } from "../../vision/SequenceDetectors";
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
@@ -128,7 +130,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const rule = exercise.validationType === "validado" ? exercise.validationRule : undefined;
     const targetReps = rule?.repetitions ?? 1;
 
-    const detectorRef = useRef<MovementDetector | null>(null);
+    const detectorRef = useRef<Detector | null>(null);
     const hasAnnouncedHoldRef = useRef(false);
     const hasFinishedRef = useRef(false);
     const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -156,7 +158,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
         }
 
         const baseline = getCalibration(trackId) ?? {};
-        detectorRef.current = new MovementDetector(rule, baseline);
+        detectorRef.current = createDetector(rule, baseline);
     }, [trackId, rule]);
 
     useEffect(() => {
@@ -203,10 +205,15 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                 setMessage(feedback.message);
                 speak(feedback.message);
             } else if (feedback.kind === "holding") {
-                setMessage(`Continue segurando... ${Math.ceil(feedback.remainingMs / 1000)}s`);
-                if (!hasAnnouncedHoldRef.current) {
-                    hasAnnouncedHoldRef.current = true;
-                    speak("Continue segurando");
+                // remainingMs 0 = detector sequencial (sem tempo de segurar): mostra a própria mensagem.
+                if (feedback.remainingMs > 0) {
+                    setMessage(`Continue segurando... ${Math.ceil(feedback.remainingMs / 1000)}s`);
+                    if (!hasAnnouncedHoldRef.current) {
+                        hasAnnouncedHoldRef.current = true;
+                        speak("Continue segurando");
+                    }
+                } else {
+                    setMessage(feedback.message);
                 }
             } else if (feedback.kind === "waiting-release") {
                 hasAnnouncedHoldRef.current = false;

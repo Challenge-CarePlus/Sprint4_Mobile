@@ -16,6 +16,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "mouthSmile", repetitions: 5, holdDurationMs: 2000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-smile.mp4",
+        demoVideoAsset: require("../assets/videos/children-smile.mp4"),
     },
     {
         id: "children-pucker",
@@ -32,6 +33,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "mouthPucker", repetitions: 5, holdDurationMs: 2000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-pucker.mp4",
+        demoVideoAsset: require("../assets/videos/children-pucker.mp4"),
     },
     {
         id: "children-tongue-out",
@@ -51,6 +53,7 @@ export const EXERCISES: Exercise[] = [
         // sempre.
         validationType: "guiado",
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-tongue-out.mp4",
+        demoVideoAsset: require("../assets/videos/children-tongue-out.mp4"),
     },
     {
         id: "children-blow-balloon",
@@ -67,6 +70,7 @@ export const EXERCISES: Exercise[] = [
         validationType: "validado",
         validationRule: { movement: "cheekPuff", repetitions: 5, holdDurationMs: 3000 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-blow-balloon.mp4",
+        demoVideoAsset: require("../assets/videos/children-blow-balloon.mp4"),
     },
     {
         id: "children-tongue-click",
@@ -112,7 +116,7 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 10,
         validationType: "validado",
-        validationRule: { movement: "jawOpen", repetitions: 10 },
+        validationRule: { movement: "jawOpen", repetitions: 10, mode: "vowels" },
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-vowel-overarticulation.mp4",
         demoVideoAsset: require("../assets/videos/adults-vowel-overarticulation.mp4"),
     },
@@ -128,7 +132,7 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 8,
         validationType: "validado",
-        validationRule: { movement: "mouthSmile", repetitions: 8 },
+        validationRule: { movement: "mouthSmile", repetitions: 8, mode: "alternate" },
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-smile-pucker.mp4",
         demoVideoAsset: require("../assets/videos/adults-smile-pucker.mp4"),
     },

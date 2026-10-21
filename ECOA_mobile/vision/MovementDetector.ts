@@ -16,6 +16,13 @@ export type DetectorFeedback =
 type InternalState = "idle" | "engaging" | "cooldown";
 
 /**
+ * Quanto o sinal pode ficar abaixo do limiar durante a sustentação sem perder
+ * a repetição: o score do MediaPipe oscila de quadro a quadro, e zerar o
+ * tempo a cada queda de 1 quadro tornava "segure 3 segundos" quase impossível.
+ */
+const HOLD_GRACE_MS = 400;
+
+/**
  * Calcula o quanto um movimento está "ativo" em relação à calibração do
  * usuário (não um valor absoluto). Quando o movimento depende de mais de um
  * blendshape (ex.: sorriso = lado esquerdo + direito), usa o maior delta.
@@ -46,6 +53,7 @@ export function computeRelativeScore(
 export class MovementDetector {
     private state: InternalState = "idle";
     private engagedSince: number | null = null;
+    private belowSince: number | null = null;
     private repetitionsDone = 0;
 
     constructor(
@@ -99,9 +107,16 @@ export class MovementDetector {
         now: number
     ): DetectorFeedback {
         if (!isAboveThreshold) {
-            this.state = "idle";
-            this.engagedSince = null;
-            return { kind: "prompt", message: "Quase lá, tente de novo" };
+            this.belowSince ??= now;
+
+            if (now - this.belowSince > HOLD_GRACE_MS) {
+                this.state = "idle";
+                this.engagedSince = null;
+                this.belowSince = null;
+                return { kind: "prompt", message: "Quase lá, tente de novo" };
+            }
+        } else {
+            this.belowSince = null;
         }
 
         const elapsed = now - (this.engagedSince ?? now);

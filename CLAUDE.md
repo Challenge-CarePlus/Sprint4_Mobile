@@ -312,7 +312,7 @@ com ícone de play só quando nenhum dos dois estiver resolvido.
   `ExerciseVideo` de `"cover"` para `"contain"` — mesmo raciocínio já aplicado antes na câmera
   (`FaceTrackingCamera.web.tsx`), prioriza nunca cortar o rosto mesmo que um vídeo futuro venha
   numa proporção diferente de 16:9.
-- **Idosos (5 de 5)**: `elderly-jaw-open-close`, `pucker-hold`, `smile-hold`, `tongue-elevation` ligados em `assets/videos/elderly-*.mp4` (20/10). `effortful-swallow` ligado em 21/10. Falta só a trilha infantil (5). **Atenção ao tamanho**: `pucker-hold` tem ~17MB e `smile-hold` ~10MB (os de adultos têm ~1MB) — comprimir (H.264, 1024x576) antes de produção.
+- **Idosos (5 de 5)**: `elderly-jaw-open-close`, `pucker-hold`, `smile-hold`, `tongue-elevation` ligados em `assets/videos/elderly-*.mp4` (20/10). `effortful-swallow` ligado em 21/10. **Infantil (4 de 5)**: smile, pucker, tongue-out, blow-balloon ligados (21/10); falta só `children-tongue-click`. **Atenção ao tamanho**: `pucker-hold` tem ~17MB e `smile-hold` ~10MB (os de adultos têm ~1MB) — comprimir (H.264, 1024x576) antes de produção.
 - **Pendente**: os outros 6 (trilhas infantil e idosos). Plano combinado com o usuário: a
   trilha adulta era o primeiro lote, agora validada — próximo passo é gerar as outras duas.
   Reaproveitamento entre trilhas é limitado — só "Alongamento de mandíbula" tem um par visual
@@ -361,6 +361,16 @@ linha:
   280px, `View` sem rolagem) e usava uma caixa só largura-total sem considerar a proporção real
   da câmera. Agora usa `getCameraBoxSize` também, dentro de um `ScrollView` — mesmo mecanismo
   das outras telas, sem caixa especial.
+
+## Validação alinhada às instruções (21/10)
+
+Auditoria pedida pela usuária ("as validações não condizem com a descrição nem com o vídeo"). Achados reais:
+`adults-smile-pucker` validava só sorriso ×8 (dava para nunca fazer o bico) e `adults-vowel-overarticulation`
+validava só abertura de mandíbula (I e U têm a boca quase fechada). Agora `ValidationRule.mode` escolhe o detector
+(`vision/createDetector.ts`, `vision/SequenceDetectors.ts`): `alternate` conta cada troca sorriso↔bico; `vowels`
+exige A-E-I-O-U em ordem (regiões de jawOpen × sorriso × bico/funnel). A sustentação ("segure 2–3 s") ganhou
+tolerância de 400 ms de oscilação — antes um único quadro abaixo do limiar zerava a contagem. 19 testes. **Limiares
+ainda não calibrados com rostos reais** (podem exigir ajuste fino); cheekPuff do MediaPipe costuma ser baixo.
 
 ## Correção: movimento "tongueOut" nunca validava
 

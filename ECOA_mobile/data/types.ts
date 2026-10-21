@@ -17,6 +17,11 @@ export type ValidationRule = {
     movement: FacialMovement;
     holdDurationMs?: number;
     repetitions?: number;
+    /**
+     * Exercícios que não são "um movimento repetido": `alternate` (sorriso ↔ bico,
+     * cada troca conta) e `vowels` (A-E-I-O-U em ordem). Ver SequenceDetectors.
+     */
+    mode?: "alternate" | "vowels";
 };
 
 type ExerciseBase = {

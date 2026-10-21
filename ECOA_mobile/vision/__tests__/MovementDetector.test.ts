@@ -107,7 +107,9 @@ describe("MovementDetector — exercício com tempo de segurar", () => {
 
         detector.processReading([bs("mouthPucker", 0.9)], 0);
 
-        const feedback = detector.processReading([bs("mouthPucker", 0)], 500);
+        // Queda curta (<400ms) é tolerada; só reseta se o sinal ficar baixo além disso.
+        detector.processReading([bs("mouthPucker", 0)], 500);
+        const feedback = detector.processReading([bs("mouthPucker", 0)], 1000);
 
         expect(feedback).toMatchObject({ kind: "prompt", message: "Quase lá, tente de novo" });
         expect(detector.repetitionsCompleted).toBe(0);

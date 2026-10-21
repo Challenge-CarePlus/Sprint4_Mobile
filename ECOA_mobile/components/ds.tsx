@@ -226,6 +226,7 @@ export function Button({
     loading = false,
     disabled = false,
     minHeight,
+    fontSize,
     block = true,
 }: {
     title: string;
@@ -236,6 +237,8 @@ export function Button({
     disabled?: boolean;
     /** Trilha Idoso: 56px. */
     minHeight?: number;
+    /** Trilha Idoso: rótulo de 18px+. */
+    fontSize?: number;
     block?: boolean;
 }) {
     const off = disabled || loading;
@@ -269,7 +272,15 @@ export function Button({
                     {icon ? (
                         <MaterialIcons name={icon} size={18} color={disabled ? colors.inkMuted : fg} />
                     ) : null}
-                    <Text style={[styles.btnText, { color: disabled ? colors.inkMuted : fg }]}>{title}</Text>
+                    <Text
+                        style={[
+                            styles.btnText,
+                            { color: disabled ? colors.inkMuted : fg },
+                            fontSize ? { fontSize, lineHeight: Math.round(fontSize * 1.33) } : null,
+                        ]}
+                    >
+                        {title}
+                    </Text>
                 </>
             )}
         </Pressable>

@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { Button } from "../../components/ds";
 import GradientButton from "../../components/GradientButton";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
@@ -222,7 +223,9 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             const feedback = detectorRef.current.processReading(blendshapes, timestamp);
             setFeedbackKind(feedback.kind);
 
-            if (feedback.kind !== "relaxing") {
+            // "Relaxe" é falado uma vez por repetição: só rearma num novo ciclo (prompt/holding),
+            // não quando o rosto oscila em torno do limiar entre relaxing e waiting-release.
+            if (feedback.kind === "prompt" || feedback.kind === "holding") {
                 hasAnnouncedRelaxRef.current = false;
             }
 
@@ -345,9 +348,15 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
 
             {stuck && !errorMessage && (
-                <Pressable onPress={handleSkip} accessibilityRole="button" style={styles.skip}>
-                    <Text style={styles.skipText}>Não está validando? Pular este exercício</Text>
-                </Pressable>
+                <View style={styles.skip}>
+                    <Button
+                        variant="secondary"
+                        title="Não está validando? Pular este exercício"
+                        minHeight={presentation.minTouchTarget + (presentation.highContrast ? 0 : 4)}
+                        fontSize={presentation.highContrast ? 18 : undefined}
+                        onPress={handleSkip}
+                    />
+                </View>
             )}
         </ScrollView>
     );
@@ -638,15 +647,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     skip: {
-        minHeight: 48,
-        paddingHorizontal: 16,
-        justifyContent: "center",
-    },
-    skipText: {
-        fontFamily: fonts.bodySemiBold,
-        fontSize: 14,
-        color: colors.brandInk,
-        textDecorationLine: "underline",
+        width: "100%",
     },
     error: {
         color: colors.danger,

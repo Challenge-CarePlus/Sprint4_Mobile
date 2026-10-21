@@ -10,6 +10,7 @@ export type DetectorFeedback =
     | { kind: "prompt"; message: string }
     | { kind: "holding"; message: string; remainingMs: number }
     | { kind: "waiting-release"; message: string }
+    | { kind: "relaxing"; message: string; remainingMs: number }
     | { kind: "repetition-complete"; message: string; repetitionsDone: number }
     | { kind: "exercise-complete"; repetitionsDone: number };
 
@@ -54,6 +55,7 @@ export class MovementDetector {
     private state: InternalState = "idle";
     private engagedSince: number | null = null;
     private belowSince: number | null = null;
+    private relaxSince: number | null = null;
     private repetitionsDone = 0;
 
     constructor(
@@ -67,7 +69,7 @@ export class MovementDetector {
 
     processReading(blendshapes: Blendshape[], now: number): DetectorFeedback {
         const relativeScore = computeRelativeScore(this.rule, blendshapes, this.baseline);
-        const threshold = MOVEMENT_ACTIVATION_DELTA[this.rule.movement];
+        const threshold = this.rule.activationDelta ?? MOVEMENT_ACTIVATION_DELTA[this.rule.movement];
         const isAboveThreshold = relativeScore >= threshold;
         const requiredHoldMs = this.rule.holdDurationMs ?? 0;
 
@@ -79,7 +81,7 @@ export class MovementDetector {
             return this.handleEngaging(isAboveThreshold, requiredHoldMs, now);
         }
 
-        return this.handleCooldown(isAboveThreshold);
+        return this.handleCooldown(isAboveThreshold, now);
     }
 
     private handleIdle(
@@ -88,7 +90,7 @@ export class MovementDetector {
         now: number
     ): DetectorFeedback {
         if (!isAboveThreshold) {
-            return { kind: "prompt", message: ENCOURAGEMENT_BY_MOVEMENT[this.rule.movement] };
+            return { kind: "prompt", message: this.promptMessage() };
         }
 
         if (requiredHoldMs === 0) {
@@ -130,13 +132,32 @@ export class MovementDetector {
         return { kind: "holding", message: "Continue segurando...", remainingMs };
     }
 
-    private handleCooldown(isAboveThreshold: boolean): DetectorFeedback {
-        if (!isAboveThreshold) {
-            this.state = "idle";
-            return { kind: "prompt", message: ENCOURAGEMENT_BY_MOVEMENT[this.rule.movement] };
+    /** Tempo de relaxamento exigido entre repetições (conta como parte do exercício). */
+    private get relaxMs(): number {
+        return this.rule.relaxDurationMs ?? ((this.rule.holdDurationMs ?? 0) > 0 ? 1500 : 0);
+    }
+
+    private promptMessage(): string {
+        return this.rule.promptMessage ?? ENCOURAGEMENT_BY_MOVEMENT[this.rule.movement];
+    }
+
+    private handleCooldown(isAboveThreshold: boolean, now: number): DetectorFeedback {
+        if (isAboveThreshold) {
+            // Ainda no movimento (ou voltou a ele): o relaxamento só conta com o rosto solto.
+            this.relaxSince = null;
+            return { kind: "waiting-release", message: "Ótimo! Relaxe antes da próxima repetição." };
         }
 
-        return { kind: "waiting-release", message: "Ótimo! Relaxe antes da próxima repetição." };
+        this.relaxSince ??= now;
+        const remainingMs = this.relaxMs - (now - this.relaxSince);
+
+        if (remainingMs > 0) {
+            return { kind: "relaxing", message: "Relaxe...", remainingMs };
+        }
+
+        this.state = "idle";
+        this.relaxSince = null;
+        return { kind: "prompt", message: this.promptMessage() };
     }
 
     private registerRepetition(): DetectorFeedback {

@@ -47,11 +47,10 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 5,
         durationSeconds: 2,
-        // "guiado", não "validado": o MediaPipe não expõe um blendshape de
-        // língua (ver nota em data/types.ts) — com câmera, esse exercício
-        // nunca validava de verdade, ficava preso pedindo o movimento pra
-        // sempre.
-        validationType: "guiado",
+validationType: "validado",
+        validationRule: { movement: "jawOpen", activationDelta: 0.15, holdDurationMs: 2000, repetitions: 5, relaxDurationMs: 1500, promptMessage: "Abre a boca e bota a língua pra fora" },
+        validationNote:
+            "A câmera confirma a boca aberta durante os 2 segundos; a língua em si não é visível para ela.",
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-tongue-out.mp4",
         demoVideoAsset: require("../assets/videos/children-tongue-out.mp4"),
     },
@@ -68,7 +67,7 @@ export const EXERCISES: Exercise[] = [
         repetitions: 5,
         durationSeconds: 3,
         validationType: "validado",
-        validationRule: { movement: "cheekPuff", repetitions: 5, holdDurationMs: 3000 },
+        validationRule: { movement: "cheekPuff", activationDelta: 0.1, repetitions: 5, holdDurationMs: 3000, relaxDurationMs: 1500 },
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-blow-balloon.mp4",
         demoVideoAsset: require("../assets/videos/children-blow-balloon.mp4"),
     },
@@ -83,7 +82,10 @@ export const EXERCISES: Exercise[] = [
             "Se sentir a boca cansada, descansa um pouquinho.",
         ],
         repetitions: 10,
-        validationType: "guiado",
+        validationType: "validado",
+        validationRule: { movement: "jawOpen", activationDelta: 0.08, repetitions: 10, relaxDurationMs: 200, promptMessage: "Faz o tique-taque com a língua" },
+        validationNote:
+            "A câmera conta cada abrir e fechar da boca do estalo; o som da língua não é medido.",
         demoVideoUrl: "https://placeholder.careplus.local/videos/children-tongue-click.mp4",
         demoVideoAsset: require("../assets/videos/children-tongue-click.mp4"),
     },
@@ -149,7 +151,10 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 5,
         durationSeconds: 3,
-        validationType: "guiado",
+        validationType: "validado",
+        validationRule: { movement: "mouthPucker", activationDelta: 0.1, holdDurationMs: 3000, repetitions: 5, relaxDurationMs: 2000, promptMessage: "Solte o ar vibrando os lábios" },
+        validationNote:
+            "A câmera confirma os lábios projetados soltando ar por 3 s e o descanso entre repetições; a vibração em si não é medida.",
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-lip-trill.mp4",
         demoVideoAsset: require("../assets/videos/adults-lip-trill.mp4"),
     },
@@ -164,7 +169,10 @@ export const EXERCISES: Exercise[] = [
             "Repita por 5 ciclos completos.",
         ],
         repetitions: 5,
-        validationType: "guiado",
+        validationType: "validado",
+        validationRule: { movement: "jawOpen", activationDelta: 0.06, holdDurationMs: 2000, repetitions: 5, relaxDurationMs: 2000, promptMessage: "Expire devagar pela boca" },
+        validationNote:
+            "A câmera confirma a expiração pela boca entreaberta; o tempo de relaxamento é a inspiração pelo nariz. A barriga não é visível para a câmera.",
         demoVideoUrl: "https://placeholder.careplus.local/videos/adults-diaphragmatic-breathing.mp4",
         demoVideoAsset: require("../assets/videos/adults-diaphragmatic-breathing.mp4"),
     },
@@ -231,7 +239,10 @@ export const EXERCISES: Exercise[] = [
         ],
         repetitions: 5,
         durationSeconds: 3,
-        validationType: "guiado",
+        validationType: "validado",
+        validationRule: { movement: "jawOpen", activationDelta: 0.06, holdDurationMs: 3000, repetitions: 5, relaxDurationMs: 1500, promptMessage: "Abra um pouquinho a boca e encoste a língua" },
+        validationNote:
+            "A câmera confirma a boca entreaberta por 3 s e o descanso entre repetições; a posição da língua não é visível para ela.",
         professionalGuidanceRecommended: true,
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-tongue-elevation.mp4",
         demoVideoAsset: require("../assets/videos/elderly-tongue-elevation.mp4"),
@@ -247,7 +258,10 @@ export const EXERCISES: Exercise[] = [
             "Pare se sentir desconforto e avise seu(sua) fonoaudiólogo(a).",
         ],
         repetitions: 5,
-        validationType: "guiado",
+        validationType: "validado",
+        validationRule: { movement: "lipPress", activationDelta: 0.15, holdDurationMs: 1000, repetitions: 5, relaxDurationMs: 2000, promptMessage: "Engula apertando bem os lábios" },
+        validationNote:
+            "A câmera confirma o esforço (lábios firmes) e o descanso entre repetições; a deglutição em si não é visível para ela.",
         professionalGuidanceRecommended: true,
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-effortful-swallow.mp4",
         demoVideoAsset: require("../assets/videos/elderly-effortful-swallow.mp4"),

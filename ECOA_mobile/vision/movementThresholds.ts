@@ -10,6 +10,7 @@ export const MOVEMENT_BLENDSHAPES: Record<FacialMovement, string[]> = {
     mouthPucker: ["mouthPucker"],
     mouthSmile: ["mouthSmileLeft", "mouthSmileRight"],
     cheekPuff: ["cheekPuff"],
+    lipPress: ["mouthPressLeft", "mouthPressRight"],
 };
 
 /**
@@ -23,6 +24,7 @@ export const MOVEMENT_ACTIVATION_DELTA: Record<FacialMovement, number> = {
     mouthPucker: 0.25,
     mouthSmile: 0.3,
     cheekPuff: 0.25,
+    lipPress: 0.2,
 };
 
 export const ENCOURAGEMENT_BY_MOVEMENT: Record<FacialMovement, string> = {
@@ -30,4 +32,5 @@ export const ENCOURAGEMENT_BY_MOVEMENT: Record<FacialMovement, string> = {
     mouthPucker: "Faça mais bico com os lábios",
     mouthSmile: "Sorria mais",
     cheekPuff: "Encha mais as bochechas",
+    lipPress: "Pressione os lábios com firmeza",
 };

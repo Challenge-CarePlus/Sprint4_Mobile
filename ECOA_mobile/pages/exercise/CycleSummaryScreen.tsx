@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -41,7 +41,11 @@ export default function CycleSummaryScreen() {
     const track = TRACKS.find((t) => t.id === trackId);
     const [previousCycles, setPreviousCycles] = useState(0);
 
-    const outcomes = getSessionOutcomes(trackId);
+    // Foto dos resultados no 1º render: o efeito abaixo limpa o armazenamento da sessão
+    // depois de salvar o ciclo, e o re-render seguinte lia o armazenamento já vazio
+    // (resumo mostrava 0/5 mesmo com todos os exercícios feitos).
+    const outcomesRef = useRef(getSessionOutcomes(trackId));
+    const outcomes = outcomesRef.current;
     const validatedCount = outcomes.filter((o) => o.validationType === "validado").length;
     const guidedCount = outcomes.filter((o) => o.validationType === "guiado").length;
 

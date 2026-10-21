@@ -81,3 +81,52 @@ describe("MovementDetector — tolerância na sustentação", () => {
         expect(d.repetitionsCompleted).toBe(1);
     });
 });
+
+describe("MovementDetector — tempo de relaxamento", () => {
+    const rule = { movement: "mouthSmile" as const, holdDurationMs: 500, repetitions: 3, relaxDurationMs: 1500 };
+
+    it("só aceita a próxima repetição depois de relaxar pelo tempo exigido", () => {
+        const d = new MovementDetector(rule, {});
+        let t = hold(d, SMILE, 0, 700).end; // 1ª repetição
+        expect(d.repetitionsCompleted).toBe(1);
+
+        // Relaxa só 500ms e sorri de novo: ainda em cooldown, não conta.
+        t = hold(d, NEUTRAL, t, 500).end;
+        t = hold(d, SMILE, t, 700).end;
+        expect(d.repetitionsCompleted).toBe(1);
+
+        // Relaxa 1,6 s completos e sorri: conta.
+        t = hold(d, NEUTRAL, t, 1600).end;
+        hold(d, SMILE, t, 700);
+        expect(d.repetitionsCompleted).toBe(2);
+    });
+
+    it("informa o tempo restante de relaxamento", () => {
+        const d = new MovementDetector(rule, {});
+        const t = hold(d, SMILE, 0, 700).end;
+        const { last } = hold(d, NEUTRAL, t, 300);
+        expect(last).toMatchObject({ kind: "relaxing" });
+        expect(last.remainingMs).toBeGreaterThan(0);
+    });
+});
+
+describe("exercícios convertidos para visão computacional (todos validados)", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { EXERCISES } = require("../../data/exercises");
+
+    it("nenhum exercício é 'guiado'", () => {
+        expect(EXERCISES.filter((e: any) => e.validationType !== "validado")).toHaveLength(0);
+    });
+
+    it("boca aberta por 3 s com relaxamento valida a respiração (jawOpen leve)", () => {
+        const ex = EXERCISES.find((e: any) => e.id === "adults-diaphragmatic-breathing");
+        const d = new MovementDetector(ex.validationRule, {});
+        const OPEN = bs({ jawOpen: 0.2 });
+        let t = 0;
+        for (let i = 0; i < 5; i++) {
+            t = hold(d, OPEN, t, 2200).end; // expira por 2 s
+            t = hold(d, NEUTRAL, t, 2100).end; // inspira (relaxamento) por 2 s
+        }
+        expect(d.repetitionsCompleted).toBe(5);
+    });
+});

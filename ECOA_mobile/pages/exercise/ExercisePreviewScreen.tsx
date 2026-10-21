@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
-import { ActionBar, RepChip, StepBadge } from "../../components/ds";
+import { ActionBar, Alert, RepChip, StepBadge } from "../../components/ds";
 import ExerciseVideo from "../../components/ExerciseVideo";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
@@ -170,6 +170,12 @@ export default function ExercisePreviewScreen() {
                 </View>
 
                 {repetitionLabel ? <RepChip kids={kids}>{repetitionLabel}</RepChip> : null}
+
+                {exercise.validationNote ? (
+                    <View style={styles.note}>
+                        <Alert tone="info">{exercise.validationNote}</Alert>
+                    </View>
+                ) : null}
             </ScrollView>
 
             <LinearGradient
@@ -286,6 +292,11 @@ const styles = StyleSheet.create({
     stepText: {
         flex: 1,
         fontFamily: fonts.body,
+    },
+    note: {
+        width: "100%",
+        maxWidth: 560,
+        alignSelf: "center",
     },
     // Ação fixa no rodapé do container.
     dock: {

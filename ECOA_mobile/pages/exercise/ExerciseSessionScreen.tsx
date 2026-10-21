@@ -132,6 +132,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
     const detectorRef = useRef<Detector | null>(null);
     const hasAnnouncedHoldRef = useRef(false);
+    const hasAnnouncedRelaxRef = useRef(false);
     const hasFinishedRef = useRef(false);
     const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -140,6 +141,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const [feedbackKind, setFeedbackKind] = useState<DetectorFeedback["kind"] | null>(null);
     const [sessionActive, setSessionActive] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [stuck, setStuck] = useState(false);
     const [cameraAspect, setCameraAspect] = useState<number | null>(null);
     const [faceVisible, setFaceVisible] = useState(true);
     const faceVisibleRef = useRef(true);
@@ -168,6 +170,26 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             }
         };
     }, []);
+
+    // Sem progresso por 25 s (limiar ainda sem calibração com todos os rostos): oferece
+    // seguir a jornada em vez de deixar a pessoa presa. O exercício fica registrado como não validado.
+    useEffect(() => {
+        setStuck(false);
+        const id = setTimeout(() => setStuck(true), 25000);
+        return () => clearTimeout(id);
+    }, [repsDone]);
+
+    function handleSkip() {
+        if (hasFinishedRef.current) return;
+        hasFinishedRef.current = true;
+        recordExerciseOutcome(trackId, {
+            exerciseId: exercise.id,
+            validationType: "validado",
+            success: false,
+        });
+        setSessionActive(false);
+        goToNextStep(navigation, track, trackId, exerciseIndex);
+    }
 
     const finishExercise = useCallback(() => {
         if (hasFinishedRef.current) return;
@@ -200,7 +222,19 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             const feedback = detectorRef.current.processReading(blendshapes, timestamp);
             setFeedbackKind(feedback.kind);
 
-            if (feedback.kind === "prompt") {
+            if (feedback.kind !== "relaxing") {
+                hasAnnouncedRelaxRef.current = false;
+            }
+
+            if (feedback.kind === "relaxing") {
+                // O relaxamento entre repetições também é contado e mostrado.
+                hasAnnouncedHoldRef.current = false;
+                setMessage(`Relaxe... ${Math.ceil(feedback.remainingMs / 1000)}s`);
+                if (!hasAnnouncedRelaxRef.current) {
+                    hasAnnouncedRelaxRef.current = true;
+                    speak("Relaxe");
+                }
+            } else if (feedback.kind === "prompt") {
                 hasAnnouncedHoldRef.current = false;
                 setMessage(feedback.message);
                 speak(feedback.message);
@@ -309,6 +343,12 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             </View>
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+
+            {stuck && !errorMessage && (
+                <Pressable onPress={handleSkip} accessibilityRole="button" style={styles.skip}>
+                    <Text style={styles.skipText}>Não está validando? Pular este exercício</Text>
+                </Pressable>
+            )}
         </ScrollView>
     );
 }
@@ -498,7 +538,7 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
 }
 
 function getFeedbackColor(kind: DetectorFeedback["kind"] | null, trail: TrailTheme): string {
-    if (kind === "waiting-release" || kind === "repetition-complete" || kind === "exercise-complete") {
+    if (kind === "relaxing" || kind === "waiting-release" || kind === "repetition-complete" || kind === "exercise-complete") {
         return colors.success;
     }
     if (kind === "holding") {
@@ -596,6 +636,17 @@ const styles = StyleSheet.create({
     progressRow: {
         flexDirection: "row",
         gap: 6,
+    },
+    skip: {
+        minHeight: 48,
+        paddingHorizontal: 16,
+        justifyContent: "center",
+    },
+    skipText: {
+        fontFamily: fonts.bodySemiBold,
+        fontSize: 14,
+        color: colors.brandInk,
+        textDecorationLine: "underline",
     },
     error: {
         color: colors.danger,

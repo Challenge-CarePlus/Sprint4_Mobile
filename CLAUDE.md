@@ -372,6 +372,21 @@ exige A-E-I-O-U em ordem (regiões de jawOpen × sorriso × bico/funnel). A sust
 tolerância de 400 ms de oscilação — antes um único quadro abaixo do limiar zerava a contagem. 19 testes. **Limiares
 ainda não calibrados com rostos reais** (podem exigir ajuste fino); cheekPuff do MediaPipe costuma ser baixo.
 
+## Todos os exercícios validados pela câmera + relaxamento (21/10)
+
+Decisão da usuária: **os 15 exercícios são validados por visão computacional** (nenhum "guiado" restou em
+`data/exercises.ts`) e o **tempo de relaxamento conta**. Como o MediaPipe não vê língua, barriga nem garganta,
+os 6 exercícios antes guiados usam um **indicador facial aproximado**, declarado ao paciente na prévia
+(`Exercise.validationNote`): tongue-out/tongue-elevation/respiração = boca aberta (jawOpen, limiares 0,15/0,06/0,06),
+tongue-click = abrir/fechar a boca ×10, lip-trill = lábios projetados (mouthPucker), deglutição = lábios firmes
+(`lipPress` = mouthPressLeft/Right). `ValidationRule` ganhou `activationDelta`, `relaxDurationMs` e `promptMessage`.
+Relaxamento: depois de cada repetição o rosto precisa ficar solto por `relaxDurationMs` (padrão 1,5 s com tempo
+de segurar) — a tela mostra "Relaxe... Ns"; na respiração o relaxamento é a inspiração. Escape: sem progresso por
+25 s aparece "Pular este exercício" (registrado como não validado) para ninguém ficar preso com limiares ainda
+não calibrados. Balãozinho: cheekPuff baixado para 0,1. **Resumo do ciclo** mostrava 0/5: o efeito limpava o
+armazenamento e o re-render lia vazio; agora usa um snapshot (useRef). A tela guiada (`GuidedExerciseSession`) ficou
+sem uso. **Honestidade**: estes 6 validam um indicador, não o movimento em si (língua, diafragma, deglutição).
+
 ## Correção: movimento "tongueOut" nunca validava
 
 O usuário relatou alguns exercícios "pedindo para abrir a boca" quando não deveriam. Revisei o

@@ -91,6 +91,8 @@ export default function FaceTrackingCamera({
         }
 
         let cancelled = false;
+        // O ref já é nulo quando o cleanup roda; guarda o elemento para soltar a câmera dele.
+        const videoEl = videoRef.current;
 
         async function start() {
             try {
@@ -169,6 +171,10 @@ export default function FaceTrackingCamera({
             }
             streamRef.current?.getTracks().forEach((track) => track.stop());
             streamRef.current = null;
+            if (videoEl) {
+                videoEl.pause();
+                videoEl.srcObject = null;
+            }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isActive, preferredFacing]);

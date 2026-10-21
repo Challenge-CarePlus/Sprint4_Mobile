@@ -33,18 +33,27 @@ export default function ExerciseVideo({ source, style, kids = false }: Props) {
         const video = videoRef.current;
         if (!video) return;
 
+        // Sem video.load(): o elemento já nasce com src e autoplay (e é recriado por `key`
+        // a cada exercício); load() reiniciava o download e abortava o play() em curso.
+        let playing = false;
         setNeedsTap(false);
         video.muted = true;
         video.defaultMuted = true;
         video.playsInline = true;
-        video.load();
-        video.play().catch(() => setNeedsTap(true));
+        video.play().catch((error: Error) => {
+            // AbortError = trocado/desmontado no meio; só NotAllowedError é bloqueio de autoplay.
+            if (error?.name === "NotAllowedError") setNeedsTap(true);
+        });
 
-        // Se não começou sozinho (bloqueio de autoplay, economia de bateria/dados), oferece o toque.
+        // `video.paused` vira false assim que play() é chamado, mesmo com o arquivo ainda
+        // baixando — em rede lenta a caixa ficava preta sem aviso. O que vale é o evento "playing".
         const id = setTimeout(() => {
-            if (video.paused) setNeedsTap(true);
+            if (!playing) setNeedsTap(true);
         }, 2000);
-        const onPlaying = () => setNeedsTap(false);
+        const onPlaying = () => {
+            playing = true;
+            setNeedsTap(false);
+        };
         video.addEventListener("playing", onPlaying);
 
         return () => {

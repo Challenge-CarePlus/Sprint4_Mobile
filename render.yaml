@@ -14,3 +14,32 @@ services:
         generateValue: true
       - key: CORS_ORIGIN
         sync: false
+
+  # v3 (modo administrador): serviço SEPARADO pra não derrubar a v2 em produção.
+  # Mesmo código-base, branch v3. Plano free: disco efêmero — treinos (data/) e
+  # vídeos (uploads/) somem num redeploy/reinício; os usuários mockados e o treino
+  # de exemplo são recriados pelo seed. Produção de verdade exige Postgres + storage
+  # de objetos (ver CLAUDE.md).
+  - type: web
+    name: ecoa-backend-v3
+    runtime: node
+    plan: free
+    branch: v3
+    rootDir: ECOA_backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      # URL(s) do front da v3 na Vercel, separadas por vírgula. As previews do
+      # projeto (care-plus-*-isabelabarcellos0812-6004s-projects.vercel.app) já passam
+      # pelo regex do código; aqui entra só o domínio fixo, se houver.
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DATA_DIR
+        value: /tmp/ecoa-data
+      - key: UPLOADS_DIR
+        value: /tmp/ecoa-uploads

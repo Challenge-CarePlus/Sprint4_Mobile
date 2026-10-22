@@ -9,7 +9,8 @@ import { getCameraBoxSize } from "../../vision/cameraBoxSize";
 import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
-import { speak } from "../../services/speech";
+import VoicePrompt from "../../components/VoicePrompt";
+import { say } from "../../services/speechPhrases";
 import { findExercise, findTrack } from "../../services/trackStore";
 import { fonts, kidsColors, radii, Theme } from "../../theme/tokens";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
@@ -76,7 +77,7 @@ export default function CalibrationScreen() {
             setNoFace(true);
             setProgress(0);
             setSecondsRemaining(Math.ceil(CALIBRATION_DURATION_MS / 1000));
-            speak("Não vimos seu rosto. Fique de frente para a câmera.");
+            say("no-face", track?.ageGroup);
             // Pausa antes de tentar de novo: sem ela a mensagem piscava e sumia.
             retryTimeoutRef.current = setTimeout(() => {
                 hasStartedRef.current = false;
@@ -99,7 +100,7 @@ export default function CalibrationScreen() {
 
         hasStartedRef.current = true;
         if (attempt === 0) {
-            speak("Relaxe o rosto. Vamos calibrar por 3 segundos.");
+            say("calibrate-start", track?.ageGroup);
         }
         collectingRef.current = true;
         setCollecting(true);
@@ -194,6 +195,8 @@ export default function CalibrationScreen() {
 
                 {cameraLoading && <CameraLoading kids={kids} />}
             </View>
+
+            <VoicePrompt />
 
             {status === "ready" && (
                 <CountdownRing

@@ -16,7 +16,9 @@ import { createDetector } from "../../vision/createDetector";
 import type { Detector } from "../../vision/SequenceDetectors";
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
+import VoicePrompt from "../../components/VoicePrompt";
 import { resetSpeechDedup, speak } from "../../services/speech";
+import { say } from "../../services/speechPhrases";
 import { fonts, radii, Theme } from "../../theme/tokens";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { getPresentation } from "../../theme/ageGroupThemes";
@@ -126,6 +128,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
+    const ageGroup = track.ageGroup;
     const trail = useTrailTheme(track.ageGroup);
     // exercise é tipado como Exercise (a union completa) aqui porque é passado
     // via props — a narrowing do pai não atravessa a fronteira do componente,
@@ -239,19 +242,19 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                 setMessage(`Relaxe... ${Math.ceil(feedback.remainingMs / 1000)}s`);
                 if (!hasAnnouncedRelaxRef.current) {
                     hasAnnouncedRelaxRef.current = true;
-                    speak("Relaxe");
+                    say("relax", ageGroup);
                 }
             } else if (feedback.kind === "prompt") {
                 hasAnnouncedHoldRef.current = false;
                 setMessage(feedback.message);
-                speak(feedback.message);
+                say("prompt", ageGroup, feedback.message);
             } else if (feedback.kind === "holding") {
                 // remainingMs 0 = detector sequencial (sem tempo de segurar): mostra a própria mensagem.
                 if (feedback.remainingMs > 0) {
                     setMessage(`Continue segurando... ${Math.ceil(feedback.remainingMs / 1000)}s`);
                     if (!hasAnnouncedHoldRef.current) {
                         hasAnnouncedHoldRef.current = true;
-                        speak("Continue segurando");
+                        say("holding", ageGroup);
                     }
                 } else {
                     setMessage(feedback.message);
@@ -259,20 +262,20 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             } else if (feedback.kind === "waiting-release") {
                 hasAnnouncedHoldRef.current = false;
                 setMessage(feedback.message);
-                speak("Ótimo!");
+                say("release", ageGroup);
             } else if (feedback.kind === "repetition-complete") {
                 hasAnnouncedHoldRef.current = false;
                 setRepsDone(feedback.repetitionsDone);
                 setMessage("Ótimo! Próxima repetição.");
-                speak("Ótimo!");
+                say("release", ageGroup);
             } else if (feedback.kind === "exercise-complete") {
                 setRepsDone(feedback.repetitionsDone);
                 setMessage("Exercício concluído!");
-                speak("Muito bem! Exercício concluído.");
+                say("complete", ageGroup);
                 finishExercise();
             }
         },
-        [finishExercise]
+        [finishExercise, ageGroup]
     );
 
     const cameraBox = getCameraBoxSize(0.52, 340, 520, cameraAspect, SESSION_CONTENT_PADDING);
@@ -350,6 +353,8 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             </View>
 
             {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+
+            <VoicePrompt />
 
             {stuck && !errorMessage && (
                 <View style={styles.skip}>

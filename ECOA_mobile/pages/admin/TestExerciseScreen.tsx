@@ -5,7 +5,8 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Alert, Button, CameraLoading, CountdownRing, PageIntro } from "../../components/ds";
 import { CustomExercise } from "../../data/training";
-import { speak } from "../../services/speech";
+import VoicePrompt from "../../components/VoicePrompt";
+import { say } from "../../services/speechPhrases";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { fonts, radii, Theme } from "../../theme/tokens";
 import { getCameraBoxSize } from "../../vision/cameraBoxSize";
@@ -78,7 +79,7 @@ export default function TestExerciseScreen() {
             setRepetitions(0);
             setFeedback(null);
             setPhaseBoth("testing");
-            speak("Agora faça o exercício.");
+            say("test-ready");
         }, CALIBRATION_DURATION_MS);
 
         return () => {
@@ -102,7 +103,7 @@ export default function TestExerciseScreen() {
 
             if (next.kind === "exercise-complete") {
                 setPhaseBoth("done");
-                speak("Muito bem! A câmera reconheceu o exercício.");
+                say("test-complete");
             }
         },
         [setPhaseBoth]
@@ -165,6 +166,8 @@ export default function TestExerciseScreen() {
 
                 {cameraLoading && <CameraLoading />}
             </View>
+
+            <VoicePrompt />
 
             {phase === "calibrating" && status === "ready" && (
                 <CountdownRing

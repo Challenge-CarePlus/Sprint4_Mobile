@@ -12,6 +12,7 @@ import AppRouter from "./routes/AppRouter";
 import { MAX_APP_WIDTH } from "./theme/layout";
 import { ToastProvider } from "./components/Toast";
 import { DraftProvider } from "./context/DraftContext";
+import { loadVoiceSettings } from "./services/speech";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 
 // Foco visível do teclado em `brand` (DS), no lugar do contorno preto padrão do navegador.
@@ -44,6 +45,11 @@ export default function App() {
 function Root() {
     const { colors } = useTheme();
     useWebFocusRing();
+
+    // Voz de orientação: aplica o que a pessoa configurou antes da primeira fala.
+    useEffect(() => {
+        loadVoiceSettings();
+    }, []);
 
     const [fontsLoaded] = useFonts({
         PlusJakartaSans_400Regular,

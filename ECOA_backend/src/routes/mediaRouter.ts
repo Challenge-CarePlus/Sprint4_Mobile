@@ -51,15 +51,17 @@ uploadsRouter.post("/video", ...requireRole("admin"), ((req, res) => {
                 : refuse(400, "Envie um único arquivo no campo \"file\"");
         }
         if (error) {
-            console.error("upload:", error);
-            return refuse(500, "Erro interno");
+            // O que sobra aqui vem do parser multipart (busboy): cabeçalho quebrado, corpo truncado,
+            // boundary ausente, NUL no nome... é entrada ruim do cliente, não falha do servidor.
+            return refuse(400, "Upload inválido: o envio do arquivo está malformado");
         }
 
         const file = req.file;
         if (!file) return refuse(400, "Nenhum vídeo enviado (campo \"file\")");
 
         const original = file.originalname;
-        if (/[\\/]|\.\./.test(original) || DANGEROUS_INNER.test(original)) {
+        // eslint-disable-next-line no-control-regex
+        if (/[\\/\u0000-\u001f\u007f]|\.\./.test(original) || DANGEROUS_INNER.test(original)) {
             return refuse(400, "Nome de arquivo inválido");
         }
 
@@ -73,9 +75,15 @@ uploadsRouter.post("/video", ...requireRole("admin"), ((req, res) => {
         }
 
         const stored = `${randomBytes(16).toString("hex")}.${ext}`;
-        const dir = path.resolve(uploadsDir());
-        await fs.mkdir(dir, { recursive: true });
-        await fs.writeFile(path.join(dir, stored), file.buffer);
+        try {
+            const dir = path.resolve(uploadsDir());
+            await fs.mkdir(dir, { recursive: true });
+            await fs.writeFile(path.join(dir, stored), file.buffer);
+        } catch (writeError) {
+            // Falha de disco é do servidor: registra só a mensagem, sem despejar o objeto.
+            console.error("upload: falha ao gravar o vídeo:", (writeError as Error).message);
+            return refuse(500, "Erro interno");
+        }
 
         res.status(201).json({
             success: true,

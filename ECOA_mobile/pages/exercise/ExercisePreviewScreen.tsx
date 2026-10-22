@@ -6,8 +6,7 @@ import Svg, { Circle } from "react-native-svg";
 
 import { ActionBar, Alert, RepChip, StepBadge } from "../../components/ds";
 import ExerciseVideo from "../../components/ExerciseVideo";
-import { getExerciseById } from "../../data/exercises";
-import { TRACKS } from "../../data/tracks";
+import { findExercise, findTrack } from "../../services/trackStore";
 import { fonts, kidsColors, kidsFonts, radii, Theme } from "../../theme/tokens";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { getPresentation } from "../../theme/ageGroupThemes";
@@ -26,10 +25,10 @@ export default function ExercisePreviewScreen() {
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
-    const track = TRACKS.find((t) => t.id === trackId);
+    const track = findTrack(trackId);
     const trail = useTrailTheme(track?.ageGroup ?? "adults");
     const exerciseId = track?.exerciseIds[exerciseIndex];
-    const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
+    const exercise = exerciseId ? findExercise(exerciseId) : undefined;
 
     if (!track || !exercise) {
         return (
@@ -59,6 +58,10 @@ export default function ExercisePreviewScreen() {
         .filter(Boolean)
         .join(" · ");
 
+    // Vídeo local (trilhas padrão) ou o enviado pela equipe (url completa; o placeholder não conta).
+    const remoteUrl = /^https?:\/\/(?!placeholder\.)/i.test(exercise.demoVideoUrl) ? exercise.demoVideoUrl : null;
+    const videoSource = exercise.demoVideoAsset ?? (remoteUrl ? { uri: remoteUrl } : undefined);
+
     // Protótipo (.cp-ex-title): 24/30 em todas as trilhas; Idosos 28/34 e texto 18px.
     const titleSize = senior ? 28 : 24;
     const titleLine = senior ? 34 : 30;
@@ -70,9 +73,9 @@ export default function ExercisePreviewScreen() {
                     Exercício {exerciseIndex + 1} de {track.exerciseIds.length} · {track.name}
                 </StepBadge>
 
-                {exercise.demoVideoAsset ? (
+                {videoSource ? (
                     <View style={[styles.video, shadow.hero]} accessibilityLabel="Vídeo de demonstração">
-                        <ExerciseVideo source={exercise.demoVideoAsset} style={styles.videoPlayer} kids={kids} />
+                        <ExerciseVideo source={videoSource} style={styles.videoPlayer} kids={kids} />
                     </View>
                 ) : (
                     <LinearGradient

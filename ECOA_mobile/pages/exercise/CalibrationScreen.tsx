@@ -10,7 +10,7 @@ import type { Blendshape } from "../../vision/FaceLandmarkerBridge";
 import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/calibration";
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
-import { TRACKS } from "../../data/tracks";
+import { findExercise, findTrack } from "../../services/trackStore";
 import { fonts, kidsColors, radii, Theme } from "../../theme/tokens";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { useTrailTheme } from "../../theme/trailThemes";
@@ -30,7 +30,7 @@ export default function CalibrationScreen() {
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
-    const track = TRACKS.find((t) => t.id === trackId);
+    const track = findTrack(trackId);
     const trail = useTrailTheme(track?.ageGroup ?? "adults");
 
     const collectorRef = useRef(new CalibrationCollector());

@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import GradientButton from "../../components/GradientButton";
-import { TRACKS } from "../../data/tracks";
+import { findExercise, findTrack } from "../../services/trackStore";
 import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
@@ -43,7 +43,7 @@ export default function CycleSummaryScreen() {
     const route = useRoute();
     const { trackId } = route.params as RouteParams;
 
-    const track = TRACKS.find((t) => t.id === trackId);
+    const track = findTrack(trackId);
     const trail = useTrailTheme(track?.ageGroup ?? "adults");
     const [previousCycles, setPreviousCycles] = useState(0);
 

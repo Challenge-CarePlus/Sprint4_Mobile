@@ -14,7 +14,7 @@ import EditExerciseScreen from "../pages/admin/EditExerciseScreen";
 import TestExerciseScreen from "../pages/admin/TestExerciseScreen";
 
 import { AUTH_REQUIRED } from "../config/authConfig";
-import { TRACKS } from "../data/tracks";
+import { findTrack } from "../services/trackStore";
 import { ThemeScope, useTheme } from "../theme/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
@@ -33,7 +33,7 @@ const Stack = createNativeStackNavigator();
 /** Trilha Infantil fica sempre clara (regra do DS), mesmo com o app no escuro. */
 function themeFor(params: unknown): "light" | undefined {
     const trackId = (params as { trackId?: string } | undefined)?.trackId;
-    return TRACKS.find((t) => t.id === trackId)?.ageGroup === "children" ? "light" : undefined;
+    return findTrack(trackId)?.ageGroup === "children" ? "light" : undefined;
 }
 
 function PrivateRoutes() {

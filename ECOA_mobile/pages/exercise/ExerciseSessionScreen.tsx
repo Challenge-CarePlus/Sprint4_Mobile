@@ -6,8 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { Button } from "../../components/ds";
 import GradientButton from "../../components/GradientButton";
-import { getExerciseById } from "../../data/exercises";
-import { TRACKS } from "../../data/tracks";
+import { findExercise, findTrack } from "../../services/trackStore";
 import { Exercise, Track } from "../../data/types";
 import FaceTrackingCamera from "../../vision/FaceTrackingCamera";
 import { getCameraBoxSize } from "../../vision/cameraBoxSize";
@@ -43,9 +42,9 @@ export default function ExerciseSessionScreen() {
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
-    const track = TRACKS.find((t) => t.id === trackId);
+    const track = findTrack(trackId);
     const exerciseId = track?.exerciseIds[exerciseIndex];
-    const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
+    const exercise = exerciseId ? findExercise(exerciseId) : undefined;
 
     // Normalmente inalcançável: ExercisePreviewScreen só manda pra cá depois de
     // calibrar. Mas essa tela também é alcançável por nome de rota sozinha (ex.:

@@ -3,7 +3,13 @@ import { useNavigation } from "@react-navigation/native";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { MenuCard, PageIntro } from "../../components/ds";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { TRACKS } from "../../data/tracks";
+import { Track } from "../../data/types";
+import { listCustomTracks, setCustomTrainings } from "../../services/trackStore";
+import { trainingsApi } from "../../services/trainingsApi";
 import { AgeGroup } from "../../data/types";
 import { Theme } from "../../theme/tokens";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
@@ -25,6 +31,32 @@ const AGE_GROUP_TITLE: Record<AgeGroup, string> = {
 export default function TrackSelectScreen() {
     const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
+    const { role } = useAuth();
+    const [custom, setCustom] = useState<Track[]>([]);
+
+    // Treinos personalizados que este usuário pode ver (o servidor filtra por papel/paciente).
+    // O admin vê só as 3 trilhas padrão aqui, como no protótipo; sem rede, ficam as padrão.
+    useFocusEffect(
+        useCallback(() => {
+            let alive = true;
+            if (role === "admin") {
+                setCustom([]);
+                return;
+            }
+            trainingsApi
+                .listTrainings()
+                .then((list) => {
+                    setCustomTrainings(list);
+                    if (alive) setCustom(listCustomTracks());
+                })
+                .catch(() => {
+                    if (alive) setCustom([]);
+                });
+            return () => {
+                alive = false;
+            };
+        }, [role])
+    );
 
     function handleSelectTrack(trackId: string) {
         // Garante um início limpo: se uma tentativa anterior dessa trilha foi
@@ -59,6 +91,17 @@ export default function TrackSelectScreen() {
                                 : `${track.exerciseIds.length} exercícios`
                         }
                         kids={track.ageGroup === "children"}
+                        onPress={() => handleSelectTrack(track.id)}
+                    />
+                ))}
+
+                {custom.map((track) => (
+                    <MenuCard
+                        key={track.id}
+                        icon="favorite"
+                        title={track.name}
+                        subtitle={track.description}
+                        meta={`Personalizado · ${track.exerciseIds.length} ${track.exerciseIds.length === 1 ? "exercício" : "exercícios"}`}
                         onPress={() => handleSelectTrack(track.id)}
                     />
                 ))}

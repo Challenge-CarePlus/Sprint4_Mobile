@@ -15,7 +15,7 @@ com **exemplos reais de resposta** (curl) colados na mensagem.
 
 ## Entregas
 1. **Papéis e usuários mockados.** `role: "admin" | "patient"` (hoje existe `Access.USER/ADMIN` — pode evoluir).
-   Seed dos 9 usuários da tabela do SPEC (senha de TODOS = `ecoa2026`, hash bcrypt); `ecoafono@email.com` vira **admin**.
+   Seed dos 9 usuários da tabela do SPEC (pacientes com senha `ecoa2026`, hash bcrypt; o admin `ecoafono@email.com` tem a senha em `ADMIN_PASSWORD`, nunca no repositório — ver `backend-fixes-1.md`).
    `POST /auth/login` → `{ success, token, user:{ id, name, email, role } }` com claim `role` no JWT.
    Mantenha o que já foi endurecido: rate limit, validação, mensagem única de login, `JWT_SECRET` obrigatório em produção.
    Middleware `requireRole("admin")`: **401 sem token, 403 se não for admin** (checado no servidor).

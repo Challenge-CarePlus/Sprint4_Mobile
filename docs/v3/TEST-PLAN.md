@@ -15,8 +15,8 @@ Tipo: **API** (curl/script) · **E2E** (Playwright, Edge) · **UNIT** (jest) · 
 - Playwright com `channel:'msedge'`; webcam falsa: `--use-fake-device-for-media-stream --use-file-for-fake-video-capture=<rosto>.y4m`
   (sem rosto a calibração não avança — ver V3-T40).
 - Rate limit é por IP e compartilhado: reiniciar o servidor entre baterias grandes.
-- Usuários: admin `ecoafono@email.com`; pacientes `ana.lima`, `pedro.souza`, `mariana.costa`, `lucas.almeida`,
-  `juliana.rocha`, `antonio.ferreira`, `helena.martins`, `jose.pereira` `@ecoa.test`; senha de todos `ecoa2026`.
+- Usuários: admin `ecoafono@email.com` (senha = `ADMIN_PASSWORD`; nos testes de API é uma senha própria da suíte); pacientes `ana.lima`, `pedro.souza`, `mariana.costa`, `lucas.almeida`,
+  `juliana.rocha`, `antonio.ferreira`, `helena.martins`, `jose.pereira` `@ecoa.test`; senha dos pacientes `ecoa2026`.
 
 ## A. Baseline e regressão (critérios 1, 9)
 

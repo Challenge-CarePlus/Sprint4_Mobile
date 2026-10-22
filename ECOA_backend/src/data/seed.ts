@@ -1,7 +1,9 @@
 import { Training } from "../models/training";
 
-// Senha de TODOS os usuários mockados (só pra demonstração no evento).
-export const MOCK_PASSWORD = "ecoa2026";
+// Senha dos PACIENTES mockados (usuários de teste sem privilégio, só pra demonstração
+// no evento). A senha do ADMIN não mora aqui nem em lugar nenhum do repositório:
+// vem de ADMIN_PASSWORD (ver config/adminPassword.ts).
+export const PATIENT_MOCK_PASSWORD = "ecoa2026";
 
 export type MockUser = {
     id: string;

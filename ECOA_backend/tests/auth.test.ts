@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import request from "supertest";
-import { bearer, login, makeApp, PASSWORD } from "./helpers";
+import { ADMIN_EMAIL, ADMIN_TEST_PASSWORD, bearer, login, makeApp, PASSWORD } from "./helpers";
 
 const ctx = makeApp();
 afterAll(ctx.cleanup);
@@ -9,7 +9,7 @@ describe("POST /auth/login", () => {
     it("admin: devolve token e user com role admin", async () => {
         const res = await request(ctx.app)
             .post("/auth/login")
-            .send({ email: "ecoafono@email.com", password: PASSWORD });
+            .send({ email: ADMIN_EMAIL, password: ADMIN_TEST_PASSWORD });
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -33,9 +33,8 @@ describe("POST /auth/login", () => {
         expect(jwt.verify(res.body.token, "test-secret")).toMatchObject({ id: "p3", role: "patient" });
     });
 
-    it("os 9 usuários do seed entram com a senha padrão", async () => {
+    it("os 8 pacientes do seed entram com a senha padrão", async () => {
         const emails = [
-            "ecoafono@email.com",
             "ana.lima@ecoa.test",
             "pedro.souza@ecoa.test",
             "mariana.costa@ecoa.test",
@@ -54,14 +53,14 @@ describe("POST /auth/login", () => {
     it("e-mail com caixa/espaços diferentes continua valendo", async () => {
         const res = await request(ctx.app)
             .post("/auth/login")
-            .send({ email: "  Ecoafono@Email.COM ", password: PASSWORD });
+            .send({ email: "  Ecoafono@Email.COM ", password: ADMIN_TEST_PASSWORD });
         expect(res.status).toBe(200);
     });
 
     it("mensagem ÚNICA: senha errada e e-mail desconhecido são indistinguíveis", async () => {
         const wrongPassword = await request(ctx.app)
             .post("/auth/login")
-            .send({ email: "ecoafono@email.com", password: "senha-errada" });
+            .send({ email: ADMIN_EMAIL, password: "senha-errada" });
         const unknownEmail = await request(ctx.app)
             .post("/auth/login")
             .send({ email: "ninguem@ecoa.test", password: PASSWORD });

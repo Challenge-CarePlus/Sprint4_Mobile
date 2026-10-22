@@ -3,17 +3,31 @@ import os from "os";
 import path from "path";
 import request from "supertest";
 
+/** Senha dos pacientes mockados (pública, sem privilégio). */
 export const PASSWORD = "ecoa2026";
+/** Senha do admin SÓ nos testes: o servidor a recebe por ADMIN_PASSWORD, como em produção. */
+export const ADMIN_TEST_PASSWORD = "senha-de-teste-do-admin";
+export const ADMIN_EMAIL = "ecoafono@email.com";
 
 /**
  * Sobe uma instância isolada do app: pasta de dados e de uploads temporárias
  * (nunca toca ECOA_backend/data) e módulos recarregados, já que os paths vêm de env.
  */
-export function makeApp(options: { authRateLimit?: number } = {}) {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ecoa-api-"));
+export function makeApp(
+    options: {
+        authRateLimit?: number;
+        /** Reaproveita a pasta de dados de outra instância (pra testar troca de ADMIN_PASSWORD). */
+        reuseDirOf?: { dir: string };
+        /** undefined = senha de teste; null = sem a variável (usa o valor de dev). */
+        adminPassword?: string | null;
+    } = {}
+) {
+    const dir = options.reuseDirOf?.dir ?? fs.mkdtempSync(path.join(os.tmpdir(), "ecoa-api-"));
     process.env.DATA_DIR = path.join(dir, "data");
     process.env.UPLOADS_DIR = path.join(dir, "uploads");
     process.env.JWT_SECRET = "test-secret";
+    if (options.adminPassword === null) delete process.env.ADMIN_PASSWORD;
+    else process.env.ADMIN_PASSWORD = options.adminPassword ?? ADMIN_TEST_PASSWORD;
     delete process.env.NODE_ENV;
     delete process.env.CORS_ORIGIN;
 
@@ -24,12 +38,17 @@ export function makeApp(options: { authRateLimit?: number } = {}) {
 
     return {
         app,
+        dir,
         uploadsDir: process.env.UPLOADS_DIR as string,
         cleanup: () => fs.rmSync(dir, { recursive: true, force: true }),
     };
 }
 
-export async function login(app: any, email: string, password = PASSWORD): Promise<string> {
+export async function login(
+    app: any,
+    email: string,
+    password = email === ADMIN_EMAIL ? ADMIN_TEST_PASSWORD : PASSWORD
+): Promise<string> {
     const res = await request(app).post("/auth/login").send({ email, password });
     if (res.status !== 200) throw new Error(`login ${email} falhou: ${res.status}`);
     return res.body.token;

@@ -36,7 +36,11 @@ validada e publicada). Responsável pelo produto: PM. Este documento é o contra
 - A chave `AUTH_REQUIRED` da v2 continua existindo (padrão `false` = acesso livre). A tela de entrada nova
   substitui a antiga Login/Register **quando `AUTH_REQUIRED=false`**; Cadastro fica dormente.
 
-### Usuários mockados (seed no backend; senha de TODOS = `ecoa2026`)
+### Usuários mockados (seed no backend)
+
+Senha dos **pacientes** = `ecoa2026` (usuários de teste, sem privilégio). A senha do **admin** NÃO está no repositório: é
+definida em `ADMIN_PASSWORD` (variável de ambiente; obrigatória em produção, mínimo 8 caracteres; em dev sem a variável vale
+um valor de desenvolvimento diferente do dos pacientes). O hash do admin é sempre recalculado a partir da env.
 
 | id | Nome | E-mail | Papel | Trilha atual (para a Evolução) |
 |---|---|---|---|---|

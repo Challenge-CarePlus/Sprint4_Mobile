@@ -39,8 +39,10 @@ estar no ar de novo nesse caso.
 
 Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de login/cadastro:
 
-- **Papéis** (`role: "admin" | "patient"`, claim no JWT). 9 usuários mockados (seed em `src/data/seed.ts`; senha de todos
-  `ecoa2026`; `ecoafono@email.com` é o admin). `requireRole("admin")` responde **401 sem token e 403 para paciente**, sempre
+- **Papéis** (`role: "admin" | "patient"`, claim no JWT). 9 usuários mockados (seed em `src/data/seed.ts`; pacientes com senha
+  `ecoa2026`; `ecoafono@email.com` é o admin e **a senha dele vem de `ADMIN_PASSWORD`**, nunca do repositório: obrigatória em
+  produção (o servidor não sobe sem ela; mínimo 8 caracteres), com um valor de dev próprio fora de produção; o hash do admin é
+  recalculado da env a cada subida, então trocar a variável troca a senha). `requireRole("admin")` responde **401 sem token e 403 para paciente**, sempre
   no servidor. Cadastro aberto continua existindo e cria sempre `patient`. Login devolve `{ token, user }`; erro único
   "E-mail ou senha inválidos" (não revela se o e-mail existe).
 - **Treinos** (`/trainings`, CRUD): sem token só os de `audience.all`; paciente = `all` + os que incluem seu id; admin = todos.
@@ -471,7 +473,8 @@ demais pro movimento certo, não o movimento errado sendo checado).
    # em outro terminal:
    cd ECOA_mobile && EXPO_PUBLIC_API_IP=localhost npx expo start --web
    ```
-6. No app: Login (`ecoafono@email.com` / `ecoa2026`, ou cadastre pela tela de registro) →
+6. No app: entrar como paciente (ex.: `mariana.costa@ecoa.test` / `ecoa2026`, ou sem preencher nada para o acesso livre; o admin
+   `ecoafono@email.com` usa a senha de `ADMIN_PASSWORD`) →
    "Exercícios" → aceitar consentimento → escolher uma trilha → calibração (3s, rosto
    relaxado) → fazer os 5 exercícios → conferir o resumo do ciclo. No navegador a câmera e a
    detecção já rodam de verdade (webcam via `getUserMedia`); `vision/FaceTrackingCamera.tsx`

@@ -175,14 +175,19 @@ ws://[ip]:[porta]/exercise
 Para logar dentro do aplicativo, utilize as seguintes credenciais:
 
 ```txt
-email: ecoafono@email.com
+# paciente de teste (sem privilégio)
+email: mariana.costa@ecoa.test
 senha: ecoa2026
+
+# administrador
+email: ecoafono@email.com
+senha: a definida em ADMIN_PASSWORD (variável de ambiente; não fica no repositório)
 ```
 
-Caso o login retorne “Usuário não encontrado”, cadastre esse usuário pela tela de cadastro ou verifique se ele existe no arquivo:
+Caso o login retorne “E-mail ou senha inválidos”, confira a senha de ADMIN_PASSWORD (admin) ou os dados do usuário no arquivo (criado no primeiro uso):
 
 ```txt
-ECOA_backend/src/db/users.json
+ECOA_backend/data/users.json
 ```
 
 ---

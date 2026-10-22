@@ -62,7 +62,8 @@ export default function GradientButton({
     accessibilityLabel,
 }: Props) {
     const { colors, shadow, gradients } = useTheme();
-    const textColor = textColorProp ?? colors.white;
+    // Desabilitado como no DS (fundo `line`, texto `ink-muted`): legível nos dois temas.
+    const textColor = disabled ? colors.inkMuted : textColorProp ?? colors.white;
     const styles = useThemedStyles(makeStyles);
     const isDisabled = disabled || loading;
 
@@ -85,7 +86,7 @@ export default function GradientButton({
             ]}
         >
             <LinearGradient
-                colors={isDisabled ? [colors.lineStrong, colors.lineStrong] : fillGradient ?? (fill ? [fill, fill] : gradients[gradient])}
+                colors={isDisabled ? [colors.line, colors.line] : fillGradient ?? (fill ? [fill, fill] : gradients[gradient])}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.gradient, { minHeight }, !isDisabled && shadow.sm]}
@@ -123,7 +124,7 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
         opacity: 0.92,
     },
     disabledWrapper: {
-        opacity: 0.7,
+        opacity: 1,
     },
     gradient: {
         flexDirection: "row",

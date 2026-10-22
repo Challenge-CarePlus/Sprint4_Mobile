@@ -134,6 +134,7 @@ export default function EditExerciseScreen() {
                         <View style={{ flex: 1 }}>
                             <Field
                                 label={`Passo ${index + 1}`}
+                                hideLabel
                                 multiline
                                 value={step}
                                 onChangeText={(text) => setSteps(steps.map((s, i) => (i === index ? text : s)))}
@@ -242,7 +243,7 @@ const makeStyles = ({ colors, shadow }: Theme) =>
         stepN: {
             width: 26,
             height: 26,
-            marginTop: 34,
+            marginTop: 12,
             borderRadius: 13,
             backgroundColor: colors.brandDeep,
             alignItems: "center",

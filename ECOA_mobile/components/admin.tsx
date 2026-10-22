@@ -90,12 +90,13 @@ export function Note({ children, tone = "muted" }: { children: ReactNode; tone?:
 export function Field({
     label,
     optional = false,
+    hideLabel = false,
     error,
     help,
     multiline = false,
     rows = 2,
     ...input
-}: TextInputProps & { label: string; optional?: boolean; error?: string; help?: string; rows?: number }) {
+}: TextInputProps & { label: string; optional?: boolean; hideLabel?: boolean; error?: string; help?: string; rows?: number }) {
     const { colors } = useTheme();
     const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
@@ -103,10 +104,12 @@ export function Field({
 
     return (
         <View style={styles.field}>
-            <Text style={styles.fieldLabel}>
-                {label}
-                {optional ? <Text style={styles.optional}> (opcional)</Text> : null}
-            </Text>
+            {hideLabel ? null : (
+                <Text style={styles.fieldLabel}>
+                    {label}
+                    {optional ? <Text style={styles.optional}> (opcional)</Text> : null}
+                </Text>
+            )}
             <TextInput
                 {...input}
                 multiline={multiline}

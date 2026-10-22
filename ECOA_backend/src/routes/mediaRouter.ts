@@ -111,8 +111,14 @@ mediaRouter.get("/:file", (req, res) => {
                 "Cross-Origin-Resource-Policy": "cross-origin",
             },
         },
-        (error) => {
-            if (error && !res.headersSent) notFound();
+        (error: any) => {
+            if (!error || res.headersSent) return;
+
+            // Range fora do arquivo: o player precisa do 416 + Content-Range pra se recuperar.
+            if (error.status === 416) {
+                return res.status(416).set(error.headers ?? {}).json({ success: false, message: "Faixa inválida" });
+            }
+            notFound();
         }
     );
 });

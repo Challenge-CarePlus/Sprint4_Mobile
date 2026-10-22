@@ -1,0 +1,11 @@
+{
+  // Só pro jest (ts-jest): o build usa tsconfig.json, que não enxerga tests/.
+  // Sem checagem de tipos aqui — `npm run build` / `tsc --noEmit` já checam os fontes.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "isolatedModules": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["src", "tests"]
+}

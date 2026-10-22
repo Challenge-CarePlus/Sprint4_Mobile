@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
 import { Alert, AuthLayout, Button, TextLink } from "../components/ds";
-import { colors, fonts } from "../theme/tokens";
+import { fonts, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 // Alert.alert do React Native não faz nada na web.
 function showSoon(title: string, message: string) {
@@ -17,6 +18,7 @@ function showSoon(title: string, message: string) {
 }
 
 export default function Login() {
+    const styles = useThemedStyles(makeStyles);
     const { login } = useAuth();
 
     const [email, setEmail] = useState("");
@@ -94,7 +96,7 @@ export default function Login() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     forgotRow: { alignItems: "flex-end" },
     submit: { marginTop: 8 },
     footerText: { fontFamily: fonts.body, fontSize: 14, color: colors.inkMuted },

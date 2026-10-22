@@ -3,7 +3,8 @@ import { ActivityIndicator, StyleProp, StyleSheet, Text, View, ViewStyle } from 
 import { Asset } from "expo-asset";
 import type { FaceLandmarker as FaceLandmarkerType } from "@mediapipe/tasks-vision";
 
-import { colors } from "../theme/tokens";
+import { Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 import { getSettings } from "../services/settingsStorage";
 
 export type FaceTrackingStatus = "initializing" | "ready" | "error";
@@ -56,6 +57,8 @@ export default function FaceTrackingCamera({
     onError,
     onFaceVisibilityChange,
 }: Props) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const rafRef = useRef<number | null>(null);
@@ -283,7 +286,7 @@ async function createFaceLandmarker(): Promise<FaceLandmarkerType> {
     }
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     cameraArea: {
         width: "100%",
         height: 280,

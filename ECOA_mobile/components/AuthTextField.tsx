@@ -2,7 +2,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TextInput, TextInputProps, View } from "react-native";
 
-import { colors, fonts, radii, shadow } from "../theme/tokens";
+import { fonts, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type Props = TextInputProps & {
     icon: keyof typeof MaterialIcons.glyphMap;
@@ -29,6 +30,8 @@ export default function AuthTextField({
     placeholder,
     ...rest
 }: Props) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
     const [visible, setVisible] = useState(false);
     const message = error ?? help;
@@ -93,7 +96,7 @@ export default function AuthTextField({
 // preto do navegador; o foco aparece no wrapper. No nativo não existe contorno.
 const noOutline = Platform.OS === "web" ? ({ outlineStyle: "none", outlineWidth: 0 } as object) : null;
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     field: { width: "100%", gap: 6 },
     wrapper: {
         width: "100%",

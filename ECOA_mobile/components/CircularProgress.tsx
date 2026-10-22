@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
-import { colors } from "../theme/tokens";
+import { Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -25,11 +26,16 @@ export default function CircularProgress({
     progress,
     size = 140,
     strokeWidth = 10,
-    color = colors.brand,
-    trackColor = colors.brandSoft,
-    labelColor = colors.ink,
+    color: colorProp,
+    trackColor: trackColorProp,
+    labelColor: labelColorProp,
     label,
 }: Props) {
+    const { colors } = useTheme();
+    const color = colorProp ?? colors.brand;
+    const trackColor = trackColorProp ?? colors.brandSoft;
+    const labelColor = labelColorProp ?? colors.ink;
+    const styles = useThemedStyles(makeStyles);
     const animatedProgress = useRef(new Animated.Value(progress)).current;
 
     useEffect(() => {
@@ -82,7 +88,7 @@ export default function CircularProgress({
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     labelContainer: {
         ...StyleSheet.absoluteFillObject,
         alignItems: "center",

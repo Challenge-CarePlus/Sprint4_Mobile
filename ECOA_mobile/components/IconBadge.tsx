@@ -2,9 +2,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 
-import { colors, gradients } from "../theme/tokens";
+import { Gradients, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
-type GradientName = keyof typeof gradients;
+type GradientName = keyof Gradients;
 
 type Props = {
     name: keyof typeof MaterialIcons.glyphMap;
@@ -26,6 +27,8 @@ export default function IconBadge({
     gradient = "primary",
     style,
 }: Props) {
+    const { colors, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <LinearGradient
             colors={gradients[gradient]}
@@ -38,7 +41,7 @@ export default function IconBadge({
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     badge: {
         alignItems: "center",
         justifyContent: "center",

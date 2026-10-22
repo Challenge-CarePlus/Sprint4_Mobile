@@ -17,7 +17,8 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, Ellipse, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 
-import { colors, fonts, gradients, kidsColors, kidsFonts, radii, shadow } from "../theme/tokens";
+import { fonts, kidsColors, kidsFonts, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -36,6 +37,8 @@ export function PageIntro({
     subtitle?: string;
     icon?: IconName;
 }) {
+    const { colors, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.intro}>
             {icon && (
@@ -69,6 +72,8 @@ export function MenuCard({
     disabled?: boolean;
     onPress?: () => void;
 }) {
+    const { colors, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <Pressable
             onPress={disabled ? undefined : onPress}
@@ -122,6 +127,8 @@ export function MenuCard({
 }
 
 export function Alert({ tone, children }: { tone: "danger" | "success" | "info"; children: ReactNode }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const map = {
         danger: { bg: colors.dangerSoft, fg: colors.danger, icon: "error-outline" as IconName },
         success: { bg: colors.successSoft, fg: colors.success, icon: "check-circle-outline" as IconName },
@@ -153,6 +160,8 @@ export function ActionBar({
     kids?: boolean;
     large?: boolean;
 }) {
+    const { colors, shadow, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const fg = kids ? kidsColors.indigo : colors.onHero;
     const sub = kids ? kidsColors.indigo : colors.onHeroMuted;
 
@@ -194,6 +203,8 @@ export function ActionBar({
 }
 
 export function StepBadge({ children, kids = false }: { children: ReactNode; kids?: boolean }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={[styles.badge, kids && { backgroundColor: kidsColors.indigo }]}>
             <Text style={[styles.badgeText, kids && { color: colors.white, fontFamily: kidsFonts.bold }]}>
@@ -204,6 +215,8 @@ export function StepBadge({ children, kids = false }: { children: ReactNode; kid
 }
 
 export function RepChip({ children, kids = false }: { children: ReactNode; kids?: boolean }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={[styles.chip, kids && { backgroundColor: kidsColors.yellowSoft }]}>
             <MaterialIcons name="repeat" size={16} color={kids ? kidsColors.ink : colors.brandInk} />
@@ -241,6 +254,8 @@ export function Button({
     fontSize?: number;
     block?: boolean;
 }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const off = disabled || loading;
     const fg =
         variant === "primary" ? colors.onHero : variant === "ghost" ? colors.brandInk : colors.ink;
@@ -306,6 +321,8 @@ function SmallIconButton({
     onPress?: () => void;
     expanded?: boolean;
 }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <Pressable
             onPress={onPress}
@@ -334,6 +351,7 @@ export function AppBar({
     onMenu?: () => void;
     menuOpen?: boolean;
 }) {
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.appbar}>
             {onBack ? <SmallIconButton icon="arrow-back" label="Voltar" tone="flat" onPress={onBack} /> : null}
@@ -379,6 +397,8 @@ export function NavDrawer({
     activeId?: string;
     onClose: () => void;
 }) {
+    const { colors, shadow, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <>
             <Pressable
@@ -435,6 +455,8 @@ export function HeroHeader({
     title: string[];
     subtitle?: string;
 }) {
+    const { colors, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <LinearGradient
             colors={gradients.hero}
@@ -460,6 +482,7 @@ export function HeroHeader({
 
 /** Folha clara que sobe 24px sobre o HeroHeader, com os cards dentro (cp-sheet). */
 export function Sheet({ children }: { children: ReactNode }) {
+    const styles = useThemedStyles(makeStyles);
     return <View style={styles.sheet}>{children}</View>;
 }
 
@@ -468,6 +491,7 @@ export function Sheet({ children }: { children: ReactNode }) {
 /* ------------------------------------------------------------------ */
 
 function AuthWaves({ compact }: { compact: boolean }) {
+    const { colors } = useTheme();
     // Elipses do protótipo (.cp-auth-wave-1/2) em coordenadas relativas ao contêiner.
     const w1 = compact ? { cy: 120, ry: 26 } : { cy: 112, ry: 26 };
     const w2 = compact ? { cy: 117, ry: 23 } : { cy: 107, ry: 23 };
@@ -511,6 +535,8 @@ export function AuthLayout({
     footer?: ReactNode;
     children: ReactNode;
 }) {
+    const { shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const logo = compact ? 80 : 112;
 
     return (
@@ -555,6 +581,7 @@ export function AuthLayout({
 
 /** Link de texto (cp-link): 14px 600 brandInk. */
 export function TextLink({ title, onPress }: { title: string; onPress: () => void }) {
+    const styles = useThemedStyles(makeStyles);
     return (
         <Pressable onPress={onPress} accessibilityRole="link" hitSlop={8} style={styles.link}>
             <Text style={styles.linkText}>{title}</Text>
@@ -567,6 +594,7 @@ export function TextLink({ title, onPress }: { title: string; onPress: () => voi
 /* ------------------------------------------------------------------ */
 
 function Spinner() {
+    const styles = useThemedStyles(makeStyles);
     const spin = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -605,6 +633,7 @@ export function CameraLoading({
     kids?: boolean;
     style?: StyleProp<ViewStyle>;
 }) {
+    const styles = useThemedStyles(makeStyles);
     return (
         <View
             style={[styles.camLoading, kids && { backgroundColor: kidsColors.indigo }, style]}
@@ -634,6 +663,8 @@ export function CountdownRing({
     large?: boolean;
     size?: number;
 }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const sw = 8;
     const rad = (size - sw) / 2;
     const c = 2 * Math.PI * rad;
@@ -717,6 +748,8 @@ export function OptionGroup<T extends string | number>({
     value: T;
     onChange: (value: T) => void;
 }) {
+    const { colors, shadow, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.opts}>
             <Text style={styles.optsTitle} accessibilityRole="header">
@@ -767,7 +800,7 @@ export function OptionGroup<T extends string | number>({
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     btn: {
         flexDirection: "row",
         alignItems: "center",

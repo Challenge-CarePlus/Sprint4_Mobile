@@ -4,7 +4,8 @@ import type { VideoSource } from "expo-video";
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
-import { colors, kidsColors, radii, shadow } from "../theme/tokens";
+import { kidsColors, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type Props = {
     source: VideoSource;
@@ -25,6 +26,8 @@ type Props = {
  * valendo `ExerciseVideo.tsx` (expo-video).
  */
 export default function ExerciseVideo({ source, style, kids = false }: Props) {
+    const { colors, shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const uri = resolveUri(source);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [needsTap, setNeedsTap] = useState(false);
@@ -122,7 +125,7 @@ function resolveUri(source: VideoSource): string {
     return (source && (source as { uri?: string }).uri) || "";
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         width: "100%",
         height: "100%",

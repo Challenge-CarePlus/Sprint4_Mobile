@@ -2,9 +2,11 @@ import { ScrollView, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { HeroHeader, MenuCard, Sheet } from "../components/ds";
 import { hasConsent } from "../services/consentStorage";
-import { colors } from "../theme/tokens";
+import { Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 export default function Main() {
+    const styles = useThemedStyles(makeStyles);
   const navigation = useNavigation();
 
   async function handleOpenExercises() {
@@ -57,7 +59,7 @@ export default function Main() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,

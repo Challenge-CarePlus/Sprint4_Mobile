@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { useVideoPlayer, VideoSource, VideoView } from "expo-video";
 
-import { colors, kidsColors, radii, shadow } from "../theme/tokens";
+import { kidsColors, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type Props = {
     source: VideoSource;
@@ -25,6 +26,8 @@ type Props = {
  * tocar com um toque.
  */
 export default function ExerciseVideo({ source, style, kids = false }: Props) {
+    const { colors, shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const player = useVideoPlayer(source, (p) => {
         p.loop = true;
         p.muted = true;
@@ -112,7 +115,7 @@ export default function ExerciseVideo({ source, style, kids = false }: Props) {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         width: "100%",
         height: "100%",

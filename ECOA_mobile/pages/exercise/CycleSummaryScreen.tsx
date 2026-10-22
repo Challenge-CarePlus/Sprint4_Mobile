@@ -8,8 +8,9 @@ import { TRACKS } from "../../data/tracks";
 import { saveCycleResult } from "../../services/progressStorage";
 import { clearSessionOutcomes, getSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
-import { colors, fonts, radii, shadow } from "../../theme/tokens";
-import { getTrailTheme } from "../../theme/trailThemes";
+import { fonts, radii, Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
+import { useTrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -24,6 +25,8 @@ function StatTile({
     label: string;
     value: string | number;
 }) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.statTile}>
             <MaterialIcons name={icon} size={20} color={colors.brand} />
@@ -34,11 +37,14 @@ function StatTile({
 }
 
 export default function CycleSummaryScreen() {
+    const { shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const route = useRoute();
     const { trackId } = route.params as RouteParams;
 
     const track = TRACKS.find((t) => t.id === trackId);
+    const trail = useTrailTheme(track?.ageGroup ?? "adults");
     const [previousCycles, setPreviousCycles] = useState(0);
 
     // Foto dos resultados no 1º render: o efeito abaixo limpa o armazenamento da sessão
@@ -88,7 +94,6 @@ export default function CycleSummaryScreen() {
         );
     }
 
-    const trail = getTrailTheme(track.ageGroup);
 
     return (
         <ScrollView
@@ -134,7 +139,7 @@ export default function CycleSummaryScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

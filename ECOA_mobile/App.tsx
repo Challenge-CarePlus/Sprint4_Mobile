@@ -10,10 +10,12 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/AppRouter";
 import { MAX_APP_WIDTH } from "./theme/layout";
-import { colors } from "./theme/tokens";
+import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 
 // Foco visível do teclado em `brand` (DS), no lugar do contorno preto padrão do navegador.
 function useWebFocusRing() {
+    const { colors } = useTheme();
+
     useEffect(() => {
         if (Platform.OS !== "web" || typeof document === "undefined") return;
 
@@ -26,10 +28,19 @@ function useWebFocusRing() {
         return () => {
             style.remove();
         };
-    }, []);
+    }, [colors.focus]);
 }
 
 export default function App() {
+    return (
+        <ThemeProvider>
+            <Root />
+        </ThemeProvider>
+    );
+}
+
+function Root() {
+    const { colors } = useTheme();
     useWebFocusRing();
 
     const [fontsLoaded] = useFonts({

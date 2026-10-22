@@ -18,9 +18,10 @@ import type { Detector } from "../../vision/SequenceDetectors";
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
 import { recordExerciseOutcome } from "../../services/sessionProgressStore";
 import { resetSpeechDedup, speak } from "../../services/speech";
-import { colors, fonts, radii, shadow } from "../../theme/tokens";
+import { fonts, radii, Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { getPresentation } from "../../theme/ageGroupThemes";
-import { getTrailTheme, TrailTheme } from "../../theme/trailThemes";
+import { useTrailTheme, TrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -37,6 +38,7 @@ type SessionProps = {
 const SESSION_CONTENT_PADDING = 40; // paddingHorizontal: 20 dos dois lados (styles.content)
 
 export default function ExerciseSessionScreen() {
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
@@ -102,6 +104,7 @@ function RepetitionProgress({
     filledColor: string;
     emptyColor: string;
 }) {
+    const styles = useThemedStyles(makeStyles);
     const icon = gamified ? "star" : "radio-button-checked";
     const iconOutline = gamified ? "star-border" : "radio-button-unchecked";
 
@@ -120,9 +123,11 @@ function RepetitionProgress({
 }
 
 function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: SessionProps) {
+    const { colors, shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
-    const trail = getTrailTheme(track.ageGroup);
+    const trail = useTrailTheme(track.ageGroup);
     // exercise é tipado como Exercise (a union completa) aqui porque é passado
     // via props — a narrowing do pai não atravessa a fronteira do componente,
     // então reconfirma em runtime em vez de usar `!`. Com data/types.ts como
@@ -315,7 +320,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                     onAspectRatioChange={setCameraAspect}
                     onFaceVisibilityChange={handleFaceVisibilityChange}
                     cameraStyle={styles.cameraFill}
-                    borderColor={getFeedbackColor(feedbackKind, trail)}
+                    borderColor={getFeedbackColor(feedbackKind, trail, colors.success)}
                 />
 
                 <LinearGradient
@@ -363,9 +368,11 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 }
 
 function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: SessionProps) {
+    const { colors, shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const presentation = getPresentation(track.ageGroup);
-    const trail = getTrailTheme(track.ageGroup);
+    const trail = useTrailTheme(track.ageGroup);
     const targetReps = exercise.repetitions ?? 1;
 
     const hasFinishedRef = useRef(false);
@@ -546,9 +553,9 @@ function GuidedExerciseSession({ track, exercise, trackId, exerciseIndex }: Sess
     );
 }
 
-function getFeedbackColor(kind: DetectorFeedback["kind"] | null, trail: TrailTheme): string {
+function getFeedbackColor(kind: DetectorFeedback["kind"] | null, trail: TrailTheme, success: string): string {
     if (kind === "relaxing" || kind === "waiting-release" || kind === "repetition-complete" || kind === "exercise-complete") {
-        return colors.success;
+        return success;
     }
     if (kind === "holding") {
         return trail.ringHolding;
@@ -556,7 +563,7 @@ function getFeedbackColor(kind: DetectorFeedback["kind"] | null, trail: TrailThe
     return trail.ringIdle;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

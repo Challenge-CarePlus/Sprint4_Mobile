@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors } from "../../theme/tokens";
+import { Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 
 /**
  * Variante .web.tsx — o spike usa react-native-vision-camera e a WebView do
@@ -8,6 +9,7 @@ import { colors } from "../../theme/tokens";
  * vision/FaceTrackingCamera.web.tsx para a explicação completa.
  */
 export default function VisionSpike() {
+    const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.container}>
             <Text style={styles.text}>
@@ -18,7 +20,7 @@ export default function VisionSpike() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

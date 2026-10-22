@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 import { Button, Option, OptionGroup, PageIntro } from "../components/ds";
-import { colors } from "../theme/tokens";
+import { Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 import {
     AppSettings,
@@ -39,6 +40,7 @@ const cameraOptions: Option<CameraPositionOption>[] = [
 ];
 
 export default function Settings() {
+    const styles = useThemedStyles(makeStyles);
     const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
     useEffect(() => {
@@ -93,7 +95,7 @@ export default function Settings() {
 }
 
 // Protótipo (.cp-phone-pad-sm): 16 / 16 / 24, gap 16.
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

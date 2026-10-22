@@ -8,9 +8,10 @@ import { ActionBar, Alert, RepChip, StepBadge } from "../../components/ds";
 import ExerciseVideo from "../../components/ExerciseVideo";
 import { getExerciseById } from "../../data/exercises";
 import { TRACKS } from "../../data/tracks";
-import { colors, fonts, gradients, kidsColors, kidsFonts, radii, shadow } from "../../theme/tokens";
+import { fonts, kidsColors, kidsFonts, radii, Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { getPresentation } from "../../theme/ageGroupThemes";
-import { getTrailTheme } from "../../theme/trailThemes";
+import { useTrailTheme } from "../../theme/trailThemes";
 import { hasCalibration } from "../../vision/calibrationStore";
 
 type RouteParams = {
@@ -19,11 +20,14 @@ type RouteParams = {
 };
 
 export default function ExercisePreviewScreen() {
+    const { colors, shadow, gradients } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
     const track = TRACKS.find((t) => t.id === trackId);
+    const trail = useTrailTheme(track?.ageGroup ?? "adults");
     const exerciseId = track?.exerciseIds[exerciseIndex];
     const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
 
@@ -36,7 +40,6 @@ export default function ExercisePreviewScreen() {
     }
 
     const presentation = getPresentation(track.ageGroup);
-    const trail = getTrailTheme(track.ageGroup);
     const kids = track.ageGroup === "children";
     const senior = track.ageGroup === "elderly";
     const calibrated = hasCalibration(trackId);
@@ -196,7 +199,7 @@ export default function ExercisePreviewScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

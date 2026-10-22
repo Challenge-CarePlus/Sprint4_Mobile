@@ -13,7 +13,8 @@ import FaceLandmarkerBridge, {
     FaceLandmarkerBridgeHandle,
     FaceLandmarkerResultMessage,
 } from "../../vision/FaceLandmarkerBridge";
-import { colors } from "../../theme/tokens";
+import { Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 
 const CAPTURE_INTERVAL_MS = 400;
 const TRACKED_BLENDSHAPES = [
@@ -32,6 +33,7 @@ const TRACKED_BLENDSHAPES = [
  * device físico antes de construir os detectores de exercício em cima dela.
  */
 export default function VisionSpike() {
+    const styles = useThemedStyles(makeStyles);
     const isFocused = useIsFocused();
     const device = useCameraDevice("front");
     const photoOutput = usePhotoOutput({});
@@ -228,7 +230,7 @@ export default function VisionSpike() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

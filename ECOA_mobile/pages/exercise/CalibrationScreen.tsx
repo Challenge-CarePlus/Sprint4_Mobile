@@ -11,8 +11,9 @@ import { CALIBRATION_DURATION_MS, CalibrationCollector } from "../../vision/cali
 import { setCalibration } from "../../vision/calibrationStore";
 import { speak } from "../../services/speech";
 import { TRACKS } from "../../data/tracks";
-import { colors, fonts, kidsColors, radii, shadow } from "../../theme/tokens";
-import { getTrailTheme } from "../../theme/trailThemes";
+import { fonts, kidsColors, radii, Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
+import { useTrailTheme } from "../../theme/trailThemes";
 
 type RouteParams = {
     trackId: string;
@@ -23,12 +24,14 @@ const CALIBRATION_CONTENT_PADDING = 32; // paddingHorizontal: 16 dos dois lados
 const MIN_CALIBRATION_SAMPLES = 5;
 
 export default function CalibrationScreen() {
+    const { colors, shadow } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
     const track = TRACKS.find((t) => t.id === trackId);
-    const trail = getTrailTheme(track?.ageGroup ?? "adults");
+    const trail = useTrailTheme(track?.ageGroup ?? "adults");
 
     const collectorRef = useRef(new CalibrationCollector());
     const hasStartedRef = useRef(false);
@@ -230,7 +233,7 @@ export default function CalibrationScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

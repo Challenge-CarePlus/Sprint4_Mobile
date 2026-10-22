@@ -5,7 +5,8 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { MenuCard, PageIntro } from "../../components/ds";
 import { TRACKS } from "../../data/tracks";
 import { AgeGroup } from "../../data/types";
-import { colors } from "../../theme/tokens";
+import { Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { clearSessionOutcomes } from "../../services/sessionProgressStore";
 import { clearCalibration } from "../../vision/calibrationStore";
 
@@ -22,6 +23,7 @@ const AGE_GROUP_TITLE: Record<AgeGroup, string> = {
 };
 
 export default function TrackSelectScreen() {
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
 
     function handleSelectTrack(trackId: string) {
@@ -65,7 +67,7 @@ export default function TrackSelectScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.surface },
     content: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 16 },
     list: { gap: 12 },

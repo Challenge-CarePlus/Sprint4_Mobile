@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
 import { Alert, AuthLayout, Button, TextLink } from "../components/ds";
-import { colors, fonts } from "../theme/tokens";
+import { fonts, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 // O backend exige 6–72 caracteres na senha.
 const PASSWORD_MIN = 6;
@@ -44,6 +45,7 @@ function validate(name: string, email: string, password: string, confirmPassword
 }
 
 export default function Register() {
+    const styles = useThemedStyles(makeStyles);
     const { register } = useAuth();
 
     const [name, setName] = useState("");
@@ -165,7 +167,7 @@ export default function Register() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     submit: { marginTop: 8 },
     footerText: { fontFamily: fonts.body, fontSize: 14, color: colors.inkMuted },
 });

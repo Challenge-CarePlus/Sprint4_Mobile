@@ -6,11 +6,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import IconBadge from "../../components/IconBadge";
 import GradientButton from "../../components/GradientButton";
 import { saveConsent } from "../../services/consentStorage";
-import { colors, fonts, radii, shadow } from "../../theme/tokens";
+import { fonts, radii, Theme } from "../../theme/tokens";
+import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 
 type ConsentOption = "patient" | "guardian";
 
 export default function ConsentScreen() {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
     const [selected, setSelected] = useState<ConsentOption | null>(null);
 
@@ -93,7 +96,7 @@ export default function ConsentScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.surface,

@@ -231,9 +231,9 @@ export type Shadows = { [K in keyof ShadowSet]: object };
 
 export function makeShadow(mode: ThemeMode, colors: Colors): Shadows {
     if (mode === "dark") {
-        const none = {} as Shadows;
-        for (const key of Object.keys(lightShadow(colors)) as (keyof ShadowSet)[]) none[key] = NO_SHADOW;
-        return none;
+        const none: Record<string, object> = {};
+        for (const key of Object.keys(lightShadow(colors))) none[key] = NO_SHADOW;
+        return none as Shadows;
     }
     return lightShadow(colors);
 }

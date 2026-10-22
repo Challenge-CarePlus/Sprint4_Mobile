@@ -2,7 +2,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import IconBadge from "./IconBadge";
-import { colors, fonts, radii, shadow } from "../theme/tokens";
+import { fonts, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type CardProps = {
   title: string;
@@ -21,6 +22,8 @@ export default function Card({
   gradient = "primary",
   onPress,
 }: CardProps) {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       onPress={active ? onPress : undefined}
@@ -46,7 +49,7 @@ export default function Card({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
   container: {
     width: "100%",
     backgroundColor: colors.surfaceRaised,

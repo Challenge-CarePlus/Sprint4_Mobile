@@ -10,9 +10,10 @@ import {
     ViewStyle,
 } from "react-native";
 
-import { colors, fonts, gradients, radii, shadow } from "../theme/tokens";
+import { fonts, Gradients, radii, Theme } from "../theme/tokens";
+import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
-type GradientName = keyof typeof gradients;
+type GradientName = keyof Gradients;
 
 type Props = {
     title: string;
@@ -50,7 +51,7 @@ export default function GradientButton({
     gradient = "primary",
     fill,
     fillGradient,
-    textColor = colors.white,
+    textColor: textColorProp,
     fontFamily,
     disabled = false,
     loading = false,
@@ -60,6 +61,9 @@ export default function GradientButton({
     textStyle,
     accessibilityLabel,
 }: Props) {
+    const { colors, shadow, gradients } = useTheme();
+    const textColor = textColorProp ?? colors.white;
+    const styles = useThemedStyles(makeStyles);
     const isDisabled = disabled || loading;
 
     const iconElement = icon ? (
@@ -109,7 +113,7 @@ export default function GradientButton({
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     wrapper: {
         width: "100%",
         borderRadius: radii.md,

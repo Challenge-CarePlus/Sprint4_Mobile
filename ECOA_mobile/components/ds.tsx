@@ -364,6 +364,7 @@ export function AppBar({
     onMenu?: () => void;
     menuOpen?: boolean;
 }) {
+    const { colors, mode } = useTheme();
     const styles = useThemedStyles(makeStyles);
     return (
         <View style={styles.appbar}>
@@ -371,7 +372,8 @@ export function AppBar({
             <View style={styles.appbarLogo}>
                 <Image
                     source={require("../assets/ECOA.png")}
-                    style={styles.logoImg}
+                    // O logotipo é escuro: no tema escuro vira um traço claro (legível sobre a barra).
+                    style={[styles.logoImg, mode === "dark" && { tintColor: colors.ink }]}
                     resizeMode="contain"
                     accessibilityLabel="Ecoa"
                 />

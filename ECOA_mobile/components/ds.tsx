@@ -32,24 +32,30 @@ export function PageIntro({
     title,
     subtitle,
     icon,
+    align = "center",
 }: {
     title: string;
     subtitle?: string;
     icon?: IconName;
+    align?: "center" | "left";
 }) {
     const { colors, gradients } = useTheme();
     const styles = useThemedStyles(makeStyles);
     return (
-        <View style={styles.intro}>
+        <View style={[styles.intro, align === "left" && { alignItems: "flex-start" }]}>
             {icon && (
                 <LinearGradient colors={gradients.hero} style={styles.introIcon}>
                     <MaterialIcons name={icon} size={32} color={colors.onHero} />
                 </LinearGradient>
             )}
-            <Text style={styles.introTitle} accessibilityRole="header">
+            <Text style={[styles.introTitle, align === "left" && { textAlign: "left" }]} accessibilityRole="header">
                 {title}
             </Text>
-            {subtitle ? <Text style={styles.introSubtitle}>{subtitle}</Text> : null}
+            {subtitle ? (
+                <Text style={[styles.introSubtitle, align === "left" && { textAlign: "left", maxWidth: undefined }]}>
+                    {subtitle}
+                </Text>
+            ) : null}
         </View>
     );
 }
@@ -305,6 +311,36 @@ export function Button({
 /* ------------------------------------------------------------------ */
 /* Estrutura de tela: AppBar, NavDrawer, HeroHeader, Sheet             */
 /* ------------------------------------------------------------------ */
+
+/** Selo de estado com ponto (cp-badge). */
+export function Badge({ tone = "neutral", children }: { tone?: "info" | "success" | "warning" | "danger" | "neutral"; children: ReactNode }) {
+    const { colors } = useTheme();
+    const map = {
+        info: [colors.brandSoft, colors.brandInk],
+        success: [colors.successSoft, colors.success],
+        warning: [colors.warningSoft, colors.warning],
+        danger: [colors.dangerSoft, colors.danger],
+        neutral: [colors.surface, colors.ink],
+    }[tone];
+
+    return (
+        <View
+            style={{
+                alignSelf: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                paddingVertical: 4,
+                paddingHorizontal: 10,
+                borderRadius: radii.pill,
+                backgroundColor: map[0],
+            }}
+        >
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: map[1] }} />
+            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 12, lineHeight: 16, color: map[1] }}>{children}</Text>
+        </View>
+    );
+}
 
 export const APPBAR_HEIGHT = 64;
 export const ADMINBAR_HEIGHT = 28;

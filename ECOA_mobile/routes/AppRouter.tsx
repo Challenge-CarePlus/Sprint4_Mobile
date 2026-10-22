@@ -5,6 +5,11 @@ import Login from "../pages/Login";
 import Main from "../pages/Main";
 import Register from "../pages/Register";
 import Entrance from "../pages/Entrance";
+import EvolutionScreen from "../pages/admin/EvolutionScreen";
+import PatientScreen from "../pages/admin/PatientScreen";
+import TrainingsScreen from "../pages/admin/TrainingsScreen";
+import EditTrainingScreen from "../pages/admin/EditTrainingScreen";
+import PickPatientsScreen from "../pages/admin/PickPatientsScreen";
 
 import { AUTH_REQUIRED } from "../config/authConfig";
 import { TRACKS } from "../data/tracks";
@@ -49,6 +54,13 @@ function PrivateRoutes() {
                 name="SETTINGS"
                 component={Settings}
             />
+
+            {/* Modo administrador (v3): o painel só aparece no menu/Home do admin e o servidor valida o papel. */}
+            <Stack.Screen name="EVOLUTION" component={EvolutionScreen} />
+            <Stack.Screen name="PATIENT" component={PatientScreen} />
+            <Stack.Screen name="TRAININGS" component={TrainingsScreen} />
+            <Stack.Screen name="EDIT_TRAINING" component={EditTrainingScreen} />
+            <Stack.Screen name="PICK_PATIENTS" component={PickPatientsScreen} />
 
             {/* Nova aba de exercícios de fonoaudiologia em casa (v2). */}
             <Stack.Screen

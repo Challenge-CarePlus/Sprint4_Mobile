@@ -2,7 +2,11 @@ import { ScrollView, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { HeroHeader, MenuCard, Sheet } from "../components/ds";
 import { useAuth } from "../context/AuthContext";
+import { useDraft } from "../context/DraftContext";
+import { exerciseCountLabel } from "../data/training";
+import { useLoad } from "../hooks/useLoad";
 import { hasConsent } from "../services/consentStorage";
+import { trainingsApi } from "../services/trainingsApi";
 import { Theme } from "../theme/tokens";
 import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
@@ -10,6 +14,9 @@ export default function Main() {
     const styles = useThemedStyles(makeStyles);
   const navigation = useNavigation();
   const admin = useAuth().role === "admin";
+  const counts = useLoad(async () =>
+    admin ? { patients: (await trainingsApi.listPatients()).length, trainings: (await trainingsApi.listTrainings()).length } : null
+  ).data;
 
   async function handleOpenExercises() {
     const consented = await hasConsent();
@@ -31,6 +38,24 @@ export default function Main() {
       />
 
       <Sheet>
+        {admin && (
+          <>
+            <MenuCard
+              icon="insights"
+              title="Evolução dos pacientes"
+              subtitle="Adesão e sessões da semana"
+              meta={counts ? `${counts.patients} pacientes` : undefined}
+              onPress={() => navigation.navigate("EVOLUTION" as never)}
+            />
+            <MenuCard
+              icon="fitness-center"
+              title="Treinos personalizados"
+              subtitle="Crie trilhas com seus próprios exercícios"
+              meta={counts ? (counts.trainings === 1 ? "1 treino" : `${counts.trainings} treinos`) : undefined}
+              onPress={() => navigation.navigate("TRAININGS" as never)}
+            />
+          </>
+        )}
         <MenuCard
           icon={admin ? "record-voice-over" : "fitness-center"}
           title="Exercícios"

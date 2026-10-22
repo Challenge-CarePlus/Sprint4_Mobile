@@ -47,13 +47,23 @@ export default function Menu() {
             ? "home"
             : route.name === "SETTINGS"
               ? "settings"
-              : route.name.includes("EXERCISE") || route.name === "TRACK_SELECT"
-                ? "exercise"
-                : undefined;
+              : route.name === "EVOLUTION" || route.name === "PATIENT"
+                ? "evolution"
+                : route.name.includes("TRAINING") || route.name === "PICK_PATIENTS" || route.name === "EDIT_EXERCISE"
+                  ? "trainings"
+                  : route.name.includes("EXERCISE") || route.name === "TRACK_SELECT"
+                    ? "exercise"
+                    : undefined;
 
     const items: NavDrawerItem[] = [
         { id: "home", label: isAdmin ? "Painel" : "Página inicial", icon: "home", onPress: () => go("MAIN") },
-        { id: "exercise", label: "Exercícios", icon: "fitness-center", onPress: handleOpenExercises },
+        ...(isAdmin
+            ? [
+                  { id: "evolution", label: "Evolução dos pacientes", icon: "insights" as const, onPress: () => go("EVOLUTION") },
+                  { id: "trainings", label: "Treinos personalizados", icon: "fitness-center" as const, onPress: () => go("TRAININGS") },
+              ]
+            : []),
+        { id: "exercise", label: "Exercícios", icon: isAdmin ? "record-voice-over" : "fitness-center", onPress: handleOpenExercises },
         { id: "settings", label: "Configurações", icon: "settings", onPress: () => go("SETTINGS") },
         {
             id: "theme",

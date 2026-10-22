@@ -1,12 +1,16 @@
+export type Role = "admin" | "patient";
+
 export type Login = {
-    id: number;
+    id: string;
     name: string;
     email: string;
     password: string;
-    access: Access;
+    role: Role;
 };
 
-export enum Access {
-    USER = "User",
-    ADMIN = "Admin"
+/** Usuário sem o hash — o que pode sair em resposta de API. */
+export type PublicUser = Omit<Login, "password">;
+
+export function toPublicUser(user: Login): PublicUser {
+    return { id: user.id, name: user.name, email: user.email, role: user.role };
 }

@@ -1,52 +1,36 @@
-import fs from "fs/promises";
-import path from "path";
+import bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 import { Login } from "../models/login";
+import { MOCK_PASSWORD, MOCK_USERS } from "../data/seed";
+import { usersFile } from "../config/paths";
+import { createJsonStore } from "./jsonStore";
 
-// Relativo a este arquivo (e não ao cwd): funciona igual rodando de src/ (dev)
-// ou de dist/ (build) — nos dois casos "../../src/db" aponta pro users.json
-// versionado.
-const DB_PATH =
-    process.env.USERS_DB_PATH ?? path.resolve(__dirname, "../../src/db/users.json");
+const store = createJsonStore<Login[]>(usersFile, async () => {
+    // Um hash só pra todos: a senha é a mesma e o custo do bcrypt roda uma vez.
+    const hash = await bcrypt.hash(MOCK_PASSWORD, 10);
+    return MOCK_USERS.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        password: hash,
+        role: u.role,
+    }));
+});
 
-// Fila de operações: serializa todo read-modify-write do arquivo, senão
-// cadastros simultâneos leem o mesmo estado e o último a gravar apaga os outros.
-let queue: Promise<unknown> = Promise.resolve();
-
-function enqueue<T>(task: () => Promise<T>): Promise<T> {
-    const run = queue.then(task, task);
-    queue = run.catch(() => undefined);
-    return run;
+export async function findByEmail(email: string): Promise<Login | undefined> {
+    return (await store.read()).find((u) => u.email === email);
 }
 
-async function read(): Promise<Login[]> {
-    return JSON.parse(await fs.readFile(DB_PATH, "utf-8"));
-}
-
-async function write(users: Login[]) {
-    // Grava em arquivo temporário e renomeia: um crash no meio não corrompe o JSON.
-    const tmp = `${DB_PATH}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(users, null, 2));
-    await fs.rename(tmp, DB_PATH);
-}
-
-export function findByEmail(email: string): Promise<Login | undefined> {
-    return enqueue(async () => (await read()).find((u) => u.email === email));
-}
-
-export function findById(id: number): Promise<Login | undefined> {
-    return enqueue(async () => (await read()).find((u) => u.id === id));
+export async function findById(id: string): Promise<Login | undefined> {
+    return (await store.read()).find((u) => u.id === id);
 }
 
 /** Cria o usuário de forma atômica; devolve null se o e-mail já existe. */
 export function createUser(data: Omit<Login, "id">): Promise<Login | null> {
-    return enqueue(async () => {
-        const users = await read();
-        if (users.some((u) => u.email === data.email)) return null;
+    return store.update((users) => {
+        if (users.some((u) => u.email === data.email)) return { result: null };
 
-        const id = users.reduce((max, u) => Math.max(max, u.id), 0) + 1;
-        const user: Login = { id, ...data };
-        users.push(user);
-        await write(users);
-        return user;
+        const user: Login = { id: `u-${randomUUID().slice(0, 8)}`, ...data };
+        return { next: [...users, user], result: user };
     });
 }

@@ -40,3 +40,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Backend: dados em runtime (usuários/treinos JSON e vídeos enviados)
+ECOA_backend/data/
+ECOA_backend/uploads/

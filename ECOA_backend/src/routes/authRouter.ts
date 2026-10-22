@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { Access } from "../models/login";
+import { toPublicUser } from "../models/login";
 import { JWT_SECRET } from "../config/jwt";
 import { auth, AuthPayload } from "../middleware/auth";
 import { createUser, findByEmail, findById } from "../db/userStore";
@@ -28,7 +28,9 @@ router.get("/", (req, res) => {
     });
 });
 
-router.post("/register",async (req, res) => {
+// Cadastro aberto continua existindo (dormente no app com AUTH_REQUIRED=false);
+// quem se cadastra é sempre paciente — o papel nunca vem do corpo da requisição.
+router.post("/register", async (req, res) => {
     try {
         const { name, password } = req.body ?? {};
         const email = normalizeEmail(req.body?.email);
@@ -71,7 +73,7 @@ router.post("/register",async (req, res) => {
             name: name.trim(),
             email,
             password: hashedPassword,
-            access: Access.USER
+            role: "patient"
         });
 
         if (!novoUsuario) {
@@ -84,12 +86,7 @@ router.post("/register",async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Usuário cadastrado com sucesso",
-            user: {
-                id: novoUsuario.id,
-                name: novoUsuario.name,
-                email: novoUsuario.email,
-                access: novoUsuario.access
-            }
+            user: toPublicUser(novoUsuario)
         });
     } catch (error) {
         console.error("register:", error);
@@ -100,7 +97,7 @@ router.post("/register",async (req, res) => {
     }
 });
 
-router.post("/login",async (req, res) => {
+router.post("/login", async (req, res) => {
     try {
         const email = normalizeEmail(req.body?.email);
         const password = req.body?.password;
@@ -119,28 +116,21 @@ router.post("/login",async (req, res) => {
             user?.password ?? DUMMY_HASH
         );
 
+        // Mesma mensagem pra e-mail desconhecido e senha errada: não revela qual dos dois falhou.
         if (!user || !validPassword) {
             return res.status(401).json({
                 success: false,
-                message: "Credenciais inválidas"
+                message: "E-mail ou senha inválidos"
             });
         }
 
-        const token = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                access: user.access
-            },
-            JWT_SECRET,
-            {
-                expiresIn: "3d"
-            }
-        );
+        const payload: AuthPayload = { id: user.id, email: user.email, role: user.role };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "3d" });
 
         return res.json({
             success: true,
-            token
+            token,
+            user: toPublicUser(user)
         });
     } catch (error) {
         console.error("login:", error);
@@ -152,7 +142,7 @@ router.post("/login",async (req, res) => {
 });
 
 // Valida o token e devolve o usuário — o front usa pra descartar sessão
-// expirada/inválida ao abrir o app (F1 do QA).
+// expirada/inválida ao abrir o app.
 router.get("/me", auth, async (_req, res) => {
     const payload = res.locals.user as AuthPayload;
     const user = await findById(payload.id);
@@ -166,12 +156,7 @@ router.get("/me", auth, async (_req, res) => {
 
     return res.json({
         success: true,
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            access: user.access
-        }
+        user: toPublicUser(user)
     });
 });
 

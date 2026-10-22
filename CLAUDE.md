@@ -24,6 +24,17 @@ imagem sai do dispositivo. Risco técnico principal: latência da ponte WebView 
 código implementado e validado estaticamente (typecheck, testes, bundle), mas **não validado
 em device físico neste ambiente** (sem `adb`/emulador disponível). Ver "Como testar" abaixo.
 
+## Acesso livre, sem login (temporário, 21/10)
+
+Decisão da usuária: "por enquanto" o app abre **direto na Home, sem login**. Chave única:
+`ECOA_mobile/config/authConfig.ts` → `AUTH_REQUIRED`, lida de `EXPO_PUBLIC_AUTH_REQUIRED` (**padrão `false`**; só
+`"true"` liga). Com `false`: `AppRouter` entra nas rotas privadas sem token, `AuthContext` não lê token nem registra o
+handler de 401, o Menu esconde "Sair", e nada chama o back-end (o fluxo de exercícios nunca usou a API). Consentimento e
+progresso seguem locais (AsyncStorage). **Nada foi apagado**: Login, Register, AuthContext, `jwt.ts` e o back-end ficam
+dormentes. Para voltar a exigir login: `EXPO_PUBLIC_AUTH_REQUIRED=true` no build (Vercel → Environment Variables, ou
+`.env`) e refazer o deploy (a variável é embutida no bundle; `--clear` já está no `vercel.json`). O Render só precisa
+estar no ar de novo nesse caso.
+
 ## DS v2 (atual, 20/10) — SUBSTITUI a paleta e as trilhas descritas abaixo
 
 O usuário atualizou o DS (artifact Ttcaqk6QNXVrPd1zQ7wZ2D, versão de 20/10). Regra nova: **todo o app

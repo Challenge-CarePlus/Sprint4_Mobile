@@ -11,7 +11,7 @@
  * Só o tema claro foi aplicado: o DS define o escuro, mas o app ainda não
  * tem infraestrutura de tema (etapa separada).
  */
-export const colors = {
+export const lightColors = {
     // Superfícies
     surface: "#F3F4F7",
     surfaceRaised: "#FFFFFF",
@@ -50,6 +50,45 @@ export const colors = {
 
     focus: "#0079C8",
 } as const;
+
+/** Mesmas chaves, valores string (o `as const` acima fixaria os literais claros). */
+export type Colors = { [K in keyof typeof lightColors]: string };
+
+/** Tema escuro do DS (tokens.json): elevação por camada, sem sombras. */
+export const darkColors: Colors = {
+    surface: "#0A1322",
+    surfaceRaised: "#131E31",
+    line: "#24324A",
+    lineStrong: "#6B7890",
+
+    ink: "#EEF2F8",
+    inkMuted: "#A3AEC2",
+    white: "#FFFFFF",
+
+    brand: "#5AB4F0",
+    brandInk: "#8CCBF5",
+    brandStrong: "#8CCBF5",
+    brandSoft: "#172A47",
+    onBrand: "#0A1322",
+    sky: "#3A8FCC",
+
+    brandDeep: "#1C3A66",
+    heroEnd: "#2A4F85",
+    onHero: "#FFFFFF",
+    onHeroMuted: "#B8CBEB",
+    tonalStart: "#1A2F52",
+    tonalEnd: "#142540",
+    lineTonal: "#2E4673",
+
+    success: "#6BD196",
+    successSoft: "#0F2E1E",
+    warning: "#F5C451",
+    warningSoft: "#33260A",
+    danger: "#FF8A80",
+    dangerSoft: "#3A1412",
+
+    focus: "#5AB4F0",
+};
 
 /** Kit "Ecoa · Hábitos Sustentáveis" — usado só na Trilha Infantil. */
 export const kidsColors = {
@@ -126,7 +165,7 @@ export const touchTarget = {
  * shadow-hero). `sm`/`md`/`lg`/`nav` são extrapolações nossas na mesma
  * receita para os níveis que o app já usava. `kids` é a do kit infantil.
  */
-export const shadow = {
+const lightShadow = (colors: Colors) => ({
     sm: {
         shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
@@ -183,20 +222,55 @@ export const shadow = {
         shadowRadius: 16,
         elevation: 4,
     },
-} as const;
+} as const);
+type ShadowSet = ReturnType<typeof lightShadow>;
+const NO_SHADOW = { shadowOpacity: 0, elevation: 0 } as const;
+
+/** No escuro a elevação vem da camada (surface-raised), não de sombra (DS). */
+export type Shadows = { [K in keyof ShadowSet]: object };
+
+export function makeShadow(mode: ThemeMode, colors: Colors): Shadows {
+    if (mode === "dark") {
+        const none = {} as Shadows;
+        for (const key of Object.keys(lightShadow(colors)) as (keyof ShadowSet)[]) none[key] = NO_SHADOW;
+        return none;
+    }
+    return lightShadow(colors);
+}
 
 /**
  * Gradientes: o hero marinho (`brandDeep` → `heroEnd`) é também o do botão
  * primário e do item ativo; o tonal é o dos painéis de dados. `kidsPrimary`
  * (verde-água → azul, como o "E" do logo) é a assinatura do kit infantil: só no botão principal.
  */
-export const gradients = {
-    hero: [colors.brandDeep, colors.heroEnd] as const,
-    primary: [colors.brandDeep, colors.heroEnd] as const,
-    accent: [colors.brandDeep, colors.heroEnd] as const,
-    calm: [colors.sky, colors.brandDeep] as const,
-    success: [colors.success, "#124D30"] as const,
-    surface: [colors.white, colors.brandSoft] as const,
-    tonal: [colors.tonalStart, colors.tonalEnd] as const,
-    kidsPrimary: [kidsColors.green, kidsColors.blue] as const,
-} as const;
+export function makeGradients(colors: Colors) {
+    return {
+        hero: [colors.brandDeep, colors.heroEnd] as const,
+        primary: [colors.brandDeep, colors.heroEnd] as const,
+        accent: [colors.brandDeep, colors.heroEnd] as const,
+        calm: [colors.sky, colors.brandDeep] as const,
+        success: [colors.success, "#124D30"] as const,
+        surface: [colors.white, colors.brandSoft] as const,
+        tonal: [colors.tonalStart, colors.tonalEnd] as const,
+        kidsPrimary: [kidsColors.green, kidsColors.blue] as const,
+    };
+}
+
+export type Gradients = ReturnType<typeof makeGradients>;
+export type ThemeMode = "light" | "dark";
+
+/** Tudo que a UI precisa de um tema, já resolvido. */
+export type Theme = {
+    mode: ThemeMode;
+    colors: Colors;
+    shadow: Shadows;
+    gradients: Gradients;
+};
+
+function buildTheme(mode: ThemeMode): Theme {
+    const colors = mode === "dark" ? darkColors : lightColors;
+    return { mode, colors, shadow: makeShadow(mode, colors), gradients: makeGradients(colors) };
+}
+
+export const lightTheme: Theme = buildTheme("light");
+export const darkTheme: Theme = buildTheme("dark");

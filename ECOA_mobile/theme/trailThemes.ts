@@ -1,5 +1,6 @@
 import { AgeGroup } from "../data/types";
-import { colors, fonts, gradients, kidsColors, kidsFonts } from "./tokens";
+import { useTheme } from "./ThemeContext";
+import { fonts, kidsColors, kidsFonts, Theme } from "./tokens";
 
 /**
  * Tema das telas do fluxo de exercício, por trilha. Regra do DS (Projeto
@@ -39,7 +40,8 @@ export type TrailTheme = {
     onHero: string;
 };
 
-const core: TrailTheme = {
+function coreTheme({ colors, gradients }: Theme): TrailTheme {
+    return {
     background: colors.surface,
     text: colors.ink,
     textMuted: colors.inkMuted,
@@ -62,39 +64,45 @@ const core: TrailTheme = {
     ringHolding: colors.brand,
     hero: colors.brandDeep,
     onHero: colors.onHero,
+    };
+}
+
+const kidsTheme: TrailTheme = {
+    background: kidsColors.bg,
+    text: kidsColors.ink,
+    textMuted: kidsColors.inkMuted,
+    title: kidsColors.indigo,
+    titleFont: kidsFonts.display,
+    titleSize: 30,
+    chipBackground: kidsColors.indigo,
+    chipText: "#FFFFFF",
+    card: "#FFFFFF",
+    cardText: kidsColors.ink,
+    ctaGradient: [kidsColors.green, kidsColors.blue],
+    cta: kidsColors.green,
+    onCta: kidsColors.indigo,
+    ctaFont: kidsFonts.display,
+    ctaSize: 17,
+    accent: kidsColors.green,
+    onAccent: kidsColors.indigo,
+    progressTrack: kidsColors.track,
+    ringIdle: kidsColors.indigo,
+    ringHolding: kidsColors.blue,
+    hero: kidsColors.indigo,
+    onHero: "#FFFFFF",
 };
 
-export const TRAIL_THEMES: Record<AgeGroup, TrailTheme> = {
-    adults: core,
-    // Idosos: núcleo, sem tom "muted" (alto contraste); o resto da
-    // acessibilidade (fonte 18px+, alvos 56px) vem de ageGroupThemes.
-    elderly: { ...core, textMuted: colors.ink },
-    children: {
-        background: kidsColors.bg,
-        text: kidsColors.ink,
-        textMuted: kidsColors.inkMuted,
-        title: kidsColors.indigo,
-        titleFont: kidsFonts.display,
-        titleSize: 30,
-        chipBackground: kidsColors.indigo,
-        chipText: colors.white,
-        card: colors.white,
-        cardText: kidsColors.ink,
-        ctaGradient: gradients.kidsPrimary,
-        cta: kidsColors.green,
-        onCta: kidsColors.indigo,
-        ctaFont: kidsFonts.display,
-        ctaSize: 17,
-        accent: kidsColors.green,
-        onAccent: kidsColors.indigo,
-        progressTrack: kidsColors.track,
-        ringIdle: kidsColors.indigo,
-        ringHolding: kidsColors.blue,
-        hero: kidsColors.indigo,
-        onHero: colors.white,
-    },
-};
+/** Adultos/Idosos seguem o tema (claro/escuro); a Infantil é sempre clara (kit próprio). */
+export function getTrailTheme(ageGroup: AgeGroup, theme: Theme): TrailTheme {
+    if (ageGroup === "children") return kidsTheme;
 
-export function getTrailTheme(ageGroup: AgeGroup): TrailTheme {
-    return TRAIL_THEMES[ageGroup];
+    const core = coreTheme(theme);
+    // Idosos: núcleo, sem tom "muted" (alto contraste); o resto da acessibilidade
+    // (fonte 18px+, alvos 56px) vem de ageGroupThemes.
+    return ageGroup === "elderly" ? { ...core, textMuted: theme.colors.ink } : core;
+}
+
+export function useTrailTheme(ageGroup: AgeGroup): TrailTheme {
+    const theme = useTheme();
+    return getTrailTheme(ageGroup, theme);
 }

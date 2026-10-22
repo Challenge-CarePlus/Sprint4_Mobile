@@ -1,78 +1,79 @@
 # V3 — Infra (Render + Vercel): checklist da usuária
 
 Objetivo: publicar a `v3` **sem derrubar a v2**. A v2 continua em `ecoa-backend` (Render) e no projeto `care-plus` (Vercel).
-Verificações abaixo feitas por HTTP em 21/10 (sem acesso aos painéis).
+Verificações feitas por HTTP em 22/10 (sem acesso aos painéis).
 
-## Estado atual (21/10)
+## Estado atual (22/10)
 
 | Item | Estado |
 |---|---|
-| Render `ecoa-backend` (v2) | OK, código novo no ar: `/auth/me` sem token → 401 JSON |
-| Vercel preview da v2 (`care-plus-git-v2-…`) | OK, bundle com Plus Jakarta Sans (DS v2) |
-| Branch `v3` no GitHub | **Ainda não existe** (`origin` só tem `main` e `v2`) → sem push da v3 não há deploy |
-| Render `ecoa-backend-v3` | Não existe (`ecoa-backend-v3.onrender.com` → 404) |
-| Vercel preview da v3 | Não existe (`care-plus-git-v3-…` → 404) |
+| Render `ecoa-backend` (v2) | OK, código novo no ar |
+| Branch `v3` no GitHub | Existe. `render.yaml` já traz o serviço `ecoa-backend-v3` |
+| Render `ecoa-backend-v3` | **Não criado ainda** (`ecoa-backend-v3.onrender.com/health` → 404) |
+| Vercel preview da v3 (`care-plus-git-v3-…`) | **Existe (200)**, mas embute a API de fallback `http://10.0.2.2:3000` → **não** tem `EXPO_PUBLIC_API_BASE_URL`; o login/treinos não funcionam nele até a variável existir e haver redeploy |
 
-## Ordem de execução
+## O que o `render.yaml` da v3 já define (serviço `ecoa-backend-v3`)
 
-### 0. Pré-requisito (PM)
-Push da branch `v3` para o GitHub. Sem isso, Render e Vercel não têm o que construir.
+`branch: v3` · `rootDir: ECOA_backend` · build `npm install && npm run build` · start `npm start` · health `/health` ·
+`NODE_ENV=production` · `JWT_SECRET` gerado pelo Render · `DATA_DIR=/tmp/ecoa-data` · `UPLOADS_DIR=/tmp/ecoa-uploads` ·
+`CORS_ORIGIN` (`sync:false` — você preenche). **Vai ganhar `ADMIN_PASSWORD` (`sync:false`)**: o servidor **não sobe em
+produção sem ela** e exige **mínimo 8 caracteres**. É a senha do admin (`ecoafono@email.com`); a dos pacientes mockados segue
+`ecoa2026` (sem privilégio). Nunca colar a senha em chat, print ou commit.
 
-### 1. Render — segundo serviço `ecoa-backend-v3`
-Só depois que o Backend fechar o `render.yaml` da v3. **Não mexa no serviço `ecoa-backend` existente.**
+CORS: além de `CORS_ORIGIN`, o código já aceita qualquer deploy/preview do projeto
+(`care-plus*-isabelabarcellos0812-6004s-projects.vercel.app`). Então `CORS_ORIGIN` só é indispensável se houver outro domínio.
 
-**Plano A (Blueprint):** Render → New → Blueprint → repo `Challenge-CarePlus/Sprint4_Mobile`, **branch `v3`** → conferir que o
-serviço novo se chama `ecoa-backend-v3` (nunca reaproveitar o nome `ecoa-backend`, para não sobrescrever o da v2) → Apply.
+## Passo a passo final (usuária)
 
-**Plano B (manual):** New → Web Service → mesmo repo →
-- Name: `ecoa-backend-v3` · Branch: `v3` · Root Directory: `ECOA_backend` · Runtime: Node · Plan: Free
-- Build Command: `npm install && npm run build` · Start Command: `npm start`
-- Advanced → Health Check Path: `/health`
-- Environment:
-  - `NODE_ENV` = `production`
-  - `JWT_SECRET` = botão **Generate** (nunca colar em conversa nem commitar; **diferente** do da v2)
-  - `CORS_ORIGIN` = `https://care-plus-git-v3-isabelabarcellos0812-6004s-projects.vercel.app` (várias URLs separadas por vírgula)
-  - `UPLOADS_DIR` = conforme definido pelo Backend (se usar disco persistente, ver riscos)
-- Auto-Deploy: On.
+1. **Esperar** o PM confirmar que o `render.yaml` com `ADMIN_PASSWORD` está na `v3` do GitHub.
+2. **Render → New → Blueprint** → repo `Challenge-CarePlus/Sprint4_Mobile` → **branch `v3`**.
+   Conferir que aparece **só** `ecoa-backend-v3` como novo (o `ecoa-backend` da v2 já existe; não deve ser alterado — se o
+   Render propuser mudar o da v2, **cancele**).
+3. Na tela do Blueprint, preencher as variáveis pedidas:
+   - `ADMIN_PASSWORD` = uma senha **sua**, ≥ 8 caracteres (anote num lugar seguro; é a que entra no painel).
+   - `CORS_ORIGIN` = `https://care-plus-git-v3-isabelabarcellos0812-6004s-projects.vercel.app`
+4. **Apply**. Esperar o deploy ficar *Live* (se *Failed*, abrir Logs e me mandar as últimas linhas — **sem** valores de senha).
+5. Copiar a URL pública do serviço (algo como `https://ecoa-backend-v3.onrender.com`) e **me passar**.
+6. **Vercel → projeto `care-plus` → Settings → Environment Variables → Add**:
+   - Key `EXPO_PUBLIC_API_BASE_URL` · Value = a URL do passo 5 (sem barra no final)
+   - Environments: marcar **só Preview**, e em *Git Branch* escolher `v3` → Save.
+   - **Não** editar a variável existente de Production (é a da v2).
+7. **Vercel → Deployments → deploy mais recente da `v3` → ⋯ → Redeploy → desmarcar "Use existing Build Cache"**.
+   (A variável é embutida no bundle **durante o build**; sem redeploy o preview continua com a API errada.)
+8. Plano B manual do Render (se o Blueprint der problema): New → Web Service → mesmo repo, Name `ecoa-backend-v3`, Branch
+   `v3`, Root Directory `ECOA_backend`, Build `npm install && npm run build`, Start `npm start`, Health Check `/health`,
+   Free; Environment: `NODE_ENV=production`, `JWT_SECRET`=Generate, `ADMIN_PASSWORD`, `CORS_ORIGIN`,
+   `DATA_DIR=/tmp/ecoa-data`, `UPLOADS_DIR=/tmp/ecoa-uploads`.
 
-Anotar a URL pública (ex.: `https://ecoa-backend-v3.onrender.com`) e me passar. Eu verifico por HTTP: `/health`, `POST /auth/login`
-(admin e paciente mockado), `/auth/me`, 401/403 nas rotas de admin, CORS com
-`Origin: https://care-plus-git-v3-isabelabarcellos0812-6004s-projects.vercel.app` e, quando existir, upload + `Range` em `/media`.
+## O que eu verifico por HTTP depois de cada passo
 
-### 2. Vercel — variável só para a branch `v3`
-Vercel → projeto `care-plus` → Settings → Environment Variables → **Add**:
-- Key `EXPO_PUBLIC_API_BASE_URL` · Value = URL do backend v3 · **desmarcar Production e Development, marcar só Preview** →
-  "Select a custom Preview branch" / Git Branch = `v3` → Save.
-- (Opcional, documentar) `EXPO_PUBLIC_AUTH_REQUIRED` = `false` (padrão; `true` volta a exigir login). Só mexer se for o caso.
-- **Não alterar** a `EXPO_PUBLIC_API_BASE_URL` existente (Production/v2).
+| Depois do passo | Verificação |
+|---|---|
+| 4–5 (Render no ar) | `GET /health` = 200 (a 1ª chamada pode levar ~50 s: serviço dormindo) · `GET /auth/me` sem token = 401 JSON · rota inexistente = 404 JSON |
+| 4–5 | `POST /auth/login` paciente mockado (`ana.lima@ecoa.test`/`ecoa2026`) = 200 + `role: patient`; admin com senha errada = erro genérico sem vazar qual campo |
+| 4–5 | Rotas de admin (`/patients`, `POST /trainings`, `POST /uploads/video`): **401 sem token, 403 com token de paciente** |
+| 4–5 | CORS: `Origin: https://care-plus-git-v3-…vercel.app` → `access-control-allow-origin` presente; origem estranha → ausente |
+| 4–5 | `GET /trainings` sem token devolve só treinos `audience.all` (seed "Aquecimento para apresentações") |
+| 7 (redeploy) | O preview `care-plus-git-v3-…` responde 200 e o JS embute `https://ecoa-backend-v3.onrender.com` (e **não** `10.0.2.2`); a v2 (`care-plus-git-v2-…`) continua embutindo `ecoa-backend.onrender.com` |
+| 7 | Quando existir upload: `POST /uploads/video` com admin → `GET /media/:file` com `Range: bytes=0-99` = 206 e `Content-Type` de vídeo |
 
-> A variável é **embutida no bundle no momento do build**. Mudou o valor → precisa de **Redeploy** (Deployments → ⋯ →
-> Redeploy, **desmarcar "Use existing Build Cache"**; o `vercel.json` já usa `--clear`).
-
-### 3. Preview da v3
-Depois do push da v3, a Vercel gera `care-plus-git-v3-isabelabarcellos0812-6004s-projects.vercel.app` (alias estável da branch).
-Se a variável foi criada **depois** do primeiro build → Redeploy sem cache. Eu confirmo por HTTP qual API o bundle embute
-(`grep` por `onrender.com` no JS) e que a v2 continua apontando para `ecoa-backend.onrender.com`.
-
-### 4. Conferência final
-- v2 intacta: `care-plus-git-v2-…` abre e loga; `ecoa-backend.onrender.com/health` = 200.
-- v3: entrada → admin (`ecoafono@email.com` / `ecoa2026`) abre o painel; Mariana vê o treino destinado a ela; Pedro não.
+Eu **não** testo login do admin com a senha real (não a conheço nem devo): essa checagem final é da usuária — entrar com
+`ecoafono@email.com` + `ADMIN_PASSWORD` e ver o Painel do administrador.
 
 ## Riscos para decisão da usuária
 
-1. **Disco efêmero (Render free):** treinos (JSON) e vídeos enviados **somem em redeploy ou reinício**. Aceito nesta fase (SPEC).
-   Produção: Render Postgres (treinos/usuários) + armazenamento de objetos (Cloudflare R2 ou Supabase Storage) para vídeos.
-   Disco persistente do Render é pago.
-2. **Limite de upload 30 MB** × plano/proxy: conferir se o Render free aceita o corpo; vídeo grande no free pode estourar tempo/memória.
-3. **Sleep de ~50 s:** o free dorme após ~15 min sem uso; o primeiro login do admin (e da demo) pode demorar. Acordar com um
-   `GET /health` poucos minutos antes do evento.
-4. **Horas gratuitas:** o free tem cota mensal de instâncias compartilhada na conta; dois serviços ativos consomem mais cota
-   (com sleep, normalmente cabe). Se a cota acabar, o serviço fica suspenso até o mês virar.
-5. **Segredos:** `JWT_SECRET` nunca em conversa, commit ou print. Senha dos usuários mockados (`ecoa2026`) é de teste — não
-   reutilizar em dados reais.
-6. **Vercel Hobby:** proíbe uso comercial; previews por branch funcionam, mas uploads/vídeos não devem passar pela Vercel.
-7. **CORS:** previews por commit (`care-plus-<hash>-…`) mudam a cada deploy; use só o **alias da branch** em `CORS_ORIGIN`.
+1. **Disco efêmero:** `DATA_DIR` e `UPLOADS_DIR` estão em `/tmp` — treinos criados e vídeos enviados **somem em redeploy ou
+   reinício** (o seed e os usuários mockados voltam). Aceito nesta fase. Produção: Render Postgres + armazenamento de objetos
+   (Cloudflare R2 ou Supabase Storage). Disco persistente do Render é pago. **Para o evento: criar os treinos de demonstração
+   pouco antes e não redeployar depois.**
+2. **Upload de 30 MB** no free: pode estourar tempo/memória; testar com um vídeo real antes do evento.
+3. **Sleep de ~50 s:** o free dorme após ~15 min sem uso; o 1º login do admin pode demorar. Acordar com um `GET /health`
+   poucos minutos antes.
+4. **Cota de horas gratuitas:** dois serviços ativos consomem mais cota mensal compartilhada (com sleep, normalmente cabe).
+5. **Segredos:** `JWT_SECRET` e `ADMIN_PASSWORD` nunca em conversa, commit ou print. Senha dos mockados é de teste.
+6. **Vercel Hobby:** proíbe uso comercial; vídeos não devem ser servidos pela Vercel.
+7. **Redeploy do Render ≠ redeploy da Vercel:** mudar `ADMIN_PASSWORD`/`CORS_ORIGIN` só reinicia o backend (e apaga o `/tmp`);
+   mudar `EXPO_PUBLIC_*` exige Redeploy sem cache na Vercel.
 
-## Lembrete de rotina
-A cada push na v3: eu confiro os dois deploys e aviso o PM **quando** é preciso Redeploy manual (mudança de env var da Vercel
-ou de `EXPO_PUBLIC_*`).
+## Rotina
+A cada push na v3: confiro os dois deploys e aviso o PM **quando** é preciso Redeploy manual na Vercel.

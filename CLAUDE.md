@@ -68,6 +68,17 @@ Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de logi
   sumir num redeploy ou quando o serviço dorme/reinicia** (usuários mockados e o treino de exemplo voltam pelo seed). Produção de
   verdade exige Postgres (treinos/usuários) + armazenamento de objetos (vídeos, ex. Cloudflare R2). Decisão pendente do PM.
 
+## Voz de orientação configurável (v3, 22/10)
+
+Configurações → **Voz**: interruptor (padrão ligado), voz (`Automática (recomendada)` ou uma das vozes pt-BR do aparelho), ritmo
+(Devagar 0,8 · **Calma 0,9** · Normal 1,0) e **Testar voz** (o toque também destrava o áudio do navegador). Persistido em
+`AppSettings` (`voiceEnabled`, `voiceId`, `voiceRate`; quem já tinha configurações recebe os padrões). `services/speech.ts` aplica voz,
+ritmo e tom suave, não repete a mesma frase nem fala duas ao mesmo tempo e, no navegador, detecta fala bloqueada (sem `onstart` em ~1,5 s):
+a calibração/sessão mostram **"Toque para ativar a voz"**. A escolha automática é heurística (`services/voiceChoice.ts`, testada).
+As frases faladas ficam em `services/speechPhrases.ts` (gentis; infantil calorosa; idosos curtas e −0,05 de ritmo) e o texto da tela não mudou.
+**Limite**: a qualidade da voz depende do aparelho. **Alternativa futura (não implementada)**: áudio pré-gravado ou TTS neural na nuvem, para a
+mesma voz em todos os aparelhos — decisão de custo/privacidade.
+
 ## DS v2 (atual, 20/10) — SUBSTITUI a paleta e as trilhas descritas abaixo
 
 O usuário atualizou o DS (artifact Ttcaqk6QNXVrPd1zQ7wZ2D, versão de 20/10). Regra nova: **todo o app

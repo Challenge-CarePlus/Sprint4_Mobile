@@ -6,6 +6,7 @@ import React, {
     useState,
 } from "react";
 
+import { AUTH_REQUIRED } from "../config/authConfig";
 import api, { setUnauthorizedHandler } from "../services/api";
 import { isTokenExpired } from "../services/jwt";
 
@@ -50,6 +51,12 @@ export const AuthProvider = ({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Login desligado: nada de ler token, registrar o handler de 401 ou esperar carregamento.
+        if (!AUTH_REQUIRED) {
+            setLoading(false);
+            return;
+        }
+
         loadStorage();
         setUnauthorizedHandler(() => {
             logout();

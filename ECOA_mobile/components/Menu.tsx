@@ -4,6 +4,7 @@ import { StatusBar, StyleSheet, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import { AUTH_REQUIRED } from "../config/authConfig";
 import { hasConsent } from "../services/consentStorage";
 import { APPBAR_HEIGHT, AppBar, NavDrawer, NavDrawerItem } from "./ds";
 
@@ -58,7 +59,10 @@ export default function Menu() {
                 navigation.navigate("SETTINGS" as never);
             },
         },
-        { id: "logout", label: "Sair", icon: "logout", onPress: handleLogout, separated: true },
+        // Sem login não há sessão para encerrar.
+        ...(AUTH_REQUIRED
+            ? [{ id: "logout", label: "Sair", icon: "logout" as const, onPress: handleLogout, separated: true }]
+            : []),
     ];
 
     return (

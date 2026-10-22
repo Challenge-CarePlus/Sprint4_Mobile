@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Main from "../pages/Main";
 import Register from "../pages/Register";
 
+import { AUTH_REQUIRED } from "../config/authConfig";
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
 import Settings from "../pages/Settings";
@@ -94,13 +95,16 @@ function PublicRoutes() {
 export default function AppRouter() {
     const { token, loading } = useAuth();
 
-    if (loading) {
+    if (AUTH_REQUIRED && loading) {
         return null;
     }
 
+    // Login desligado (AUTH_REQUIRED=false): vai direto às rotas do app, sem token.
+    const canEnter = !AUTH_REQUIRED || Boolean(token);
+
     return (
         <NavigationContainer>
-            {token ? (
+            {canEnter ? (
                 <PrivateRoutes />
             ) : (
                 <PublicRoutes />

@@ -55,6 +55,8 @@ export default function CycleSummaryScreen() {
     // Exercício pulado (travado na câmera) é registrado com success:false e não conta como concluído.
     const completed = outcomes.filter((o) => o.success);
     const skippedCount = outcomes.length - completed.length;
+    // Mais pulados do que feitos: o título não deve comemorar um ciclo que a câmera mal validou.
+    const mostlySkipped = outcomes.length > 0 && skippedCount > completed.length;
     const validatedCount = completed.filter((o) => o.validationType === "validado").length;
     const guidedCount = completed.filter((o) => o.validationType === "guiado").length;
 
@@ -105,8 +107,15 @@ export default function CycleSummaryScreen() {
                     <MaterialIcons name="emoji-events" size={44} color={trail.accent} />
                 </View>
 
-                <Text style={[styles.title, { color: trail.onHero, fontFamily: trail.titleFont }]}>Ciclo concluído!</Text>
+                <Text style={[styles.title, { color: trail.onHero, fontFamily: trail.titleFont }]}>
+                    {mostlySkipped ? "Ciclo finalizado" : "Ciclo concluído!"}
+                </Text>
                 <Text style={[styles.subtitle, { color: trail.onHero }]}>{track.name}</Text>
+                {mostlySkipped ? (
+                    <Text style={[styles.subtitle, { color: trail.onHero, fontWeight: "400" }]}>
+                        Vários exercícios foram pulados. Tente de novo de frente para a câmera, com boa luz.
+                    </Text>
+                ) : null}
             </View>
 
             <View style={styles.statsGrid}>

@@ -68,12 +68,17 @@ export default function Settings() {
     const toast = useToast();
     const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
     const [voices, setVoices] = useState<VoiceInfo[]>([]);
+    const [voicesLoaded, setVoicesLoaded] = useState(false);
     const speechStatus = useSpeechStatus();
 
     // As vozes chegam de forma assíncrona (no navegador, depois do evento voiceschanged).
     useEffect(() => {
         let alive = true;
-        loadVoices().then((list) => alive && setVoices(list));
+        loadVoices().then((list) => {
+            if (!alive) return;
+            setVoices(list);
+            setVoicesLoaded(true);
+        });
         const unsubscribe = subscribeVoices((list) => alive && setVoices(list));
         return () => {
             alive = false;
@@ -127,7 +132,8 @@ export default function Settings() {
     ];
     // Voz salva que sumiu do aparelho volta a aparecer como Automática.
     const voiceValue = settings.voiceId && ptBr.some((voice) => voice.identifier === settings.voiceId) ? settings.voiceId : "auto";
-    const noVoice = voices.length > 0 ? ptBr.length === 0 : speechStatus === "unavailable";
+    // Sem nenhuma voz pt-BR (inclui lista vazia depois de esperar o aparelho carregar as vozes).
+    const noVoice = (voicesLoaded && ptBr.length === 0) || speechStatus === "unavailable";
 
     return (
         <ScrollView

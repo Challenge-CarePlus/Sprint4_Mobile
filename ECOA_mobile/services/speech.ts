@@ -237,7 +237,11 @@ function speakOnWeb(synth: SpeechSynthesis, text: string, rate: number, voice: V
 
     if (voice) {
         const match = synth.getVoices().find((candidate) => candidate.voiceURI === voice.identifier);
-        if (match) utterance.voice = match;
+        try {
+            if (match) utterance.voice = match;
+        } catch {
+            // voz que o navegador deixou de aceitar: fala com a padrão em pt-BR
+        }
     }
 
     utterance.onstart = markStarted;

@@ -4,6 +4,7 @@ import path from "path";
 import { RequestHandler, Router } from "express";
 import multer from "multer";
 import { uploadsDir } from "../config/paths";
+import { MEDIA_FILE } from "../media";
 import { requireRole } from "../middleware/auth";
 
 export const MAX_VIDEO_BYTES = 30 * 1024 * 1024;
@@ -95,8 +96,6 @@ uploadsRouter.post("/video", ...requireRole("admin"), ((req, res) => {
     });
 }) as RequestHandler);
 
-const MEDIA_FILE = /^[a-f0-9]{32}\.(mp4|webm|mov)$/;
-
 export const mediaRouter = Router();
 
 // sendFile cuida de Range/206, Content-Length e Content-Type (pelo nome em disco).
@@ -122,11 +121,20 @@ mediaRouter.get("/:file", (req, res) => {
         (error: any) => {
             if (!error || res.headersSent) return;
 
-            // Range fora do arquivo: o player precisa do 416 + Content-Range pra se recuperar.
-            if (error.status === 416) {
-                return res.status(416).set(error.headers ?? {}).json({ success: false, message: "Faixa inválida" });
+            // Repassa o status que o sendFile calculou: 416 (Range fora do arquivo, com o Content-Range
+            // que o player precisa pra se recuperar), 412 etc. Só arquivo inexistente é 404.
+            const status = error.status >= 400 && error.status < 500 ? error.status : 404;
+            if (status === 404) return notFound();
+
+            // O sendFile já gravou headers de vídeo (Content-Type, ETag, Cache-Control...) antes de
+            // falhar: sem limpar, o corpo JSON sairia como video/mp4 e um erro poderia ser cacheado.
+            for (const header of ["Content-Type", "Content-Length", "ETag", "Last-Modified", "Cache-Control"]) {
+                res.removeHeader(header);
             }
-            notFound();
+            res.status(status).set(error.headers ?? {}).json({
+                success: false,
+                message: status === 416 ? "Faixa de bytes inválida" : "Requisição inválida",
+            });
         }
     );
 });

@@ -51,12 +51,16 @@ Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de logi
 - **Vídeos**: `POST /uploads/video` (admin, multipart `file`, ≤ 30 MB, mp4/webm/mov; confere mime, extensão e os primeiros
   bytes; nome em disco aleatório) devolve uma URL **relativa** `/media/<32hex>.<ext>` — o app prefixa a base da API. `GET /media/:file`
   serve com `Range`/`206`, só aceita nomes gerados pelo upload (sem path traversal nem listagem). O treino só aceita essa
-  URL em `video.url`. Vídeo trocado/removido ou treino excluído apaga o arquivo se nenhum outro treino o usa.
+  URL em `video.url` **e o arquivo precisa existir** em `UPLOADS_DIR` (senão 400 "Vídeo não encontrado, envie de novo" — vale também
+  no PUT, o que importa quando o disco efêmero apagou o vídeo). Vídeo trocado/removido ou treino excluído apaga o arquivo se
+  nenhum outro treino o usa; uploads sem treino há mais de 24 h são apagados na inicialização e a cada 6 h (`removeStaleUploads`).
+  Range fora do arquivo → 416 com `Content-Range`; multipart malformado → 400. Os **ids dos exercícios são sempre gerados pelo
+  servidor** (o `id` enviado pelo cliente é ignorado).
 - **Pacientes** (`/patients`, admin): dados de evolução **de exemplo** fixos (`sample: true`), do protótipo.
 - **Persistência**: JSON atômico com fila (`src/db/jsonStore.ts`) em `ECOA_backend/data/` (`DATA_DIR`) e vídeos em
   `ECOA_backend/uploads/` (`UPLOADS_DIR`), ambos fora do git e recriados pelo seed quando não existem. O antigo
   `src/db/users.json` versionado foi removido (o seed recria os usuários).
-- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 81 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
+- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 118 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
   Range, path traversal em `/media`, vídeos órfãos, rate limit, CORS). Cada suíte usa pastas temporárias.
 - **Deploy**: `render.yaml` tem um segundo serviço `ecoa-backend-v3` (branch `v3`) separado do da v2. Quem precisa de `@types/*`
   no build tem que estar em `dependencies` (o Render instala com `NODE_ENV=production`, sem devDependencies).

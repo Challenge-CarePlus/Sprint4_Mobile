@@ -133,11 +133,11 @@ function validateExercise(value: unknown, position: number): CustomExercise {
     if (steps.length > LIMITS.steps) return fail(`${label}: no máximo ${LIMITS.steps} passos`);
 
     const goal = text(value.goal, `${label}: objetivo`, LIMITS.goal, false);
-    const id =
-        typeof value.id === "string" && /^[\w-]{1,64}$/.test(value.id) ? value.id : randomUUID();
 
     return {
-        id,
+        // O id enviado pelo cliente é ignorado: o servidor sempre gera um único (como no id do treino).
+        // Antes, dois exercícios com o mesmo id ("ex1", "ex1") eram aceitos.
+        id: randomUUID(),
         name,
         ...(goal ? { goal } : {}),
         steps,

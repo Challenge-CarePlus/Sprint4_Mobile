@@ -8,11 +8,13 @@ import {
     listTrainings,
     replaceTraining,
 } from "../db/trainingStore";
-import { removeOrphanVideos, videoUrlsOf } from "../media";
+import { allVideosExist, removeOrphanVideos, videoUrlsOf } from "../media";
 import { Training } from "../models/training";
 import { validateTrainingInput } from "../validation/training";
 
 const router = Router();
+
+const VIDEO_MISSING = "Vídeo não encontrado, envie de novo";
 
 const isVisibleTo = (training: Training, user?: AuthPayload) =>
     user?.role === "admin" ||
@@ -50,6 +52,10 @@ router.post("/", ...requireRole("admin"), async (req, res) => {
         return res.status(400).json({ success: false, message: parsed.message });
     }
 
+    if (!(await allVideosExist(parsed.value.exercises))) {
+        return res.status(400).json({ success: false, message: VIDEO_MISSING });
+    }
+
     const now = new Date().toISOString();
     const training = await createTraining({
         id: randomUUID(),
@@ -66,6 +72,10 @@ router.put("/:id", ...requireRole("admin"), async (req, res) => {
     const parsed = validateTrainingInput(req.body);
     if (!parsed.ok) {
         return res.status(400).json({ success: false, message: parsed.message });
+    }
+
+    if (!(await allVideosExist(parsed.value.exercises))) {
+        return res.status(400).json({ success: false, message: VIDEO_MISSING });
     }
 
     const replaced = await replaceTraining(String(req.params.id), (previous) => ({

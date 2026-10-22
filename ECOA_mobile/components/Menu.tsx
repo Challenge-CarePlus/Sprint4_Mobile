@@ -49,7 +49,7 @@ export default function Menu() {
               ? "settings"
               : route.name === "EVOLUTION" || route.name === "PATIENT"
                 ? "evolution"
-                : route.name.includes("TRAINING") || route.name === "PICK_PATIENTS" || route.name === "EDIT_EXERCISE"
+                : route.name.includes("TRAINING") || route.name === "PICK_PATIENTS" || route.name === "EDIT_EXERCISE" || route.name === "TEST_EXERCISE"
                   ? "trainings"
                   : route.name.includes("EXERCISE") || route.name === "TRACK_SELECT"
                     ? "exercise"

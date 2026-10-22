@@ -10,6 +10,8 @@ import PatientScreen from "../pages/admin/PatientScreen";
 import TrainingsScreen from "../pages/admin/TrainingsScreen";
 import EditTrainingScreen from "../pages/admin/EditTrainingScreen";
 import PickPatientsScreen from "../pages/admin/PickPatientsScreen";
+import EditExerciseScreen from "../pages/admin/EditExerciseScreen";
+import TestExerciseScreen from "../pages/admin/TestExerciseScreen";
 
 import { AUTH_REQUIRED } from "../config/authConfig";
 import { TRACKS } from "../data/tracks";
@@ -61,6 +63,8 @@ function PrivateRoutes() {
             <Stack.Screen name="TRAININGS" component={TrainingsScreen} />
             <Stack.Screen name="EDIT_TRAINING" component={EditTrainingScreen} />
             <Stack.Screen name="PICK_PATIENTS" component={PickPatientsScreen} />
+            <Stack.Screen name="EDIT_EXERCISE" component={EditExerciseScreen} />
+            <Stack.Screen name="TEST_EXERCISE" component={TestExerciseScreen} />
 
             {/* Nova aba de exercícios de fonoaudiologia em casa (v2). */}
             <Stack.Screen

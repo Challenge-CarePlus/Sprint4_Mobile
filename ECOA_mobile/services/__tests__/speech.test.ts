@@ -193,4 +193,59 @@ describe("services/speech — configuração da voz", () => {
         delete (global as any).window;
         delete (global as any).SpeechSynthesisUtterance;
     });
+
+    it("no navegador, a voz escolhida/automática vale sem ninguém chamar loadVoices antes", () => {
+        jest.doMock("react-native", () => ({ Platform: { OS: "web" } }));
+        let utterance: any;
+        const voices = [
+            { voiceURI: "generica", name: "Voz Genérica", lang: "pt-BR", localService: true, default: true },
+            { voiceURI: "natural", name: "Microsoft Francisca Online (Natural) - Portuguese (Brazil)", lang: "pt-BR", localService: false, default: false },
+        ];
+        (global as any).window = {
+            speechSynthesis: { speak: (u: any) => (utterance = u), cancel: jest.fn(), getVoices: () => voices, speaking: false },
+        };
+        (global as any).SpeechSynthesisUtterance = function (this: any, text: string) {
+            this.text = text;
+        };
+
+        const { speechService } = loadSpeechModule();
+        speechService.speak("Muito bem"); // sem loadVoices antes (recarregou a página)
+        expect(utterance.voice.voiceURI).toBe("natural"); // Automática
+
+        speechService.configureVoice({ voiceId: "generica" });
+        speechService.resetSpeechDedup();
+        utterance.onend?.();
+        speechService.speak("Outra frase");
+        expect(utterance.voice.voiceURI).toBe("generica"); // escolhida
+
+        jest.dontMock("react-native");
+        delete (global as any).window;
+        delete (global as any).SpeechSynthesisUtterance;
+    });
+
+    it("o prazo de uma fala bloqueada não marca 'bloqueada' por cima de uma fala que funcionou depois", () => {
+        jest.doMock("react-native", () => ({ Platform: { OS: "web" } }));
+        const utterances: any[] = [];
+        (global as any).window = {
+            speechSynthesis: { speak: (u: any) => utterances.push(u), cancel: jest.fn(), getVoices: () => [{}], speaking: false },
+        };
+        (global as any).SpeechSynthesisUtterance = function (this: any, text: string) {
+            this.text = text;
+        };
+
+        const { speechService } = loadSpeechModule();
+        speechService.speak("Primeira"); // sem onstart: o prazo de 1,5 s está armado
+        jest.advanceTimersByTime(1000);
+
+        speechService.unlockSpeech(); // o toque da pessoa
+        utterances[1].onstart(); // desta vez a fala começa
+        expect(speechService.getSpeechStatus()).toBe("ok");
+
+        jest.advanceTimersByTime(1500); // o prazo antigo venceria aqui
+        expect(speechService.getSpeechStatus()).toBe("ok");
+
+        jest.dontMock("react-native");
+        delete (global as any).window;
+        delete (global as any).SpeechSynthesisUtterance;
+    });
 });

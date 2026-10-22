@@ -12,7 +12,7 @@ import AppRouter from "./routes/AppRouter";
 import { MAX_APP_WIDTH } from "./theme/layout";
 import { ToastProvider } from "./components/Toast";
 import { DraftProvider } from "./context/DraftContext";
-import { loadVoiceSettings } from "./services/speech";
+import { loadVoices, loadVoiceSettings } from "./services/speech";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 
 // Foco visível do teclado em `brand` (DS), no lugar do contorno preto padrão do navegador.
@@ -49,6 +49,7 @@ function Root() {
     // Voz de orientação: aplica o que a pessoa configurou antes da primeira fala.
     useEffect(() => {
         loadVoiceSettings();
+        loadVoices(); // preenche a lista de vozes para a Automática e a escolhida valerem já na primeira fala
     }, []);
 
     const [fontsLoaded] = useFonts({

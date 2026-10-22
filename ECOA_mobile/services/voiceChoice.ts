@@ -10,7 +10,7 @@ export type VoiceInfo = {
 
 /** pt-BR, com hífen ou sublinhado (Android devolve `pt_BR`). pt-PT e outros ficam de fora. */
 export function isPtBr(voice: VoiceInfo): boolean {
-    return /^pt[-_]br$/i.test(voice.language.trim());
+    return /^pt[-_]br$/i.test((voice.language ?? "").trim());
 }
 
 export function ptBrVoices(voices: VoiceInfo[]): VoiceInfo[] {
@@ -22,7 +22,7 @@ export function ptBrVoices(voices: VoiceInfo[]): VoiceInfo[] {
  * compactas. Heurística — a qualidade real depende do aparelho; por isso a escolha manual existe.
  */
 export function scoreVoice(voice: VoiceInfo): number {
-    const name = voice.name.toLowerCase();
+    const name = (voice.name ?? "").toLowerCase();
     let score = 0;
 
     if (/natural|neural|online|premium|enhanced|aprimorad/.test(name)) score += 50;

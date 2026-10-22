@@ -134,6 +134,19 @@ export function loadVoices(timeoutMs = 1500): Promise<VoiceInfo[]> {
         .catch(() => []);
 }
 
+/**
+ * Vozes para escolher na hora de falar. No navegador lê direto da síntese (o cache só é preenchido quando
+ * alguém chama `loadVoices`, e a lista pode chegar depois do evento `voiceschanged`); no app usa o cache.
+ */
+function currentVoices(): VoiceInfo[] {
+    const synth = isWeb() ? webSynth() : null;
+    if (synth) {
+        const live = synth.getVoices().map(toVoiceInfo);
+        if (live.length) return live;
+    }
+    return cachedVoices;
+}
+
 /** Avisa quando a lista de vozes muda (o navegador termina de carregar, o usuário instala uma voz). */
 export function subscribeVoices(listener: (voices: VoiceInfo[]) => void): () => void {
     voiceListeners.add(listener);
@@ -197,7 +210,7 @@ export function speak(text: string, options: SpeakOptions = {}): void {
     }
 
     const rate = Math.min(1.2, Math.max(0.5, config.rate + (options.rateOffset ?? 0)));
-    const voice = resolveVoice(cachedVoices, config.voiceId);
+    const voice = resolveVoice(currentVoices(), config.voiceId);
 
     if (isWeb()) {
         const synth = webSynth();
@@ -243,6 +256,10 @@ function speakOnWeb(synth: SpeechSynthesis, text: string, rate: number, voice: V
             // voz que o navegador deixou de aceitar: fala com a padrão em pt-BR
         }
     }
+
+    // Uma fala anterior sem `onstart` ainda tem o seu prazo armado: se não for limpo, dispara depois e
+    // marca "bloqueada" por cima de uma fala que funcionou (o aviso piscava de volta).
+    clearTimers();
 
     utterance.onstart = markStarted;
     utterance.onend = markDone;

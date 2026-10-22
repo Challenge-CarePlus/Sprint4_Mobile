@@ -30,7 +30,7 @@ export default function Card({
       disabled={!active}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityState={{ disabled: !active }}
+      aria-disabled={!active}
       style={({ pressed }) => [
         styles.container,
         !active && styles.disabled,

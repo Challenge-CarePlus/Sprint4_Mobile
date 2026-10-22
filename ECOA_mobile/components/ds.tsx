@@ -85,7 +85,7 @@ export function MenuCard({
             onPress={disabled ? undefined : onPress}
             disabled={disabled}
             accessibilityRole="button"
-            accessibilityState={{ disabled }}
+            aria-disabled={disabled}
             accessibilityLabel={`${title}. ${subtitle}${disabled ? ". Em breve" : ""}`}
             style={({ pressed }) => [
                 styles.mcard,
@@ -272,10 +272,11 @@ export function Button({
             disabled={off}
             accessibilityRole="button"
             accessibilityLabel={title}
-            accessibilityState={{ disabled: off, busy: loading }}
+            aria-disabled={off}
+            aria-busy={loading}
             style={({ pressed }) => [
                 styles.btn,
-                { minHeight: minHeight ?? (variant === "ghost" ? 44 : 52) },
+                { minHeight: minHeight ?? (variant === "ghost" ? 48 : 52) },
                 block && variant !== "ghost" && styles.btnBlock,
                 variant === "primary" && { backgroundColor: pressed ? colors.heroEnd : colors.brandDeep },
                 variant === "secondary" && {
@@ -377,15 +378,13 @@ function SmallIconButton({
             onPress={onPress}
             accessibilityRole="button"
             accessibilityLabel={label}
-            accessibilityState={expanded == null ? undefined : { expanded }}
-            hitSlop={6}
-            style={({ pressed }) => [
-                styles.ibSm,
-                tone === "soft" && { backgroundColor: colors.brandSoft },
-                pressed && { opacity: 0.7 },
-            ]}
+            aria-expanded={expanded}
+            // Alvo de 48px; o círculo visível continua com os 36px do protótipo.
+            style={({ pressed }) => [styles.ibHit, pressed && { opacity: 0.7 }]}
         >
-            <MaterialIcons name={icon} size={18} color={colors.brandInk} />
+            <View style={[styles.ibSm, tone === "soft" && { backgroundColor: colors.brandSoft }]}>
+                <MaterialIcons name={icon} size={18} color={colors.brandInk} />
+            </View>
         </Pressable>
     );
 }
@@ -469,7 +468,7 @@ export function NavDrawer({
                         key={item.id}
                         onPress={item.onPress}
                         accessibilityRole="button"
-                        accessibilityState={{ selected: item.id === activeId }}
+                        aria-selected={item.id === activeId}
                         style={({ pressed }) => [
                             styles.drawerItem,
                             item.separated && styles.drawerSep,
@@ -815,7 +814,7 @@ export function OptionGroup<T extends string | number>({
                             key={o.value}
                             onPress={() => onChange(o.value)}
                             accessibilityRole="radio"
-                            accessibilityState={{ checked: on }}
+                            aria-checked={on}
                             accessibilityLabel={o.description ? `${o.title}. ${o.description}` : o.title}
                             style={[styles.opt, on ? styles.optOn : shadow.card]}
                         >
@@ -865,6 +864,7 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     btnBlock: { alignSelf: "stretch" },
     btnText: { fontFamily: fonts.bodySemiBold, fontSize: 15, lineHeight: 20 },
 
+    ibHit: { width: 48, height: 48, alignItems: "center", justifyContent: "center" },
     ibSm: {
         width: 36,
         height: 36,

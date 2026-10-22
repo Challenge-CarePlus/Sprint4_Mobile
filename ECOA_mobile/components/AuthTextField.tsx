@@ -69,7 +69,7 @@ export default function AuthTextField({
                         onPress={() => setVisible((v) => !v)}
                         accessibilityRole="button"
                         accessibilityLabel={visible ? "Ocultar senha" : "Mostrar senha"}
-                        accessibilityState={{ expanded: visible }}
+                        aria-expanded={visible}
                         style={styles.trail}
                     >
                         <MaterialIcons

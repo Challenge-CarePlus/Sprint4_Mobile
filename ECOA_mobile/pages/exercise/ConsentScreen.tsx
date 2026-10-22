@@ -58,7 +58,7 @@ export default function ConsentScreen() {
                 ]}
                 onPress={() => setSelected("patient")}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: selected === "patient" }}
+                aria-checked={selected === "patient"}
             >
                 <Text style={styles.optionText}>Sou o(a) paciente e tenho 18 anos ou mais</Text>
                 {selected === "patient" && (
@@ -74,7 +74,7 @@ export default function ConsentScreen() {
                 ]}
                 onPress={() => setSelected("guardian")}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: selected === "guardian" }}
+                aria-checked={selected === "guardian"}
             >
                 <Text style={styles.optionText}>
                     Sou responsável legal por um(a) paciente menor de 18 anos

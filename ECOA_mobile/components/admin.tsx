@@ -236,7 +236,7 @@ export function Chips<T extends string>({
                         key={o.value}
                         onPress={() => onChange(o.value)}
                         accessibilityRole="radio"
-                        accessibilityState={{ checked: on }}
+                        aria-checked={on}
                         style={[styles.chip, on && { backgroundColor: colors.brandDeep }]}
                     >
                         <Text style={[styles.chipText, on && { color: colors.onHero }]}>{o.label}</Text>
@@ -427,7 +427,7 @@ export function SwitchRow({ on, label, sub, onChange }: { on: boolean; label: st
         <Pressable
             onPress={() => onChange(!on)}
             accessibilityRole="switch"
-            accessibilityState={{ checked: on }}
+            aria-checked={on}
             accessibilityLabel={sub ? `${label}. ${sub}` : label}
             style={styles.switchRow}
         >
@@ -462,7 +462,7 @@ export function CheckRow({
         <Pressable
             onPress={onChange}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: on }}
+            aria-checked={on}
             accessibilityLabel={subtitle ? `${title}. ${subtitle}` : title}
             style={[styles.row, on && { backgroundColor: colors.brandSoft, ...({ shadowOpacity: 0, elevation: 0 } as object) }]}
         >
@@ -584,7 +584,7 @@ const makeStyles = ({ colors, shadow }: Theme) =>
 
         chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
         chip: {
-            height: 36,
+            height: 48,
             paddingHorizontal: 14,
             borderRadius: radii.pill,
             backgroundColor: colors.surfaceRaised,

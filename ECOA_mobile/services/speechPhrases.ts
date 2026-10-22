@@ -56,9 +56,13 @@ const GENTLE_PROMPTS: Record<string, string> = {
     "Sorria mais": "Se puder, sorria um pouquinho mais",
     "Encha mais as bochechas": "Se puder, encha um pouquinho mais as bochechas",
     "Pressione os lábios com firmeza": "Aperte os lábios com calma, sem exagerar",
+    "Quase lá, tente de novo": "Está quase, pode tentar de novo",
     "Alterne: sorria e depois faça bico": "Quando quiser, sorria e depois faça um biquinho",
     "Fale as vogais A, E, I, O, U, abrindo bem a boca": "Quando quiser, fale as vogais A, E, I, O, U, abrindo bem a boca",
 };
+
+/** Mensagens que já são gentis (ou só orientam o próximo passo): não levam prefixo. */
+const ALREADY_GENTLE = /^(quando|se puder|que tal|vamos|agora|comece|pode|está quase|quase)(\s|,|$)/i;
 
 function lowerFirst(text: string): string {
     return text.charAt(0).toLowerCase() + text.slice(1);
@@ -68,6 +72,11 @@ function lowerFirst(text: string): string {
 export function gentlePrompt(message: string, ageGroup: AgeGroup = "adults"): string {
     const trimmed = message.trim().replace(/[.!]+$/, "");
     const known = GENTLE_PROMPTS[trimmed];
+
+    // Já gentil: só a trilha infantil ganha o "Vamos lá," (sem duplicar quando já começa por "Vamos").
+    if (!known && ALREADY_GENTLE.test(trimmed)) {
+        return ageGroup === "children" && !/^vamos/i.test(trimmed) ? `Vamos lá, ${lowerFirst(trimmed)}` : trimmed;
+    }
 
     if (ageGroup === "children") {
         return `Vamos lá, ${lowerFirst((known ?? trimmed).replace(/^(Quando quiser|Se puder), /, ""))}`;

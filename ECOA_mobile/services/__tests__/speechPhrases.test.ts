@@ -18,6 +18,28 @@ describe("gentlePrompt", () => {
     });
 });
 
+describe("gentlePrompt — mensagens que o detector já escreve de forma gentil", () => {
+    it("'Quase lá, tente de novo' ganha a versão da tabela, sem prefixo duplicado", () => {
+        expect(gentlePrompt("Quase lá, tente de novo")).toBe("Está quase, pode tentar de novo");
+    });
+
+    it("não prefixa mensagens que já começam de forma gentil ou orientam o próximo passo", () => {
+        expect(gentlePrompt("Agora, o E")).toBe("Agora, o E");
+        expect(gentlePrompt("Comece com o A, abrindo bem a boca")).toBe("Comece com o A, abrindo bem a boca");
+        expect(gentlePrompt("Quando puder, solte o ar")).toBe("Quando puder, solte o ar".replace("Quando puder", "Quando puder"));
+        expect(gentlePrompt("Que tal um sorriso?")).toBe("Que tal um sorriso?");
+    });
+
+    it("infantil junta 'Vamos lá' sem repetir 'Vamos'", () => {
+        expect(gentlePrompt("Vamos tentar de novo", "children")).toBe("Vamos tentar de novo");
+        expect(gentlePrompt("Agora, o E", "children")).toBe("Vamos lá, agora, o E");
+    });
+
+    it("as mensagens de incentivo dos exercícios do app (imperativas) ganham o começo suave", () => {
+        expect(gentlePrompt("Expire devagar pela boca")).toBe("Quando quiser, expire devagar pela boca");
+    });
+});
+
 describe("phraseFor", () => {
     it("usa as frases do mapa de Orientação, sem o 'Ótimo!' seco", () => {
         expect(phraseFor("holding")).toBe("Isso, mantenha assim… você está indo bem.");

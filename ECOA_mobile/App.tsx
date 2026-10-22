@@ -10,6 +10,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/AppRouter";
 import { MAX_APP_WIDTH } from "./theme/layout";
+import { ToastProvider } from "./components/Toast";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 
 // Foco visível do teclado em `brand` (DS), no lugar do contorno preto padrão do navegador.
@@ -64,7 +65,9 @@ function Root() {
         <View style={{ flex: 1, alignItems: "center", backgroundColor: colors.line }}>
             <View style={{ flex: 1, width: "100%", maxWidth: MAX_APP_WIDTH, backgroundColor: colors.surface }}>
                 <AuthProvider>
-                    <AppRouter />
+                    <ToastProvider>
+                        <AppRouter />
+                    </ToastProvider>
                 </AuthProvider>
             </View>
         </View>

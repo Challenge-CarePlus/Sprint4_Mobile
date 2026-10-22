@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 import { Button, Option, OptionGroup, PageIntro } from "../components/ds";
+import { useToast } from "../components/Toast";
 import { Theme } from "../theme/tokens";
-import { useTheme, useThemedStyles } from "../theme/ThemeContext";
+import { ThemePreference, useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 import {
     AppSettings,
@@ -39,8 +40,21 @@ const cameraOptions: Option<CameraPositionOption>[] = [
     },
 ];
 
+const themeOptions: Option<ThemePreference>[] = [
+    { value: "auto", title: "Automático", description: "Segue o tema do celular", icon: "brightness-auto" },
+    { value: "light", title: "Claro", description: "Fundo claro o tempo todo", icon: "light-mode" },
+    {
+        value: "dark",
+        title: "Escuro",
+        description: "Mais confortável à noite e em ambientes escuros",
+        icon: "dark-mode",
+    },
+];
+
 export default function Settings() {
     const styles = useThemedStyles(makeStyles);
+    const { preference, setPreference } = useTheme();
+    const toast = useToast();
     const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
     useEffect(() => {
@@ -73,7 +87,23 @@ export default function Settings() {
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
         >
-            <PageIntro icon="settings" title="Configurações" subtitle="Ajuste o exercício do seu jeito." />
+            <PageIntro icon="settings" title="Configurações" subtitle="Ajuste o app e o exercício do seu jeito." />
+
+            <OptionGroup
+                label="Aparência"
+                options={themeOptions}
+                value={preference}
+                onChange={(next) => {
+                    setPreference(next);
+                    toast(
+                        next === "auto"
+                            ? "Tema automático: segue o celular."
+                            : next === "dark"
+                              ? "Modo escuro ativado."
+                              : "Modo claro ativado."
+                    );
+                }}
+            />
 
             <OptionGroup
                 label="Frequência de captura"

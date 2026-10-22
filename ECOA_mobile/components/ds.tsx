@@ -307,6 +307,19 @@ export function Button({
 /* ------------------------------------------------------------------ */
 
 export const APPBAR_HEIGHT = 64;
+export const ADMINBAR_HEIGHT = 28;
+
+/** Faixa fina "Modo administrador" sob a AppBar (px-adminbar). */
+export function AdminBar() {
+    const { colors } = useTheme();
+    const styles = useThemedStyles(makeStyles);
+    return (
+        <View style={styles.adminbar} accessibilityRole="summary">
+            <MaterialIcons name="shield" size={14} color={colors.brandInk} />
+            <Text style={styles.adminbarText}>Modo administrador</Text>
+        </View>
+    );
+}
 
 function SmallIconButton({
     icon,
@@ -831,6 +844,15 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
         zIndex: 4,
         ...shadow.card,
     },
+    adminbar: {
+        height: ADMINBAR_HEIGHT,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        backgroundColor: colors.brandSoft,
+    },
+    adminbarText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.brandInk },
     appbarLogo: { flex: 1, flexDirection: "row", alignItems: "center" },
     logoImg: { width: 84, height: 28 },
     scrim: {

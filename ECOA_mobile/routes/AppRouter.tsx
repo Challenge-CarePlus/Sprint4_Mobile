@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../pages/Login";
 import Main from "../pages/Main";
 import Register from "../pages/Register";
+import Entrance from "../pages/Entrance";
 
 import { AUTH_REQUIRED } from "../config/authConfig";
 import { TRACKS } from "../data/tracks";
@@ -85,6 +86,15 @@ function PrivateRoutes() {
 }
 
 
+/** Entrada do evento (AUTH_REQUIRED=false): acesso livre, só a equipe precisa logar. */
+function EntranceRoutes() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="ENTRANCE" component={Entrance} />
+        </Stack.Navigator>
+    );
+}
+
 function PublicRoutes() {
     return (
         <Stack.Navigator
@@ -109,12 +119,15 @@ export default function AppRouter() {
     const { token, loading } = useAuth();
     const { colors } = useTheme();
 
-    if (AUTH_REQUIRED && loading) {
+    const { role } = useAuth();
+
+    if (loading) {
         return null;
     }
 
-    // Login desligado (AUTH_REQUIRED=false): vai direto às rotas do app, sem token.
-    const canEnter = !AUTH_REQUIRED || Boolean(token);
+    // AUTH_REQUIRED=true: login/cadastro de antes. false: tela de entrada do evento, que
+    // deixa passar sem preencher nada (anônimo) ou com a conta da equipe/paciente.
+    const canEnter = AUTH_REQUIRED ? Boolean(token) : role !== null;
 
     const navTheme = {
         ...DefaultTheme,
@@ -123,11 +136,7 @@ export default function AppRouter() {
 
     return (
         <NavigationContainer theme={navTheme}>
-            {canEnter ? (
-                <PrivateRoutes />
-            ) : (
-                <PublicRoutes />
-            )}
+            {canEnter ? <PrivateRoutes /> : AUTH_REQUIRED ? <PublicRoutes /> : <EntranceRoutes />}
         </NavigationContainer>
     );
 }

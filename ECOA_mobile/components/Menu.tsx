@@ -4,9 +4,10 @@ import { StatusBar, StyleSheet, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-import { AUTH_REQUIRED } from "../config/authConfig";
 import { hasConsent } from "../services/consentStorage";
-import { APPBAR_HEIGHT, AppBar, NavDrawer, NavDrawerItem } from "./ds";
+import { useTheme } from "../theme/ThemeContext";
+import { useToast } from "./Toast";
+import { ADMINBAR_HEIGHT, APPBAR_HEIGHT, AdminBar, AppBar, NavDrawer, NavDrawerItem } from "./ds";
 
 /** Cabeçalho fixo das telas logadas: AppBar de 64px + NavDrawer marinho com véu. */
 export default function Menu() {
@@ -14,19 +15,30 @@ export default function Menu() {
     const navigation = useNavigation();
 
     const route = useRoute();
-    const { logout } = useAuth();
+    const { logout, role } = useAuth();
+    const { mode, setPreference } = useTheme();
+    const toast = useToast();
 
+    const isAdmin = role === "admin";
     const canGoBack = navigation.canGoBack() && route.name !== "MAIN";
+    // Faixa "Modo administrador" em todas as telas, menos no próprio painel.
+    const showAdminBar = isAdmin && route.name !== "MAIN";
+    const dark = mode === "dark";
 
     async function handleLogout() {
-        await logout();
         setMenuOpen(false);
+        await logout();
     }
 
     async function handleOpenExercises() {
         const consented = await hasConsent();
         setMenuOpen(false);
         navigation.navigate((consented ? "TRACK_SELECT" : "CONSENT") as never);
+    }
+
+    function go(name: string) {
+        setMenuOpen(false);
+        navigation.navigate(name as never);
     }
 
     // Item da tela atual fica marcado no painel.
@@ -40,33 +52,24 @@ export default function Menu() {
                 : undefined;
 
     const items: NavDrawerItem[] = [
-        {
-            id: "home",
-            label: "Página inicial",
-            icon: "home",
-            onPress: () => {
-                setMenuOpen(false);
-                navigation.navigate("MAIN" as never);
-            },
-        },
+        { id: "home", label: isAdmin ? "Painel" : "Página inicial", icon: "home", onPress: () => go("MAIN") },
         { id: "exercise", label: "Exercícios", icon: "fitness-center", onPress: handleOpenExercises },
+        { id: "settings", label: "Configurações", icon: "settings", onPress: () => go("SETTINGS") },
         {
-            id: "settings",
-            label: "Configurações",
-            icon: "settings",
+            id: "theme",
+            label: dark ? "Mudar para modo claro" : "Mudar para modo escuro",
+            icon: dark ? "light-mode" : "dark-mode",
             onPress: () => {
+                setPreference(dark ? "light" : "dark");
                 setMenuOpen(false);
-                navigation.navigate("SETTINGS" as never);
+                toast(dark ? "Modo claro ativado." : "Modo escuro ativado.");
             },
         },
-        // Sem login não há sessão para encerrar.
-        ...(AUTH_REQUIRED
-            ? [{ id: "logout", label: "Sair", icon: "logout" as const, onPress: handleLogout, separated: true }]
-            : []),
+        { id: "logout", label: "Sair", icon: "logout", onPress: handleLogout, separated: true },
     ];
 
     return (
-        <View style={styles.wrapper}>
+        <View style={[styles.wrapper, showAdminBar && { height: APPBAR_HEIGHT + ADMINBAR_HEIGHT }]}>
             <StatusBar hidden />
 
             <AppBar
@@ -74,6 +77,8 @@ export default function Menu() {
                 onMenu={() => setMenuOpen(!menuOpen)}
                 menuOpen={menuOpen}
             />
+
+            {showAdminBar && <AdminBar />}
 
             {menuOpen && <NavDrawer items={items} activeId={activeId} onClose={() => setMenuOpen(false)} />}
         </View>

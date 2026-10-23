@@ -38,9 +38,14 @@ export default function ConsentScreen() {
             <Text style={styles.title}>Antes de começar</Text>
 
             <Text style={styles.paragraph}>
-                Os exercícios usam a câmera para acompanhar os movimentos do seu rosto. Todo o
-                processamento acontece aqui mesmo no seu aparelho — nenhum vídeo ou imagem do
-                seu rosto é enviado para a internet ou armazenado.
+                Os exercícios usam a câmera para acompanhar os movimentos do seu rosto. As imagens são
+                analisadas só no seu aparelho: nunca são enviadas nem guardadas.
+            </Text>
+
+            <Text style={styles.paragraph}>
+                A biblioteca de visão do Google pode enviar estatísticas técnicas de uso, sem imagens.
+                Ao nosso servidor vão apenas o seu login, os treinos e os vídeos que o administrador
+                enviar.
             </Text>
 
             <Text style={styles.paragraph}>

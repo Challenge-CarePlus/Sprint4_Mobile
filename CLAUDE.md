@@ -19,8 +19,9 @@ exercícios de fonoaudiologia das sessões semanais. Branch de trabalho: `v2`.
 O briefing original pedia MediaPipe Face Landmarker *Web*, que não roda nativamente em React
 Native. Decisão (aprovada com o usuário): uma **WebView local e invisível**, carregando
 `@mediapipe/tasks-vision` como asset bundlado (sem CDN), recebe frames da câmera nativa via
-`postMessage` e devolve landmarks/blendshapes. Processamento 100% no aparelho, nenhum vídeo ou
-imagem sai do dispositivo. Risco técnico principal: latência da ponte WebView em tempo real —
+`postMessage` e devolve landmarks/blendshapes. As imagens da câmera são processadas só no aparelho e nunca
+são enviadas (ver `docs/v3/PRIVACIDADE.md`: a biblioteca MediaPipe pode enviar ao Google estatísticas técnicas de uso, sem imagens;
+ao nosso servidor vão só login, treinos e os vídeos que o administrador enviar). Risco técnico principal: latência da ponte WebView em tempo real —
 código implementado e validado estaticamente (typecheck, testes, bundle), mas **não validado
 em device físico neste ambiente** (sem `adb`/emulador disponível). Ver "Como testar" abaixo.
 
@@ -34,6 +35,12 @@ progresso seguem locais (AsyncStorage). **Nada foi apagado**: Login, Register, A
 dormentes. Para voltar a exigir login: `EXPO_PUBLIC_AUTH_REQUIRED=true` no build (Vercel → Environment Variables, ou
 `.env`) e refazer o deploy (a variável é embutida no bundle; `--clear` já está no `vercel.json`). O Render só precisa
 estar no ar de novo nesse caso.
+
+## Privacidade e CSP (v3, 22/10)
+
+Imagens da câmera: só no aparelho, nunca enviadas. O MediaPipe web faz um POST de ~90 bytes (protobuf, sem imagem) a `odml.pa.googleapis.com/v1/log`;
+o `ECOA_mobile/vercel.json` envia `Content-Security-Policy: connect-src` (self, blob:, data:, `*.onrender.com`, `cdn.jsdelivr.net`) e o bloqueia. **Se o
+back-end sair do Render (domínio próprio) ou o CDN mudar, ajuste o `connect-src` ou o app web perde a API.** Detalhes em `docs/v3/PRIVACIDADE.md`.
 
 ## Backend v3 (modo administrador) — `ECOA_backend/`
 

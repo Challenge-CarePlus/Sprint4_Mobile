@@ -56,14 +56,28 @@ export function weakPasswordReason(password: string, production: boolean): strin
 const production = process.env.NODE_ENV === "production";
 const fromEnv = process.env.ADMIN_PASSWORD;
 
+// MODO DEMONSTRAÇÃO (protótipo apresentado em evento): só o valor exato "true" liga. Aceita senha
+// fraca/pública (inclusive ecoa2026), mantendo o mínimo de 8 caracteres. Desligado por padrão.
+// O estado só aparece no log de boot (nunca em /health, pra não anunciar a quem ataca que a senha pode ser fraca).
+export const DEMO_MODE = process.env.ALLOW_WEAK_ADMIN_PASSWORD === "true";
+
 if (production && !fromEnv) {
     throw new Error("ADMIN_PASSWORD não definida (obrigatória em produção)");
 }
 if (fromEnv !== undefined) {
-    const reason = weakPasswordReason(fromEnv, production);
+    const reason = DEMO_MODE
+        ? fromEnv.length < MIN_LENGTH_DEV ? `tem menos de ${MIN_LENGTH_DEV} caracteres` : null
+        : weakPasswordReason(fromEnv, production);
     if (reason) {
         throw new Error(`ADMIN_PASSWORD recusada: ${reason}. Defina uma senha forte (veja docs/v3/INFRA.md).`);
     }
+}
+
+if (DEMO_MODE) {
+    console.warn(
+        "[AVISO] MODO DEMONSTRACAO: senha de administrador fraca/publica permitida — nao use com dados reais. " +
+            "Desligue ALLOW_WEAK_ADMIN_PASSWORD e troque ADMIN_PASSWORD depois do evento."
+    );
 }
 
 export const ADMIN_PASSWORD = fromEnv ?? DEV_ONLY;

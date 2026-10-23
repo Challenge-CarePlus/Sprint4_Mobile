@@ -21,7 +21,7 @@ import { useDraft } from "../../context/DraftContext";
 import { audienceLabel, exerciseCountLabel, inputFromDraft, repsLabel } from "../../data/training";
 import { confirmAction } from "../../services/confirm";
 import { trainingsApi, apiErrorMessage } from "../../services/trainingsApi";
-import { DraftErrors, validateDraft } from "../../services/trainingValidation";
+import { DraftErrors, pruneErrors, validateDraft } from "../../services/trainingValidation";
 import { useTheme } from "../../theme/ThemeContext";
 import { fonts } from "../../theme/tokens";
 import { padStyles } from "./common";
@@ -33,7 +33,9 @@ export default function EditTrainingScreen() {
     const toast = useToast();
     const { draft, setName, editExercise, removeExercise } = useDraft();
 
-    const [errors, setErrors] = useState<DraftErrors>({});
+    const [shown, setShown] = useState<DraftErrors>({});
+    // Só vale o que ainda está inválido: o aviso some assim que o campo é corrigido.
+    const errors = pruneErrors(shown, validateDraft(draft));
     const [apiError, setApiError] = useState("");
     const [saving, setSaving] = useState(false);
 
@@ -46,7 +48,7 @@ export default function EditTrainingScreen() {
 
     async function save() {
         const found = validateDraft(draft);
-        setErrors(found);
+        setShown(found);
         setApiError("");
         if (Object.keys(found).length) return;
 

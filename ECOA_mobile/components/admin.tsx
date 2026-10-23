@@ -132,7 +132,11 @@ export function Field({
                     noOutline,
                 ]}
             />
-            {message ? <Text style={[styles.help, error ? styles.helpError : null]}>{message}</Text> : null}
+            {message ? (
+                <Text style={[styles.help, error ? styles.helpError : null]} accessibilityRole={error ? "alert" : undefined}>
+                    {message}
+                </Text>
+            ) : null}
         </View>
     );
 }

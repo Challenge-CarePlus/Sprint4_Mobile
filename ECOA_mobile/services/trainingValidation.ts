@@ -74,3 +74,16 @@ export function validateExerciseFields(fields: {
 
     return errors;
 }
+
+/**
+ * Erros que continuam valendo: só os campos que já foram mostrados e ainda estão inválidos (com a mensagem
+ * atual). Um campo corrigido sai da lista na hora; um campo que ainda não foi tentado não aparece.
+ */
+export function pruneErrors<T extends Record<string, string | undefined>>(shown: T, current: T): T {
+    const kept: Record<string, string> = {};
+    for (const key of Object.keys(shown)) {
+        const message = current[key];
+        if (shown[key] && message) kept[key] = message;
+    }
+    return kept as T;
+}

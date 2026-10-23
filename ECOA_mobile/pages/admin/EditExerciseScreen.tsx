@@ -18,7 +18,7 @@ import { useToast } from "../../components/Toast";
 import VideoPicker from "../../components/VideoPicker";
 import { useDraft } from "../../context/DraftContext";
 import { CustomExercise, CustomMovement, ExerciseVideo, Sensitivity, blankExercise } from "../../data/training";
-import { ExerciseErrors, validateExerciseFields } from "../../services/trainingValidation";
+import { ExerciseErrors, pruneErrors, validateExerciseFields } from "../../services/trainingValidation";
 import { useTheme, useThemedStyles } from "../../theme/ThemeContext";
 import { fonts, radii, Theme } from "../../theme/tokens";
 import {
@@ -60,14 +60,15 @@ export default function EditExerciseScreen() {
     const [sensitivity, setSensitivity] = useState<Sensitivity>(initial.validation.sensitivity);
     const [promptMessage, setPromptMessage] = useState(initial.validation.promptMessage ?? "");
     const [note, setNote] = useState(initial.validation.note ?? "");
-    const [errors, setErrors] = useState<ExerciseErrors>({});
+    const [shown, setShown] = useState<ExerciseErrors>({});
+    const errors = pruneErrors(shown, validateExerciseFields({ name, goal, steps, movement, promptMessage, note }));
 
     const suggested = useMemo(() => inferMovement(name, goal, steps), [name, goal, steps]);
     const sequence = movement === "alternateSmilePucker" || movement === "vowels";
 
     function build(): CustomExercise | null {
         const found = validateExerciseFields({ name, goal, steps, movement, promptMessage, note });
-        setErrors(found);
+        setShown(found);
         if (Object.keys(found).length || !movement) return null;
 
         return {

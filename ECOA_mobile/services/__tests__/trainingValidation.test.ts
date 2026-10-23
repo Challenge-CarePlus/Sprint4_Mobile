@@ -1,5 +1,5 @@
 import { TrainingDraft, blankExercise, inputFromDraft } from "../../data/training";
-import { FORBIDDEN_CHARS_MESSAGE, hasForbiddenChars, validateDraft, validateExerciseFields } from "../trainingValidation";
+import { FORBIDDEN_CHARS_MESSAGE, hasForbiddenChars, pruneErrors, validateDraft, validateExerciseFields } from "../trainingValidation";
 
 function draft(overrides: Partial<TrainingDraft> = {}): TrainingDraft {
     return {
@@ -59,5 +59,28 @@ describe("inputFromDraft", () => {
 
     it("zera ids quando o público é todos", () => {
         expect(inputFromDraft(draft({ audience: { all: true, ids: ["p1"] } })).audience).toEqual({ all: true, ids: [] });
+    });
+});
+
+describe("pruneErrors", () => {
+    it("remove o erro assim que o campo fica válido", () => {
+        const shown = validateDraft(draft({ name: "", exercises: [] }));
+        expect(Object.keys(shown).sort()).toEqual(["exercises", "name"]);
+
+        const after = pruneErrors(shown, validateDraft(draft({ name: "Aquecimento", exercises: [] })));
+        expect(after).toEqual({ exercises: "Adicione pelo menos um exercício." });
+    });
+
+    it("zera tudo quando nada resta (o alerta geral some)", () => {
+        const shown = validateDraft(draft({ name: "" }));
+        expect(Object.keys(pruneErrors(shown, validateDraft(draft()))).length).toBe(0);
+    });
+
+    it("troca a mensagem quando o motivo muda e não mostra campo ainda não tentado", () => {
+        const shown = validateDraft(draft({ name: "" }));
+        const current = validateDraft(draft({ name: "a<b", exercises: [] }));
+        const after = pruneErrors(shown, current);
+        expect(after.name).toBe(FORBIDDEN_CHARS_MESSAGE);
+        expect(after.exercises).toBeUndefined();
     });
 });

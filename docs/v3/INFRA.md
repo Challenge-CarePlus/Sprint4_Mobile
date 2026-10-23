@@ -20,6 +20,13 @@ Verificações feitas por HTTP em 22/10 (sem acesso aos painéis).
 produção sem ela** e exige **mínimo 12 caracteres**, **nunca igual à dos pacientes (`ecoa2026`)**, e recusa senhas óbvias (só números, `senha123`, `admin123`, `password`, `ecoafono`…). É a senha do admin (`ecoafono@email.com`); a dos pacientes mockados segue
 `ecoa2026` (sem privilégio). Nunca colar a senha em chat, print ou commit.
 
+**Modo demonstração (decisão da usuária, protótipo de evento):** definir `ALLOW_WEAK_ADMIN_PASSWORD` = `true` (valor exato,
+minúsculo; `TRUE`, `1`, `yes` ou vazio **não** ligam) no painel do Render permite `ADMIN_PASSWORD` fraca/pública, inclusive
+`ecoa2026` (mínimo 8 caracteres; vazia ou menor continua recusada). Ligado, o servidor sobe e escreve no log de boot
+"MODO DEMONSTRACAO: senha de administrador fraca/publica permitida — nao use com dados reais" (sem a senha); `/health` **não**
+mostra o modo. **Risco:** `ecoa2026` é pública (README, histórico do repo): quem lê o repo entra como admin, cria treinos e sobe
+vídeos. **Depois do evento:** apagar `ALLOW_WEAK_ADMIN_PASSWORD` e trocar `ADMIN_PASSWORD` por uma senha forte (≥ 12).
+
 CORS: além de `CORS_ORIGIN`, o código já aceita qualquer deploy/preview do projeto
 (`care-plus*-isabelabarcellos0812-6004s-projects.vercel.app`). Então `CORS_ORIGIN` só é indispensável se houver outro domínio.
 

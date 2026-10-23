@@ -41,7 +41,7 @@ Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de logi
 
 - **Papéis** (`role: "admin" | "patient"`, claim no JWT). 9 usuários mockados (seed em `src/data/seed.ts`; pacientes com senha
   `ecoa2026`; `ecoafono@email.com` é o admin e **a senha dele vem de `ADMIN_PASSWORD`**, nunca do repositório: obrigatória em
-  produção (o servidor não sobe sem ela; mínimo 12 caracteres, nunca igual à dos pacientes `ecoa2026` nem uma senha óbvia — o servidor recusa subir com ela; em dev o mínimo é 8), com um valor de dev próprio fora de produção; o hash do admin é
+  produção (o servidor não sobe sem ela; mínimo 12 caracteres, nunca igual à dos pacientes `ecoa2026` nem uma senha óbvia — o servidor recusa subir com ela; em dev o mínimo é 8). **Modo demonstração** (protótipo de evento): `ALLOW_WEAK_ADMIN_PASSWORD=true` (só o valor exato; padrão desligado) aceita senha fraca/pública, inclusive `ecoa2026`, mínimo 8, e loga um AVISO no boot (sem a senha; `/health` não mostra). Risco: quem lê o repo entra como admin e sobe vídeos — desligar a chave e trocar a senha depois do evento), com um valor de dev próprio fora de produção; o hash do admin é
   recalculado da env a cada subida, então trocar a variável troca a senha). `requireRole("admin")` responde **401 sem token e 403 para paciente**, sempre
   no servidor. Cadastro aberto continua existindo e cria sempre `patient`. Login devolve `{ token, user }`; erro único
   "E-mail ou senha inválidos" (não revela se o e-mail existe).
@@ -60,7 +60,7 @@ Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de logi
 - **Persistência**: JSON atômico com fila (`src/db/jsonStore.ts`) em `ECOA_backend/data/` (`DATA_DIR`) e vídeos em
   `ECOA_backend/uploads/` (`UPLOADS_DIR`), ambos fora do git e recriados pelo seed quando não existem. O antigo
   `src/db/users.json` versionado foi removido (o seed recria os usuários).
-- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 137 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
+- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 150 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
   Range, path traversal em `/media`, vídeos órfãos, rate limit, CORS). Cada suíte usa pastas temporárias.
 - **Deploy**: `render.yaml` tem um segundo serviço `ecoa-backend-v3` (branch `v3`) separado do da v2. Quem precisa de `@types/*`
   no build tem que estar em `dependencies` (o Render instala com `NODE_ENV=production`, sem devDependencies).

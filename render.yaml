@@ -39,6 +39,11 @@ services:
       # A usuária define no painel do Render; nunca em chat, commit ou print.
       - key: ADMIN_PASSWORD
         sync: false
+      # SÓ PARA DEMONSTRAÇÃO (protótipo em evento): o valor exato "true" deixa o servidor aceitar
+      # ADMIN_PASSWORD fraca/pública (inclusive ecoa2026; mínimo 8). Qualquer outro valor ou vazio = desligado.
+      # Desligue e troque a senha depois do evento. Nunca com dados reais.
+      - key: ALLOW_WEAK_ADMIN_PASSWORD
+        sync: false
       # URL(s) do front da v3 na Vercel, separadas por vírgula. As previews do
       # projeto (care-plus-*-isabelabarcellos0812-6004s-projects.vercel.app) já passam
       # pelo regex do código; aqui entra só o domínio fixo, se houver.

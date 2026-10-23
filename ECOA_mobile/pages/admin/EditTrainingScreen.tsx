@@ -16,10 +16,10 @@ import {
     SectionTitle,
 } from "../../components/admin";
 import { ActionBar, Alert, PageIntro } from "../../components/ds";
+import { useConfirm } from "../../components/ConfirmDialog";
 import { useToast } from "../../components/Toast";
 import { useDraft } from "../../context/DraftContext";
 import { audienceLabel, exerciseCountLabel, inputFromDraft, repsLabel } from "../../data/training";
-import { confirmAction } from "../../services/confirm";
 import { trainingsApi, apiErrorMessage } from "../../services/trainingsApi";
 import { DraftErrors, pruneErrors, validateDraft } from "../../services/trainingValidation";
 import { useTheme } from "../../theme/ThemeContext";
@@ -31,6 +31,7 @@ export default function EditTrainingScreen() {
     const navigation = useNavigation();
     const { colors, shadow } = useTheme();
     const toast = useToast();
+    const confirm = useConfirm();
     const { draft, setName, editExercise, removeExercise } = useDraft();
 
     const [shown, setShown] = useState<DraftErrors>({});
@@ -68,7 +69,10 @@ export default function EditTrainingScreen() {
     }
 
     async function remove() {
-        const yes = await confirmAction("Excluir treino?", `"${draft.name || "Sem nome"}" some para todos os pacientes. Isso não pode ser desfeito.`);
+        const yes = await confirm({
+            title: "Excluir treino?",
+            message: `"${draft.name || "Sem nome"}" some para todos os pacientes. Isso não pode ser desfeito.`,
+        });
         if (!yes) return;
 
         try {
@@ -78,6 +82,14 @@ export default function EditTrainingScreen() {
         } catch (e) {
             setApiError(apiErrorMessage(e, "Não foi possível excluir o treino."));
         }
+    }
+
+    async function askRemoveExercise(index: number, name: string) {
+        const yes = await confirm({
+            title: "Excluir exercício?",
+            message: `"${name || "Sem nome"}" sai deste treino. Isso não pode ser desfeito.`,
+        });
+        if (yes) removeExercise(index);
     }
 
     const failed = Object.keys(errors).length > 0;
@@ -132,7 +144,7 @@ export default function EditTrainingScreen() {
                             <IconAction
                                 icon="delete-outline"
                                 label={`Remover ${exercise.name || "exercício"}`}
-                                onPress={() => removeExercise(index)}
+                                onPress={() => askRemoveExercise(index, exercise.name)}
                             />
                         </View>
                     );

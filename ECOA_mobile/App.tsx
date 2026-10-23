@@ -10,6 +10,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/AppRouter";
 import { MAX_APP_WIDTH } from "./theme/layout";
+import { ConfirmProvider } from "./components/ConfirmDialog";
 import { ToastProvider } from "./components/Toast";
 import { DraftProvider } from "./context/DraftContext";
 import { loadVoices, loadVoiceSettings } from "./services/speech";
@@ -74,9 +75,11 @@ function Root() {
             <View style={{ flex: 1, width: "100%", maxWidth: MAX_APP_WIDTH, backgroundColor: colors.surface }}>
                 <AuthProvider>
                     <ToastProvider>
-                        <DraftProvider>
-                            <AppRouter />
-                        </DraftProvider>
+                        <ConfirmProvider>
+                            <DraftProvider>
+                                <AppRouter />
+                            </DraftProvider>
+                        </ConfirmProvider>
                     </ToastProvider>
                 </AuthProvider>
             </View>

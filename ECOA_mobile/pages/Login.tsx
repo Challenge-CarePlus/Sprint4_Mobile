@@ -1,25 +1,18 @@
 import React, { useState } from "react";
-import { Alert as NativeAlert, Platform, StatusBar, StyleSheet, Text, View } from "react-native";
+import { StatusBar, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import AuthTextField from "../components/AuthTextField";
+import { useToast } from "../components/Toast";
 import { Alert, AuthLayout, Button, TextLink } from "../components/ds";
 import { fonts, Theme } from "../theme/tokens";
 import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
-// Alert.alert do React Native não faz nada na web.
-function showSoon(title: string, message: string) {
-    if (Platform.OS === "web") {
-        window.alert(`${title}\n${message}`);
-    } else {
-        NativeAlert.alert(title, message);
-    }
-}
-
 export default function Login() {
     const styles = useThemedStyles(makeStyles);
     const { login } = useAuth();
+    const toast = useToast();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -84,7 +77,7 @@ export default function Login() {
                 <View style={styles.forgotRow}>
                     <TextLink
                         title="Esqueci minha senha"
-                        onPress={() => showSoon("Em breve", "A recuperação de senha ainda não está disponível.")}
+                        onPress={() => toast("Em breve: a recuperação de senha ainda não está disponível.")}
                     />
                 </View>
 

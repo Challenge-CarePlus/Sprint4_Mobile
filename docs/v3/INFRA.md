@@ -17,7 +17,7 @@ Verificações feitas por HTTP em 22/10 (sem acesso aos painéis).
 `branch: v3` · `rootDir: ECOA_backend` · build `npm install && npm run build` · start `npm start` · health `/health` ·
 `NODE_ENV=production` · `JWT_SECRET` gerado pelo Render · `DATA_DIR=/tmp/ecoa-data` · `UPLOADS_DIR=/tmp/ecoa-uploads` ·
 `CORS_ORIGIN` (`sync:false` — você preenche). **Vai ganhar `ADMIN_PASSWORD` (`sync:false`)**: o servidor **não sobe em
-produção sem ela** e exige **mínimo 8 caracteres**. É a senha do admin (`ecoafono@email.com`); a dos pacientes mockados segue
+produção sem ela** e exige **mínimo 12 caracteres**, **nunca igual à dos pacientes (`ecoa2026`)**, e recusa senhas óbvias (só números, `senha123`, `admin123`, `password`, `ecoafono`…). É a senha do admin (`ecoafono@email.com`); a dos pacientes mockados segue
 `ecoa2026` (sem privilégio). Nunca colar a senha em chat, print ou commit.
 
 CORS: além de `CORS_ORIGIN`, o código já aceita qualquer deploy/preview do projeto
@@ -30,7 +30,7 @@ CORS: além de `CORS_ORIGIN`, o código já aceita qualquer deploy/preview do pr
    Conferir que aparece **só** `ecoa-backend-v3` como novo (o `ecoa-backend` da v2 já existe; não deve ser alterado — se o
    Render propuser mudar o da v2, **cancele**).
 3. Na tela do Blueprint, preencher as variáveis pedidas:
-   - `ADMIN_PASSWORD` = uma senha **sua**, ≥ 8 caracteres (anote num lugar seguro; é a que entra no painel).
+   - `ADMIN_PASSWORD` = uma senha **sua**, ≥ 12 caracteres, diferente de `ecoa2026` e de qualquer senha óbvia (anote num lugar seguro; é a que entra no painel).
    - `CORS_ORIGIN` = `https://care-plus-git-v3-isabelabarcellos0812-6004s-projects.vercel.app`
 4. **Apply**. Esperar o deploy ficar *Live* (se *Failed*, abrir Logs e me mandar as últimas linhas — **sem** valores de senha).
 5. Copiar a URL pública do serviço (algo como `https://ecoa-backend-v3.onrender.com`) e **me passar**.

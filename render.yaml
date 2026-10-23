@@ -34,7 +34,8 @@ services:
         value: production
       - key: JWT_SECRET
         generateValue: true
-      # Senha do admin (mín. 8 caracteres). Sem ela o servidor NÃO sobe em produção.
+      # Senha do admin: >= 12 caracteres, nunca igual à dos pacientes (ecoa2026) nem óbvia.
+      # Sem ela, ou com uma fraca/pública, o servidor NÃO sobe em produção.
       # A usuária define no painel do Render; nunca em chat, commit ou print.
       - key: ADMIN_PASSWORD
         sync: false

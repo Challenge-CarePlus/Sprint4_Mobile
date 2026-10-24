@@ -1,11 +1,12 @@
-import { useRoute } from "@react-navigation/native";
-import { useState } from "react";
-import { StatusBar, StyleSheet, View } from "react-native";
+import { useIsFocused, useRoute } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import { BackHandler, Platform, StatusBar, StyleSheet, View } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { hasConsent } from "../services/consentStorage";
 import { useTheme } from "../theme/ThemeContext";
+import { useBack } from "../hooks/useBack";
 import { useToast } from "./Toast";
 import { ADMINBAR_HEIGHT, APPBAR_HEIGHT, AdminBar, AppBar, NavDrawer, NavDrawerItem } from "./ds";
 
@@ -18,12 +19,24 @@ export default function Menu() {
     const { logout, role } = useAuth();
     const { mode, setPreference } = useTheme();
     const toast = useToast();
+    const goBack = useBack();
 
     const isAdmin = role === "admin";
     const canGoBack = navigation.canGoBack() && route.name !== "MAIN";
     // Faixa "Modo administrador" em todas as telas, menos no próprio painel.
     const showAdminBar = isAdmin && route.name !== "MAIN";
     const dark = mode === "dark";
+
+    // Gesto/botão de voltar do Android segue a mesma regra do botão da barra.
+    const focused = useIsFocused();
+    useEffect(() => {
+        if (Platform.OS !== "android" || !focused || !canGoBack) return;
+        const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+            goBack();
+            return true;
+        });
+        return () => sub.remove();
+    }, [focused, canGoBack, goBack]);
 
     async function handleLogout() {
         setMenuOpen(false);
@@ -83,7 +96,7 @@ export default function Menu() {
             <StatusBar hidden />
 
             <AppBar
-                onBack={canGoBack ? () => navigation.goBack() : undefined}
+                onBack={canGoBack ? goBack : undefined}
                 onMenu={() => setMenuOpen(!menuOpen)}
                 menuOpen={menuOpen}
             />

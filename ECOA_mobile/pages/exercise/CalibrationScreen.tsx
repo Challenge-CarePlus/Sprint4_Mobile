@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useBack } from "../../hooks/useBack";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -28,6 +29,7 @@ export default function CalibrationScreen() {
     const { colors, shadow } = useTheme();
     const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
+    const goBack = useBack();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
@@ -230,7 +232,7 @@ export default function CalibrationScreen() {
                 variant="ghost"
                 title="Cancelar"
                 minHeight={senior ? 56 : undefined}
-                onPress={() => navigation.goBack()}
+                onPress={goBack}
             />
         </ScrollView>
     );

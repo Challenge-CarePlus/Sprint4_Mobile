@@ -134,6 +134,11 @@ function validateExercise(value: unknown, position: number, keepId?: string): Cu
 
     const goal = text(value.goal, `${label}: objetivo`, LIMITS.goal, false);
 
+    const manual = value.allowManualCount;
+    if (manual !== undefined && typeof manual !== "boolean") {
+        return fail(`${label}: allowManualCount deve ser verdadeiro ou falso`);
+    }
+
     return {
         // O id enviado pelo cliente é ignorado: o servidor gera um único (como no id do treino) ou, num PUT,
         // devolve o id do exercício que já existia (keepId, decidido por validateTrainingInput).
@@ -146,6 +151,7 @@ function validateExercise(value: unknown, position: number, keepId?: string): Cu
         relaxSeconds: integer(value.relaxSeconds, `${label}: relaxamento`, 0, LIMITS.seconds),
         video: validateVideo(value.video),
         validation: validateValidation(value.validation),
+        ...(manual === undefined ? {} : { allowManualCount: manual }),
     };
 }
 

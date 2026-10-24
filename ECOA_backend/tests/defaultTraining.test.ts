@@ -195,3 +195,49 @@ describe("F7: o campo protected é calculado, não forjável", () => {
         expect(raw).not.toContain('"protected"');
     });
 });
+
+describe("F4: allowManualCount no exercício", () => {
+    const send = (method: "post" | "put", url: string, body: unknown) =>
+        (request(ctx.app) as any)[method](url).set(bearer(admin)).send(body);
+
+    it("aceita true e false, devolve no POST/GET e não exige o campo", async () => {
+        const created = await send("post", "/trainings", training({
+            exercises: [exercise({ allowManualCount: true }), exercise({ allowManualCount: false }), exercise()],
+        }));
+
+        expect(created.status).toBe(201);
+        const [a, b, c] = created.body.training.exercises;
+        expect(a.allowManualCount).toBe(true);
+        expect(b.allowManualCount).toBe(false);
+        expect(c.allowManualCount).toBeUndefined();
+
+        const read = (await request(ctx.app).get(`/trainings/${created.body.training.id}`).set(bearer(admin))).body.training;
+        expect(read.exercises.map((e: any) => e.allowManualCount)).toEqual([true, false, undefined]);
+    });
+
+    it.each([["sim"], [1], [0], [null], [{}], [[true]]])("valor não-boolean %j → 400", async (value) => {
+        const res = await send("post", "/trainings", training({ exercises: [exercise({ allowManualCount: value })] }));
+        expect(res.status).toBe(400);
+        expect(res.body.message).toMatch(/allowManualCount/);
+    });
+
+    it("persiste no PUT (ligar, desligar) e o padrão segue protegido", async () => {
+        const created = (await send("post", "/trainings", training())).body.training;
+        const on = await send("put", `/trainings/${created.id}`, { ...training(), exercises: [{ ...created.exercises[0], allowManualCount: true }] });
+        expect(on.body.training.exercises[0].allowManualCount).toBe(true);
+        expect(on.body.training.exercises[0].id).toBe(created.exercises[0].id);
+
+        const off = await send("put", `/trainings/${created.id}`, { ...training(), exercises: [{ ...on.body.training.exercises[0], allowManualCount: false }] });
+        expect(off.body.training.exercises[0].allowManualCount).toBe(false);
+
+        const std = (await get()).body.training;
+        const res = await put(asInput(std, { exercises: std.exercises.map((e: any) => ({ ...e, allowManualCount: true })) }));
+        expect(res.status).toBe(200);
+        expect(res.body.training.exercises.every((e: any) => e.protected === true && e.allowManualCount === true)).toBe(true);
+    });
+
+    it("HTML no nome continua recusado junto do campo novo", async () => {
+        const res = await send("post", "/trainings", training({ exercises: [exercise({ name: "<b>x</b>", allowManualCount: true })] }));
+        expect(res.status).toBe(400);
+    });
+});

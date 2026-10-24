@@ -33,6 +33,8 @@ export type CustomExercise = {
     relaxSeconds: number;
     video: ExerciseVideo | null;
     validation: CustomValidation;
+    /** Opcional (ausente = false): o paciente pode contar a repetição manualmente (balãozinho). */
+    allowManualCount?: boolean;
     /** Só na resposta (calculado, nunca gravado nem aceito do cliente): exercício padrão, não excluível. */
     protected?: boolean;
 };

@@ -70,6 +70,7 @@ type CustomExercise = {
   repetitions: number;           // ≥ 1
   holdSeconds: number;           // 0 = sem tempo de segurar
   relaxSeconds: number;          // tempo de relaxamento entre repetições (conta na validação)
+  allowManualCount?: boolean;    // opcional (ausente = false): permite contar a repetição manualmente (F4)
   video: { url: string; name: string; size: number; mime: string } | null;
   validation: CustomValidation;  // OBRIGATÓRIO — como a câmera valida este exercício
 };

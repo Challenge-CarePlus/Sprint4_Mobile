@@ -209,11 +209,11 @@ export function ActionBar({
 }
 
 export function StepBadge({ children, kids = false }: { children: ReactNode; kids?: boolean }) {
-    const { colors } = useTheme();
+    const { colors, kids: palette } = useTheme();
     const styles = useThemedStyles(makeStyles);
     return (
-        <View style={[styles.badge, kids && { backgroundColor: kidsColors.indigo }]}>
-            <Text style={[styles.badgeText, kids && { color: colors.white, fontFamily: kidsFonts.bold }]}>
+        <View style={[styles.badge, kids && { backgroundColor: palette.hero }]}>
+            <Text style={[styles.badgeText, kids && { color: palette.onHero, fontFamily: kidsFonts.bold }]}>
                 {children}
             </Text>
         </View>
@@ -221,12 +221,12 @@ export function StepBadge({ children, kids = false }: { children: ReactNode; kid
 }
 
 export function RepChip({ children, kids = false }: { children: ReactNode; kids?: boolean }) {
-    const { colors } = useTheme();
+    const { colors, kids: palette } = useTheme();
     const styles = useThemedStyles(makeStyles);
     return (
-        <View style={[styles.chip, kids && { backgroundColor: kidsColors.yellowSoft }]}>
-            <MaterialIcons name="repeat" size={16} color={kids ? kidsColors.ink : colors.brandInk} />
-            <Text style={[styles.chipText, kids && { color: kidsColors.ink, fontFamily: kidsFonts.bold }]}>
+        <View style={[styles.chip, kids && { backgroundColor: palette.yellowSoft }]}>
+            <MaterialIcons name="repeat" size={16} color={kids ? palette.ink : colors.brandInk} />
+            <Text style={[styles.chipText, kids && { color: palette.ink, fontFamily: kidsFonts.bold }]}>
                 {children}
             </Text>
         </View>
@@ -684,9 +684,10 @@ export function CameraLoading({
     style?: StyleProp<ViewStyle>;
 }) {
     const styles = useThemedStyles(makeStyles);
+    const { kids: palette } = useTheme();
     return (
         <View
-            style={[styles.camLoading, kids && { backgroundColor: kidsColors.indigo }, style]}
+            style={[styles.camLoading, kids && { backgroundColor: palette.hero }, style]}
             accessibilityRole="progressbar"
             accessibilityLabel={message}
         >
@@ -713,7 +714,7 @@ export function CountdownRing({
     large?: boolean;
     size?: number;
 }) {
-    const { colors } = useTheme();
+    const { colors, kids: palette } = useTheme();
     const styles = useThemedStyles(makeStyles);
     const sw = 8;
     const rad = (size - sw) / 2;
@@ -735,7 +736,7 @@ export function CountdownRing({
                         r={rad}
                         fill="none"
                         strokeWidth={sw}
-                        stroke={kids ? kidsColors.track : colors.brandSoft}
+                        stroke={kids ? palette.track : colors.brandSoft}
                     />
                     <Circle
                         cx={size / 2}
@@ -754,7 +755,7 @@ export function CountdownRing({
                         style={[
                             styles.countNum,
                             large && { fontSize: 36 },
-                            kids && { fontFamily: kidsFonts.display, color: kidsColors.indigo },
+                            kids && { fontFamily: kidsFonts.display, color: palette.title },
                         ]}
                     >
                         {shown}s
@@ -766,7 +767,7 @@ export function CountdownRing({
                     style={[
                         styles.countLabel,
                         large && { fontSize: 17 },
-                        kids && { color: kidsColors.inkMuted, fontFamily: kidsFonts.body },
+                        kids && { color: palette.inkMuted, fontFamily: kidsFonts.body },
                     ]}
                 >
                     {label}

@@ -75,12 +75,12 @@ export function useTheme(): ThemeContextValue {
 export function useThemedStyles<T extends StyleSheet.NamedStyles<T> | StyleSheet.NamedStyles<any>>(
     make: (theme: Theme) => T
 ): T {
-    const { mode, colors, shadow, gradients } = useTheme();
-    return useMemo(() => make({ mode, colors, shadow, gradients }), [make, mode, colors, shadow, gradients]);
+    const { mode, colors, shadow, gradients, kids } = useTheme();
+    return useMemo(() => make({ mode, colors, shadow, gradients, kids }), [make, mode, colors, shadow, gradients, kids]);
 }
 
 /**
- * Força um tema para a subárvore (a Trilha Infantil fica sempre clara, regra do DS),
+ * Força um tema para a subárvore (ex.: telas que precisam de um tema fixo),
  * sem mexer na preferência salva.
  */
 export function ThemeScope({ force, children }: { force?: "light" | "dark"; children: ReactNode }) {

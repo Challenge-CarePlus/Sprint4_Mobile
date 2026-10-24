@@ -1,6 +1,6 @@
 import { AgeGroup } from "../data/types";
 import { useTheme } from "./ThemeContext";
-import { fonts, kidsColors, kidsFonts, Theme } from "./tokens";
+import { fonts, KidsPalette, kidsColors, kidsFonts, Theme } from "./tokens";
 
 /**
  * Tema das telas do fluxo de exercício, por trilha. Regra do DS (Projeto
@@ -67,34 +67,36 @@ function coreTheme({ colors, gradients }: Theme): TrailTheme {
     };
 }
 
-const kidsTheme: TrailTheme = {
-    background: kidsColors.bg,
-    text: kidsColors.ink,
-    textMuted: kidsColors.inkMuted,
-    title: kidsColors.indigo,
+function kidsTheme(kids: KidsPalette): TrailTheme {
+    return {
+    background: kids.bg,
+    text: kids.ink,
+    textMuted: kids.inkMuted,
+    title: kids.title,
     titleFont: kidsFonts.display,
     titleSize: 30,
-    chipBackground: kidsColors.indigo,
-    chipText: "#FFFFFF",
-    card: "#FFFFFF",
-    cardText: kidsColors.ink,
-    ctaGradient: [kidsColors.green, kidsColors.blue],
-    cta: kidsColors.green,
-    onCta: kidsColors.indigo,
+    chipBackground: kids.hero,
+    chipText: kids.onHero,
+    card: kids.card,
+    cardText: kids.ink,
+    ctaGradient: [kids.green, kids.blue],
+    cta: kids.green,
+    onCta: kids.indigo,
     ctaFont: kidsFonts.display,
     ctaSize: 17,
-    accent: kidsColors.green,
-    onAccent: kidsColors.indigo,
-    progressTrack: kidsColors.track,
-    ringIdle: kidsColors.indigo,
-    ringHolding: kidsColors.blue,
-    hero: kidsColors.indigo,
-    onHero: "#FFFFFF",
-};
+    accent: kids.green,
+    onAccent: kids.indigo,
+    progressTrack: kids.track,
+    ringIdle: kids.title,
+    ringHolding: kids.blue,
+    hero: kids.hero,
+    onHero: kids.onHero,
+    };
+}
 
-/** Adultos/Idosos seguem o tema (claro/escuro); a Infantil é sempre clara (kit próprio). */
+/** Adultos/Idosos seguem o tema (claro/escuro); a Infantil também (kit próprio, com variante escura). */
 export function getTrailTheme(ageGroup: AgeGroup, theme: Theme): TrailTheme {
-    if (ageGroup === "children") return kidsTheme;
+    if (ageGroup === "children") return kidsTheme(theme.kids);
 
     const core = coreTheme(theme);
     // Idosos: núcleo, sem tom "muted" (alto contraste); o resto da acessibilidade

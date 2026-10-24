@@ -105,7 +105,36 @@ export const kidsColors = {
     orangeSoft: "#FFE6DE",
     yellowSoft: "#FFF4C7",
     blueSoft: "#DCF2FC",
+    /** Superfície dos cards, cor dos títulos e do hero (no escuro mudam; ver `kidsDarkColors`). */
+    card: "#FFFFFF",
+    title: "#2A2867",
+    hero: "#2A2867",
+    onHero: "#FFFFFF",
 } as const;
+
+export type KidsPalette = { [K in keyof typeof kidsColors]: string };
+
+/**
+ * Variante ESCURA do kit infantil (23/10, pedido da usuária; o DS original não tem). Derivada do kit:
+ * índigo profundo no fundo, cards e trilhos em índigos mais claros, texto lavanda; as quatro cores vivas
+ * ficam iguais e o texto SOBRE elas segue sempre índigo `#2A2867` (indigo não muda). Contraste medido em
+ * docs/v3/CONTRASTE-INFANTIL-ESCURO.md.
+ */
+export const kidsDarkColors: KidsPalette = {
+    ...kidsColors,
+    bg: "#14123A",
+    card: "#1F1D52",
+    ink: "#F3F2FF",
+    inkMuted: "#B9B7E0",
+    track: "#2E2B6B",
+    greenSoft: "#2E2B6B",
+    orangeSoft: "#2E2B6B",
+    yellowSoft: "#2E2B6B",
+    blueSoft: "#2E2B6B",
+    title: "#F3F2FF",
+    hero: "#2E2B6B",
+    onHero: "#FFFFFF",
+};
 
 export const fonts = {
     /** Plus Jakarta Sans em todo o núcleo (400–600, nunca bold pesado). */
@@ -265,11 +294,13 @@ export type Theme = {
     colors: Colors;
     shadow: Shadows;
     gradients: Gradients;
+    /** Kit infantil na variante do modo (claro/escuro). */
+    kids: KidsPalette;
 };
 
 function buildTheme(mode: ThemeMode): Theme {
     const colors = mode === "dark" ? darkColors : lightColors;
-    return { mode, colors, shadow: makeShadow(mode, colors), gradients: makeGradients(colors) };
+    return { mode, colors, shadow: makeShadow(mode, colors), gradients: makeGradients(colors), kids: mode === "dark" ? kidsDarkColors : kidsColors };
 }
 
 export const lightTheme: Theme = buildTheme("light");

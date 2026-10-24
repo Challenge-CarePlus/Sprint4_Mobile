@@ -15,7 +15,7 @@ import TestExerciseScreen from "../pages/admin/TestExerciseScreen";
 
 import { AUTH_REQUIRED } from "../config/authConfig";
 import { findTrack } from "../services/trackStore";
-import { ThemeScope, useTheme } from "../theme/ThemeContext";
+import { useTheme } from "../theme/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import Menu from "../components/Menu";
 import Settings from "../pages/Settings";
@@ -30,21 +30,13 @@ import CycleSummaryScreen from "../pages/exercise/CycleSummaryScreen";
 
 const Stack = createNativeStackNavigator();
 
-/** Trilha Infantil fica sempre clara (regra do DS), mesmo com o app no escuro. */
-function themeFor(params: unknown): "light" | undefined {
-    const trackId = (params as { trackId?: string } | undefined)?.trackId;
-    return findTrack(trackId)?.ageGroup === "children" ? "light" : undefined;
-}
-
 function PrivateRoutes() {
     return (
         <Stack.Navigator
-            screenLayout={({ route, children }) => <ThemeScope force={themeFor(route.params)}>{children}</ThemeScope>}
+            
             screenOptions={{
-                header: ({ route }) => (
-                    <ThemeScope force={themeFor(route.params)}>
-                        <Menu />
-                    </ThemeScope>
+                header: () => (
+                    <Menu />
                 ),
             }}
         >

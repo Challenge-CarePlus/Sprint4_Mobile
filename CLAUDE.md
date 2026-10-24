@@ -36,6 +36,14 @@ dormentes. Para voltar a exigir login: `EXPO_PUBLIC_AUTH_REQUIRED=true` no build
 `.env`) e refazer o deploy (a variável é embutida no bundle; `--clear` já está no `vercel.json`). O Render só precisa
 estar no ar de novo nesse caso.
 
+## Trilha Infantil no tema escuro (v3, 23/10)
+
+A regra "Trilha Infantil sempre clara" foi **revogada pela usuária em 23/10**: a trilha infantil segue claro/escuro/automático. O DS original não tem
+o escuro infantil; a variante foi derivada (`kidsDarkColors` em `theme/tokens.ts`, exposta como `theme.kids`): fundo `#14123A`, cards `#1F1D52`,
+trilhos/chips/hero `#2E2B6B`, texto `#F3F2FF`, secundário `#B9B7E0`; verde/laranja/amarelo/azul iguais; **texto sobre as cores vivas sempre índigo
+`#2A2867`**; gradiente verde→azul no botão. Contraste medido em `docs/v3/CONTRASTE-INFANTIL-ESCURO.md` (todos ≥ 4,5:1). `docs/v3/SPEC.md`/`TEST-PLAN.md`
+(V3-T63) ainda citam "sempre clara": desatualizados.
+
 ## Privacidade e CSP (v3, 22/10)
 
 Imagens da câmera: só no aparelho, nunca enviadas. O MediaPipe web faz um POST de ~90 bytes (protobuf, sem imagem) a `odml.pa.googleapis.com/v1/log`;

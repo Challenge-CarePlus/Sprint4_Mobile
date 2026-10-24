@@ -49,7 +49,8 @@ export function DraftProvider({ children }: { children: ReactNode }) {
         [exerciseIndex]
     );
     const removeExercise = useCallback(
-        (index: number) => setDraft((d) => ({ ...d, exercises: d.exercises.filter((_, i) => i !== index) })),
+        (index: number) =>
+            setDraft((d) => ({ ...d, exercises: d.exercises.filter((e, i) => i !== index || e.protected === true) })),
         []
     );
 

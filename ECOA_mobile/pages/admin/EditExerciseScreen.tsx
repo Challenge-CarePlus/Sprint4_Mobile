@@ -83,6 +83,7 @@ export default function EditExerciseScreen() {
             relaxSeconds,
             video,
             allowManualCount: allowManualCount || undefined,
+            protected: initial.protected,
             validation: {
                 movement,
                 sensitivity,

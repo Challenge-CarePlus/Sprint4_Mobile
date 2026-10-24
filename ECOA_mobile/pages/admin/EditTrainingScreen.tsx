@@ -15,7 +15,7 @@ import {
     Note,
     SectionTitle,
 } from "../../components/admin";
-import { ActionBar, Alert, PageIntro } from "../../components/ds";
+import { ActionBar, Alert, Badge, PageIntro } from "../../components/ds";
 import { useConfirm } from "../../components/ConfirmDialog";
 import { useToast } from "../../components/Toast";
 import { useDraft } from "../../context/DraftContext";
@@ -80,7 +80,12 @@ export default function EditTrainingScreen() {
             toast("Treino excluído.");
             navigation.goBack();
         } catch (e) {
-            setApiError(apiErrorMessage(e, "Não foi possível excluir o treino."));
+            const status = (e as { response?: { status?: number } })?.response?.status;
+            setApiError(
+                status === 403
+                    ? "Treinos padrão não podem ser excluídos. Você pode editar o nome e quem vai ver."
+                    : apiErrorMessage(e, "Não foi possível excluir o treino.")
+            );
         }
     }
 
@@ -105,6 +110,14 @@ export default function EditTrainingScreen() {
 
                 {failed && <Alert tone="danger">Faltam alguns dados para salvar. Veja os campos marcados.</Alert>}
                 {apiError !== "" && <Alert tone="danger">{apiError}</Alert>}
+                {draft.protected ? (
+                    <View style={styles.standard}>
+                        <Badge tone="neutral">Padrão</Badge>
+                        <Text style={[styles.exSub, { color: colors.inkMuted, flex: 1 }]}>
+                            Treinos padrão podem ser editados, mas não excluídos.
+                        </Text>
+                    </View>
+                ) : null}
 
                 <Field
                     label="Nome da trilha"
@@ -135,17 +148,20 @@ export default function EditTrainingScreen() {
                             >
                                 <Text style={[styles.exTitle, { color: colors.ink }]}>{exercise.name || "Sem nome"}</Text>
                                 <Text style={[styles.exSub, { color: colors.inkMuted }]}>
+                                    {exercise.protected ? "Padrão · " : ""}
                                     {`${steps} ${steps === 1 ? "passo" : "passos"} · ${repsLabel(exercise)} · `}
                                     <InlineStatus ok={Boolean(exercise.video)}>
                                         {exercise.video ? "com vídeo" : "sem vídeo"}
                                     </InlineStatus>
                                 </Text>
                             </Pressable>
-                            <IconAction
-                                icon="delete-outline"
-                                label={`Remover ${exercise.name || "exercício"}`}
-                                onPress={() => askRemoveExercise(index, exercise.name)}
-                            />
+                            {exercise.protected ? null : (
+                                <IconAction
+                                    icon="delete-outline"
+                                    label={`Remover ${exercise.name || "exercício"}`}
+                                    onPress={() => askRemoveExercise(index, exercise.name)}
+                                />
+                            )}
                         </View>
                     );
                 })}
@@ -180,7 +196,7 @@ export default function EditTrainingScreen() {
                 </Pressable>
                 {errors.audience ? <Note tone="error">{errors.audience}</Note> : null}
 
-                {!draft.isNew && <DangerLink icon="delete-outline" title="Excluir treino" onPress={remove} />}
+                {!draft.isNew && !draft.protected && <DangerLink icon="delete-outline" title="Excluir treino" onPress={remove} />}
             </ScrollView>
 
             <Dock>
@@ -213,5 +229,6 @@ const styles = StyleSheet.create({
     exTitle: { fontFamily: fonts.bodySemiBold, fontSize: 15, lineHeight: 20 },
     exSub: { fontFamily: fonts.body, fontSize: 12, lineHeight: 17 },
     aud: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 20 },
+    standard: { flexDirection: "row", alignItems: "center", gap: 10 },
     link: { fontFamily: fonts.bodySemiBold, fontSize: 14 },
 });

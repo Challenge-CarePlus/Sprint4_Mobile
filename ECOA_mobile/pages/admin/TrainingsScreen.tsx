@@ -54,7 +54,7 @@ export default function TrainingsScreen() {
                                 navigation.navigate("EDIT_TRAINING" as never);
                             }}
                         >
-                            {training.example ? <Badge tone="neutral">Exemplo</Badge> : null}
+                            {training.protected || training.example ? <Badge tone="neutral">Padrão</Badge> : null}
                         </RowCard>
                     ))
                 ) : (

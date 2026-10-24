@@ -1,4 +1,4 @@
-import { TrainingDraft, blankExercise, inputFromDraft } from "../../data/training";
+import { TrainingDraft, blankExercise, inputFromDraft, isLocalId } from "../../data/training";
 import { FORBIDDEN_CHARS_MESSAGE, hasForbiddenChars, pruneErrors, validateDraft, validateExerciseFields } from "../trainingValidation";
 
 function draft(overrides: Partial<TrainingDraft> = {}): TrainingDraft {
@@ -82,5 +82,21 @@ describe("pruneErrors", () => {
         const after = pruneErrors(shown, current);
         expect(after.name).toBe(FORBIDDEN_CHARS_MESSAGE);
         expect(after.exercises).toBeUndefined();
+    });
+});
+
+describe("treino padrão (F7): ids no corpo do PUT", () => {
+    it("reenvia o id de exercício que o servidor já conhece e omite ids locais e o campo protected", () => {
+        const local = blankExercise();
+        const padrao = { ...blankExercise(), id: "e1", protected: true, name: "Padrão", steps: ["a"] };
+        const novo = { ...local, name: "Novo", steps: ["b"] };
+        const input = inputFromDraft(draft({ exercises: [padrao, novo] }));
+
+        expect(input.exercises[0].id).toBe("e1");
+        expect("protected" in input.exercises[0]).toBe(false);
+        expect("id" in input.exercises[1]).toBe(false);
+        expect(isLocalId(local.id)).toBe(true);
+        expect(isLocalId("e1")).toBe(false);
+        expect(isLocalId("3f2b8c1e-aaaa-bbbb-cccc-111122223333")).toBe(false);
     });
 });

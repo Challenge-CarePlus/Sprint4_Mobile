@@ -43,12 +43,16 @@ export type CustomExercise = {
     validation: CustomValidation;
     /** Permite contar as repetições à mão ("Fiz uma vez"), além da câmera. */
     allowManualCount?: boolean;
+    /** Exercício padrão (vem do servidor, só leitura): pode ser editado, não excluído. */
+    protected?: boolean;
 };
 
 export type Training = {
     id: string;
     name: string;
     example?: boolean;
+    /** Treino padrão (servidor): pode ser editado, não excluído. */
+    protected?: boolean;
     audience: Audience;
     exercises: CustomExercise[];
     createdAt: string;
@@ -60,13 +64,15 @@ export type Training = {
 export type TrainingInput = {
     name: string;
     audience: Audience;
-    exercises: Omit<CustomExercise, "id">[];
+    /** `id` só dos exercícios que o servidor já conhece (ele os preserva; e1/e2 do padrão precisam continuar na lista). */
+    exercises: (Omit<CustomExercise, "id" | "protected"> & { id?: string })[];
 };
 
 /** Rascunho em edição no painel (id novo gerado no app até salvar). */
 export type TrainingDraft = {
     id: string;
     isNew: boolean;
+    protected?: boolean;
     name: string;
     audience: Audience;
     exercises: CustomExercise[];
@@ -103,6 +109,11 @@ export function repsLabel(exercise: Pick<CustomExercise, "repetitions" | "holdSe
     return exercise.holdSeconds ? `${base} · ${exercise.holdSeconds} s cada` : base;
 }
 
+/** Id de rascunho gerado por `newLocalId` (nunca é id do servidor). */
+export function isLocalId(id: string): boolean {
+    return /^[a-z]-[0-9a-z]+-\d+$/.test(id);
+}
+
 let counter = 0;
 /** Id local de rascunho (único na sessão). */
 export function newLocalId(prefix = "n"): string {
@@ -132,6 +143,7 @@ export function draftFromTraining(training: Training): TrainingDraft {
     return {
         id: training.id,
         isNew: false,
+        protected: training.protected === true,
         name: training.name,
         audience: { all: training.audience.all, ids: [...training.audience.ids] },
         exercises: training.exercises.map((e, i) => ({
@@ -148,7 +160,9 @@ export function inputFromDraft(draft: TrainingDraft): TrainingInput {
     return {
         name: draft.name.trim(),
         audience: draft.audience.all ? { all: true, ids: [] } : { all: false, ids: [...draft.audience.ids] },
-        exercises: draft.exercises.map(({ id: _id, ...rest }) => ({
+        exercises: draft.exercises.map(({ id, protected: _protected, ...rest }) => ({
+            // Id local de rascunho não vai (o servidor gera); o de um exercício que já existia volta, para ele ser preservado.
+            ...(isLocalId(id) ? {} : { id }),
             ...rest,
             name: rest.name.trim(),
             goal: rest.goal?.trim() || undefined,

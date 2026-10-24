@@ -164,6 +164,8 @@ export function inputFromDraft(draft: TrainingDraft): TrainingInput {
             // Id local de rascunho não vai (o servidor gera); o de um exercício que já existia volta, para ele ser preservado.
             ...(isLocalId(id) ? {} : { id }),
             ...rest,
+            // null explícito: JSON.stringify descarta undefined, e o corpo não deve depender de como o servidor trata campo ausente.
+            video: rest.video ?? null,
             name: rest.name.trim(),
             goal: rest.goal?.trim() || undefined,
             steps: rest.steps.map((s) => s.trim()).filter(Boolean),

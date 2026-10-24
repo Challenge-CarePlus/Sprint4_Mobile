@@ -84,6 +84,7 @@ type CustomValidation = {
 
 type Training = {                // "trilha personalizada"
   id: string; name: string; example?: boolean;
+  protected?: true;              // SÓ na resposta (calculado): treino padrão, não excluível (F7)
   audience: Audience;
   exercises: CustomExercise[];   // ≥ 1
   createdAt: string; updatedAt: string; createdBy: string;
@@ -136,8 +137,8 @@ no servidor** (nunca confiar no app).
 | `GET /trainings` | público/logado | **Sem token**: treinos com `audience.all`. **Paciente**: `all` + os que incluem seu id. **Admin**: todos. |
 | `GET /trainings/:id` | idem | mesma regra de visibilidade |
 | `POST /trainings` | admin | cria (valida o modelo acima) |
-| `PUT /trainings/:id` | admin | substitui |
-| `DELETE /trainings/:id` | admin | exclui (e seus vídeos órfãos) |
+| `PUT /trainings/:id` | admin | substitui. Mantém o id dos exercícios que já existiam (id enviado só vale se for de um existente, uma vez); no treino padrão, remover `e1`/`e2` → 400 "Exercícios padrão não podem ser removidos" |
+| `DELETE /trainings/:id` | admin | exclui (e seus vídeos órfãos). Treino `example` → **403** `"Treino padrão não pode ser excluído"` |
 | `POST /uploads/video` | admin | multipart `file` → `{url,name,size,mime}`; valida mime/extensão/tamanho |
 | `GET /media/:file` | público | serve o vídeo com `Range` e `Content-Type` corretos |
 | `GET /patients` | admin | lista dos 8 pacientes + dados de evolução de exemplo |
@@ -145,6 +146,7 @@ no servidor** (nunca confiar no app).
 
 Persistência: arquivos JSON atômicos (padrão do `userStore`) + pasta de uploads. **Limitação conhecida e
 aceita nesta fase**: o disco do Render free é efêmero — treinos e vídeos podem sumir num redeploy/reinício.
+**F7 (padrão não excluível):** o seed tem ids fixos (`t-ex`, exercícios `e1` e `e2`). As respostas trazem `protected: true` no treino `t-ex` e nesses dois exercícios (campo calculado a cada resposta; não é gravado e o `protected`/`example` enviados pelo cliente são ignorados). Nome, público e campos do padrão podem ser editados; exercícios novos adicionados a ele são excluíveis.
 Seed (`example: true`, "Aquecimento para apresentações") recriado quando o arquivo não existe. Decisão de
 produção pendente (Postgres + armazenamento de objetos); registrar no CLAUDE.md.
 

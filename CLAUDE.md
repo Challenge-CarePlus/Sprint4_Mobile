@@ -62,12 +62,15 @@ Contrato completo em `docs/v3/SPEC.md`. O que o backend faz agora, além de logi
   no PUT, o que importa quando o disco efêmero apagou o vídeo). Vídeo trocado/removido ou treino excluído apaga o arquivo se
   nenhum outro treino o usa; uploads sem treino há mais de 24 h são apagados na inicialização e a cada 6 h (`removeStaleUploads`).
   Range fora do arquivo → 416 com `Content-Range`; multipart malformado → 400. Os **ids dos exercícios são sempre gerados pelo
-  servidor** (o `id` enviado pelo cliente é ignorado).
+  servidor** (o `id` enviado pelo cliente é ignorado; num PUT, só vale o id de um exercício que o treino já tinha, uma vez).
+- **Treino padrão (F7)**: `t-ex` "Aquecimento para apresentações" (`example: true`) e seus exercícios `e1`/`e2` (ids fixos do seed) vêm com
+  `protected: true` nas respostas (calculado, nunca gravado nem aceito do cliente). `DELETE` nele → **403** "Treino padrão não pode ser
+  excluído"; `PUT` que tire `e1`/`e2` → **400** "Exercícios padrão não podem ser removidos". Editar nome/público/campos é permitido.
 - **Pacientes** (`/patients`, admin): dados de evolução **de exemplo** fixos (`sample: true`), do protótipo.
 - **Persistência**: JSON atômico com fila (`src/db/jsonStore.ts`) em `ECOA_backend/data/` (`DATA_DIR`) e vídeos em
   `ECOA_backend/uploads/` (`UPLOADS_DIR`), ambos fora do git e recriados pelo seed quando não existem. O antigo
   `src/db/users.json` versionado foi removido (o seed recria os usuários).
-- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 150 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
+- **Testes**: `cd ECOA_backend && npm test` (jest + supertest, 164 casos: login, 401/403, CRUD, audiência, upload ok/recusado,
   Range, path traversal em `/media`, vídeos órfãos, rate limit, CORS). Cada suíte usa pastas temporárias.
 - **Deploy**: `render.yaml` tem um segundo serviço `ecoa-backend-v3` (branch `v3`) separado do da v2. Quem precisa de `@types/*`
   no build tem que estar em `dependencies` (o Render instala com `NODE_ENV=production`, sem devDependencies).

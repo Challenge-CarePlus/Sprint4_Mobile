@@ -5,11 +5,11 @@ import {
     PlusJakartaSans_600SemiBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { useEffect } from "react";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { ActivityIndicator, Platform, useWindowDimensions, View } from "react-native";
 
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./routes/AppRouter";
-import { MAX_APP_WIDTH } from "./theme/layout";
+import { appWidthFor } from "./theme/layout";
 import { ConfirmProvider } from "./components/ConfirmDialog";
 import { ToastProvider } from "./components/Toast";
 import { DraftProvider } from "./context/DraftContext";
@@ -45,6 +45,7 @@ export default function App() {
 
 function Root() {
     const { colors } = useTheme();
+    const { width: windowWidth } = useWindowDimensions();
     useWebFocusRing();
 
     // Voz de orientação: aplica o que a pessoa configurou antes da primeira fala.
@@ -72,7 +73,7 @@ function Root() {
 
     return (
         <View style={{ flex: 1, alignItems: "center", backgroundColor: colors.line }}>
-            <View style={{ flex: 1, width: "100%", maxWidth: MAX_APP_WIDTH, backgroundColor: colors.surface }}>
+            <View style={{ flex: 1, width: "100%", maxWidth: appWidthFor(windowWidth), backgroundColor: colors.surface }}>
                 <AuthProvider>
                     <ToastProvider>
                         <ConfirmProvider>

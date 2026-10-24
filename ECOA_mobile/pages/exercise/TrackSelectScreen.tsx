@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-import { MenuCard, PageIntro } from "../../components/ds";
+import { Columns, MenuCard, PageIntro } from "../../components/ds";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
@@ -79,6 +79,7 @@ export default function TrackSelectScreen() {
             />
 
             <View style={styles.list}>
+                <Columns>
                 {TRACKS.map((track) => (
                     <MenuCard
                         key={track.id}
@@ -105,6 +106,7 @@ export default function TrackSelectScreen() {
                         onPress={() => handleSelectTrack(track.id)}
                     />
                 ))}
+                </Columns>
             </View>
         </ScrollView>
     );

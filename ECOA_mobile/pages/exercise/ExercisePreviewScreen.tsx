@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useLayout } from "../../theme/layout";
 import Svg, { Circle } from "react-native-svg";
 
 import { ActionBar, Alert, RepChip, StepBadge } from "../../components/ds";
@@ -22,6 +23,7 @@ export default function ExercisePreviewScreen() {
     const { colors, shadow, gradients } = useTheme();
     const styles = useThemedStyles(makeStyles);
     const navigation = useNavigation();
+    const { wide } = useLayout();
     const route = useRoute();
     const { trackId, exerciseIndex } = route.params as RouteParams;
 
@@ -73,6 +75,8 @@ export default function ExercisePreviewScreen() {
                     Exercício {exerciseIndex + 1} de {track.exerciseIds.length} · {track.name}
                 </StepBadge>
 
+                <View style={wide ? styles.cols : styles.colStack}>
+                <View style={wide ? styles.colLeft : styles.colStack}>
                 {videoSource ? (
                     <View style={[styles.video, shadow.hero]} accessibilityLabel="Vídeo de demonstração">
                         <ExerciseVideo source={videoSource} style={styles.videoPlayer} kids={kids} />
@@ -108,7 +112,9 @@ export default function ExercisePreviewScreen() {
                         </Text>
                     </LinearGradient>
                 )}
+                </View>
 
+                <View style={wide ? styles.colRight : styles.colStack}>
                 <Text
                     style={[
                         styles.title,
@@ -182,6 +188,8 @@ export default function ExercisePreviewScreen() {
                         <Alert tone="info">{exercise.validationNote}</Alert>
                     </View>
                 ) : null}
+                </View>
+                </View>
             </ScrollView>
 
             <LinearGradient
@@ -223,6 +231,10 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
         overflow: "hidden",
         backgroundColor: colors.brandDeep,
     },
+    cols: { flexDirection: "row", alignItems: "center", gap: 32, width: "100%" },
+    colLeft: { flex: 1.1, gap: 16 },
+    colRight: { flex: 1, gap: 16 },
+    colStack: { gap: 16 },
     kidsRings: { position: "absolute", right: -50, top: -50 },
     videoPlaceholder: {
         alignItems: "center",

@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode, useEffect, useRef } from "react";
+import { Children, Fragment, isValidElement, ReactNode, useEffect, useRef } from "react";
 import {
     ActivityIndicator,
     Animated,
@@ -18,6 +18,7 @@ import {
 import Svg, { Circle, Defs, Ellipse, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 
 import { fonts, kidsColors, kidsFonts, radii, Theme } from "../theme/tokens";
+import { useLayout } from "../theme/layout";
 import { useTheme, useThemedStyles } from "../theme/ThemeContext";
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
@@ -543,7 +544,36 @@ export function HeroHeader({
 /** Folha clara que sobe 24px sobre o HeroHeader, com os cards dentro (cp-sheet). */
 export function Sheet({ children }: { children: ReactNode }) {
     const styles = useThemedStyles(makeStyles);
-    return <View style={styles.sheet}>{children}</View>;
+    return (
+        <View style={styles.sheet}>
+            <Columns>{children}</Columns>
+        </View>
+    );
+}
+
+/** Achata fragmentos, para cada card virar um item da grade. */
+function flatten(children: ReactNode): ReactNode[] {
+    return Children.toArray(children).flatMap((child) =>
+        isValidElement(child) && child.type === Fragment ? flatten((child.props as { children?: ReactNode }).children) : [child]
+    );
+}
+
+/** Lista em uma coluna (celular, tablet em pé) ou em duas (tela larga: tablet na horizontal, monitor). */
+export function Columns({ children }: { children: ReactNode }) {
+    const { wide } = useLayout();
+    const items = flatten(children).filter((child) => child !== null && child !== false);
+
+    if (!wide) return <View style={{ gap: 16 }}>{items}</View>;
+
+    return (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
+            {items.map((child, index) => (
+                <View key={index} style={{ width: "48.8%" }}>
+                    {child}
+                </View>
+            ))}
+        </View>
+    );
 }
 
 /* ------------------------------------------------------------------ */

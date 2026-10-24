@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ScrollView, StyleSheet } from "react-native";
 
 import { EmptyState, IconCircle, RowCard } from "../../components/admin";
-import { Badge, Button, PageIntro } from "../../components/ds";
+import { Badge, Button, Columns, PageIntro } from "../../components/ds";
 import { useDraft } from "../../context/DraftContext";
 import { audienceLabel, exerciseCountLabel } from "../../data/training";
 import { useLoad } from "../../hooks/useLoad";
@@ -43,7 +43,8 @@ export default function TrainingsScreen() {
 
             {state.data !== null &&
                 (state.data.length ? (
-                    state.data.map((training) => (
+                    <Columns>
+                    {state.data.map((training) => (
                         <RowCard
                             key={training.id}
                             leading={<IconCircle icon="fitness-center" />}
@@ -56,7 +57,8 @@ export default function TrainingsScreen() {
                         >
                             {training.protected || training.example ? <Badge tone="neutral">Padrão</Badge> : null}
                         </RowCard>
-                    ))
+                    ))}
+                    </Columns>
                 ) : (
                     <EmptyState
                         icon="star-border"

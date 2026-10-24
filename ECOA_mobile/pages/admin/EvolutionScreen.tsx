@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 import { Avatar, Chips, MetricPanel, Note, Progress, RowCard } from "../../components/admin";
-import { PageIntro } from "../../components/ds";
+import { Columns, PageIntro } from "../../components/ds";
 import { useLoad } from "../../hooks/useLoad";
 import { trainingsApi } from "../../services/trainingsApi";
 import { useTheme } from "../../theme/ThemeContext";
@@ -56,6 +56,7 @@ export default function EvolutionScreen() {
                         ]}
                     />
 
+                    <Columns>
                     {list
                         .slice()
                         .sort((a, b) => a.adherence - b.adherence)
@@ -71,6 +72,7 @@ export default function EvolutionScreen() {
                                 <Progress value={patient.adherence} label={`Adesão de ${patient.name}`} />
                             </RowCard>
                         ))}
+                    </Columns>
 
                     <Note>Ordenado de quem precisa de mais atenção para quem está indo melhor.</Note>
                 </>

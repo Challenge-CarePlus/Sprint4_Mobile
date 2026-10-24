@@ -1,6 +1,6 @@
 import { Dimensions } from "react-native";
 
-import { getAppWidth } from "../theme/layout";
+import { appWidthFor } from "../theme/layout";
 
 /**
  * Câmera dimensionada pela proporção real da webcam, não a tela inteira.
@@ -28,7 +28,7 @@ export function getCameraBoxSize(
     contentPadding: number
 ): { width: number; height: number } {
     const window = Dimensions.get("window");
-    const maxWidth = getAppWidth() - contentPadding;
+    const maxWidth = appWidthFor(window.width) - contentPadding;
     const height = Math.min(max, Math.max(min, window.height * ratio));
 
     if (!aspect) {

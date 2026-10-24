@@ -47,6 +47,10 @@ export const PATIENT_EVOLUTION: Record<string, PatientEvolution> = {
     p8: { adherence: 60, sessions: 9, lastSession: "Há 2 dias", week: [1, 2, 1, 1, 0, 2, 1] },
 };
 
+/** Ids FIXOS do treino padrão e dos exercícios dele (estáveis entre reinícios e redeploys). */
+export const EXAMPLE_TRAINING_ID = "t-ex";
+export const EXAMPLE_EXERCISE_IDS = ["e1", "e2"];
+
 /** Treino de exemplo do protótipo, recriado quando trainings.json não existe. */
 export function seedTrainings(): Training[] {
     const now = new Date().toISOString();

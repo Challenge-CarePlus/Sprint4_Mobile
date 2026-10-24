@@ -33,12 +33,16 @@ export type CustomExercise = {
     relaxSeconds: number;
     video: ExerciseVideo | null;
     validation: CustomValidation;
+    /** Só na resposta (calculado, nunca gravado nem aceito do cliente): exercício padrão, não excluível. */
+    protected?: boolean;
 };
 
 export type Training = {
     id: string;
     name: string;
     example?: boolean;
+    /** Só na resposta (calculado): treino padrão, não excluível. */
+    protected?: boolean;
     audience: Audience;
     exercises: CustomExercise[];
     createdAt: string;

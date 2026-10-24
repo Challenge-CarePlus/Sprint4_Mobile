@@ -9,12 +9,19 @@ import {
     replaceTraining,
 } from "../db/trainingStore";
 import { allVideosExist, removeOrphanVideos, videoUrlsOf } from "../media";
+import { EXAMPLE_EXERCISE_IDS } from "../data/seed";
 import { Training } from "../models/training";
 import { validateTrainingInput } from "../validation/training";
 
 const router = Router();
 
 const VIDEO_MISSING = "Vídeo não encontrado, envie de novo";
+const DEFAULT_EXERCISES_KEPT = "Exercícios padrão não podem ser removidos";
+
+// "Padrão" = o treino de exemplo do seed e os exercícios de ids fixos dele. O campo protected é calculado
+// a cada resposta a partir de example + ids do seed: não é gravado e o corpo do cliente nunca o define.
+const isDefaultExercise = (training: Training, exerciseId: string) =>
+    !!training.example && EXAMPLE_EXERCISE_IDS.includes(exerciseId);
 
 const isVisibleTo = (training: Training, user?: AuthPayload) =>
     user?.role === "admin" ||
@@ -22,10 +29,19 @@ const isVisibleTo = (training: Training, user?: AuthPayload) =>
     (!!user && training.audience.ids.includes(user.id));
 
 // Pacientes só precisam saber se o treino é pra eles: a lista de quem mais o vê é do admin.
-const present = (training: Training, user?: AuthPayload): Training =>
-    user?.role === "admin"
-        ? training
-        : { ...training, audience: { all: training.audience.all, ids: [] } };
+const present = (training: Training, user?: AuthPayload): Training => {
+    const { protected: _ignored, ...base } = training;
+    const marked: Training = {
+        ...base,
+        ...(training.example ? { protected: true } : {}),
+        exercises: training.exercises.map((e) =>
+            isDefaultExercise(training, e.id) ? { ...e, protected: true } : e
+        ),
+    };
+    return user?.role === "admin"
+        ? marked
+        : { ...marked, audience: { all: marked.audience.all, ids: [] } };
+};
 
 router.get("/", optionalAuth, async (_req, res) => {
     const user = res.locals.user as AuthPayload | undefined;
@@ -65,13 +81,26 @@ router.post("/", ...requireRole("admin"), async (req, res) => {
         createdBy: (res.locals.user as AuthPayload).id,
     });
 
-    res.status(201).json({ success: true, training });
+    res.status(201).json({ success: true, training: present(training, res.locals.user) });
 });
 
 router.put("/:id", ...requireRole("admin"), async (req, res) => {
-    const parsed = validateTrainingInput(req.body);
+    const existing = await findTraining(String(req.params.id));
+    if (!existing) {
+        return res.status(404).json({ success: false, message: "Treino não encontrado" });
+    }
+
+    const parsed = validateTrainingInput(req.body, existing.exercises.map((e) => e.id));
     if (!parsed.ok) {
         return res.status(400).json({ success: false, message: parsed.message });
+    }
+
+    // Treino padrão: pode editar tudo, menos tirar os exercícios originais (ids fixos do seed).
+    if (existing.example) {
+        const kept = new Set(parsed.value.exercises.map((e) => e.id));
+        if (EXAMPLE_EXERCISE_IDS.some((id) => !kept.has(id))) {
+            return res.status(400).json({ success: false, message: DEFAULT_EXERCISES_KEPT });
+        }
     }
 
     if (!(await allVideosExist(parsed.value.exercises))) {
@@ -91,10 +120,15 @@ router.put("/:id", ...requireRole("admin"), async (req, res) => {
     // Vídeo trocado ou removido num exercício deixa o arquivo antigo sem dono.
     await removeOrphanVideos(videoUrlsOf(replaced.previous));
 
-    res.json({ success: true, training: replaced.current });
+    res.json({ success: true, training: present(replaced.current, res.locals.user) });
 });
 
 router.delete("/:id", ...requireRole("admin"), async (req, res) => {
+    const target = await findTraining(String(req.params.id));
+    if (target?.example) {
+        return res.status(403).json({ success: false, message: "Treino padrão não pode ser excluído" });
+    }
+
     const removed = await deleteTraining(String(req.params.id));
 
     if (!removed) {

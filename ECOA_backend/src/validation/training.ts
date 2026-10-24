@@ -119,7 +119,7 @@ function validateValidation(value: unknown): CustomValidation {
     return result;
 }
 
-function validateExercise(value: unknown, position: number): CustomExercise {
+function validateExercise(value: unknown, position: number, keepId?: string): CustomExercise {
     const label = `Exercício ${position}`;
     if (!isObject(value)) return fail(`${label} inválido`);
 
@@ -135,9 +135,9 @@ function validateExercise(value: unknown, position: number): CustomExercise {
     const goal = text(value.goal, `${label}: objetivo`, LIMITS.goal, false);
 
     return {
-        // O id enviado pelo cliente é ignorado: o servidor sempre gera um único (como no id do treino).
-        // Antes, dois exercícios com o mesmo id ("ex1", "ex1") eram aceitos.
-        id: randomUUID(),
+        // O id enviado pelo cliente é ignorado: o servidor gera um único (como no id do treino) ou, num PUT,
+        // devolve o id do exercício que já existia (keepId, decidido por validateTrainingInput).
+        id: keepId ?? randomUUID(),
         name,
         ...(goal ? { goal } : {}),
         steps,
@@ -157,12 +157,14 @@ export type TrainingInput = {
 
 /** Valida o corpo de POST/PUT. Devolve os dados já limpos ou a mensagem de erro (400). */
 export function validateTrainingInput(
-    body: unknown
+    body: unknown,
+    existingIds: string[] = []
 ): { ok: true; value: TrainingInput } | { ok: false; message: string } {
     try {
         if (!isObject(body)) return { ok: false, message: "Corpo inválido" };
 
         const name = text(body.name, "Nome do treino", LIMITS.name, true);
+        const available = new Set(existingIds);
 
         if (!Array.isArray(body.exercises) || body.exercises.length < 1) {
             return { ok: false, message: "Inclua pelo menos 1 exercício" };
@@ -176,7 +178,13 @@ export function validateTrainingInput(
             value: {
                 name,
                 audience: validateAudience(body.audience),
-                exercises: body.exercises.map((e, i) => validateExercise(e, i + 1)),
+                exercises: body.exercises.map((e, i) => {
+                    // PUT: o id enviado só vale se for de um exercício que o treino já tem (e uma vez só);
+                    // qualquer outro id (inclusive repetido ou forjado) é ignorado e vira id novo.
+                    const sent = isObject(e) ? e.id : undefined;
+                    const keep = typeof sent === "string" && available.delete(sent) ? sent : undefined;
+                    return validateExercise(e, i + 1, keep);
+                }),
             },
         };
     } catch (error) {

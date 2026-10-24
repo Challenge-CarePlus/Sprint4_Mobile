@@ -153,6 +153,7 @@ export function RowCard({
     trailing,
     accessibilityLabel,
     style,
+    disabled,
 }: {
     leading?: ReactNode;
     title: string;
@@ -162,14 +163,17 @@ export function RowCard({
     trailing?: ReactNode;
     accessibilityLabel?: string;
     style?: StyleProp<ViewStyle>;
+    disabled?: boolean;
 }) {
     const styles = useThemedStyles(makeStyles);
     return (
         <Pressable
             onPress={onPress}
+            disabled={disabled}
             accessibilityRole="button"
+            aria-disabled={disabled || undefined}
             accessibilityLabel={accessibilityLabel ?? (subtitle ? `${title}. ${subtitle}` : title)}
-            style={({ pressed }) => [styles.row, pressed && { transform: [{ scale: 0.99 }] }, style]}
+            style={({ pressed }) => [styles.row, pressed && { transform: [{ scale: 0.99 }] }, disabled && { opacity: 0.55 }, style]}
         >
             {leading}
             <View style={styles.rowText}>

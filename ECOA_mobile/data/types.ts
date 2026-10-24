@@ -48,6 +48,11 @@ type ExerciseBase = {
     demoVideoAsset?: number;
     professionalGuidanceRecommended?: boolean;
     /**
+     * Contagem manual além da câmera ("Fiz uma vez" / "Finalizar exercício"): para movimentos que o MediaPipe mede
+     * mal (ex.: bochecha cheia). Exceção explícita à regra "todos validados pela câmera" (23/10).
+     */
+    allowManualCount?: boolean;
+    /**
      * Transparência: o que a câmera de fato confirma, quando a validação usa um
      * indicador facial aproximado (ex.: a língua não é visível para o MediaPipe).
      */

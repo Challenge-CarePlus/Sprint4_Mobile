@@ -12,6 +12,7 @@ import {
     Note,
     SectionTitle,
     Stepper,
+    SwitchRow,
 } from "../../components/admin";
 import { ActionBar, Alert, Button, OptionGroup, PageIntro } from "../../components/ds";
 import { useToast } from "../../components/Toast";
@@ -59,6 +60,7 @@ export default function EditExerciseScreen() {
     const [movement, setMovement] = useState<CustomMovement | null>(isNew ? null : initial.validation.movement);
     const [sensitivity, setSensitivity] = useState<Sensitivity>(initial.validation.sensitivity);
     const [promptMessage, setPromptMessage] = useState(initial.validation.promptMessage ?? "");
+    const [allowManualCount, setAllowManualCount] = useState(initial.allowManualCount === true);
     const [note, setNote] = useState(initial.validation.note ?? "");
     const [shown, setShown] = useState<ExerciseErrors>({});
     const errors = pruneErrors(shown, validateExerciseFields({ name, goal, steps, movement, promptMessage, note }));
@@ -80,6 +82,7 @@ export default function EditExerciseScreen() {
             holdSeconds,
             relaxSeconds,
             video,
+            allowManualCount: allowManualCount || undefined,
             validation: {
                 movement,
                 sensitivity,
@@ -205,6 +208,13 @@ export default function EditExerciseScreen() {
                         ? "Neste movimento a câmera usa limiares próprios; a sensibilidade não muda o resultado."
                         : `${SENSITIVITY_OPTIONS.find((o) => o.value === sensitivity)?.hint}. Leve ajuda quando o paciente tem pouco movimento.`}
                 </Note>
+
+                <SwitchRow
+                    on={allowManualCount}
+                    label="Permitir contagem manual"
+                    sub="O paciente também pode tocar em Fiz uma vez, para movimentos que a câmera mede mal."
+                    onChange={setAllowManualCount}
+                />
 
                 <Field
                     label="Mensagem enquanto o movimento não aparece"

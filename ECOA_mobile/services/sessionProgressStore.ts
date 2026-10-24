@@ -5,7 +5,14 @@ export type ExerciseOutcome = {
     validationType: ValidationType;
     success: boolean;
     selfAssessment?: "yes" | "partial" | "no";
+    /** Como as repetições foram contadas: pela câmera ou à mão ("Fiz uma vez"). */
+    countedBy?: "camera" | "manual";
 };
+
+/** Se alguma repetição foi confirmada à mão, o exercício conta como "manual"; senão, pela câmera. */
+export function countedByFor(manualReps: number): "camera" | "manual" {
+    return manualReps > 0 ? "manual" : "camera";
+}
 
 /**
  * Resultados do ciclo em andamento, só em memória — acumulados enquanto o

@@ -10,6 +10,8 @@ export type CycleResult = {
     exercisesCompleted: number;
     validatedCompleted: number;
     guidedCompleted: number;
+    /** Concluídos com contagem manual ("Confirmados por você"); ausente em ciclos antigos. */
+    manualCompleted?: number;
 };
 
 const PROGRESS_KEY = "@ecoa_exercise_progress";

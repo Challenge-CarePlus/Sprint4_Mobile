@@ -86,8 +86,8 @@ export function customToValidationRule(exercise: CustomExercise): ValidationRule
 /** Texto de transparência mostrado ao paciente na prévia. */
 export function validationNoteFor(exercise: CustomExercise): string {
     const custom = exercise.validation.note?.trim();
-    if (custom) return custom;
-    return `A câmera confirma: ${movementLabel(exercise.validation.movement).toLowerCase()}.`;
+    const base = custom || `A câmera confirma: ${movementLabel(exercise.validation.movement).toLowerCase()}.`;
+    return exercise.allowManualCount ? `${base} Se a câmera não reconhecer, conte você mesma(o).` : base;
 }
 
 /** Exercício criado pelo admin → `Exercise` do fluxo do paciente (sempre validado pela câmera). */
@@ -106,6 +106,7 @@ export function customToExercise(training: Training, exercise: CustomExercise, i
         validationType: "validado",
         validationRule: rule,
         validationNote: validationNoteFor(exercise),
+        ...(exercise.allowManualCount ? { allowManualCount: true } : {}),
     };
 }
 

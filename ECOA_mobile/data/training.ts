@@ -41,6 +41,8 @@ export type CustomExercise = {
     relaxSeconds: number;
     video: ExerciseVideo | null;
     validation: CustomValidation;
+    /** Permite contar as repetições à mão ("Fiz uma vez"), além da câmera. */
+    allowManualCount?: boolean;
 };
 
 export type Training = {

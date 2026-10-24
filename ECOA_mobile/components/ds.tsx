@@ -247,10 +247,13 @@ export function Button({
     minHeight,
     fontSize,
     block = true,
+    kids = false,
 }: {
     title: string;
     onPress: () => void;
     variant?: "primary" | "secondary" | "ghost";
+    /** Trilha Infantil: verde com texto índigo (primário) ou card do kit (secundário). */
+    kids?: boolean;
     icon?: IconName;
     loading?: boolean;
     disabled?: boolean;
@@ -260,11 +263,18 @@ export function Button({
     fontSize?: number;
     block?: boolean;
 }) {
-    const { colors } = useTheme();
+    const { colors, kids: palette } = useTheme();
     const styles = useThemedStyles(makeStyles);
     const off = disabled || loading;
-    const fg =
-        variant === "primary" ? colors.onHero : variant === "ghost" ? colors.brandInk : colors.ink;
+    const fg = kids
+        ? variant === "primary"
+            ? palette.indigo
+            : palette.ink
+        : variant === "primary"
+          ? colors.onHero
+          : variant === "ghost"
+            ? colors.brandInk
+            : colors.ink;
 
     return (
         <Pressable
@@ -278,9 +288,9 @@ export function Button({
                 styles.btn,
                 { minHeight: minHeight ?? (variant === "ghost" ? 48 : 52) },
                 block && variant !== "ghost" && styles.btnBlock,
-                variant === "primary" && { backgroundColor: pressed ? colors.heroEnd : colors.brandDeep },
+                variant === "primary" && { backgroundColor: kids ? palette.green : pressed ? colors.heroEnd : colors.brandDeep },
                 variant === "secondary" && {
-                    backgroundColor: colors.surfaceRaised,
+                    backgroundColor: kids ? palette.card : colors.surfaceRaised,
                     borderColor: pressed ? colors.lineStrong : colors.line,
                 },
                 variant === "ghost" && { paddingHorizontal: 8 },

@@ -57,7 +57,8 @@ export default function CycleSummaryScreen() {
     const skippedCount = outcomes.length - completed.length;
     // Mais pulados do que feitos: o título não deve comemorar um ciclo que a câmera mal validou.
     const mostlySkipped = outcomes.length > 0 && skippedCount > completed.length;
-    const validatedCount = completed.filter((o) => o.validationType === "validado").length;
+    const manualCount = completed.filter((o) => o.countedBy === "manual").length;
+    const validatedCount = completed.filter((o) => o.validationType === "validado" && o.countedBy !== "manual").length;
     const guidedCount = completed.filter((o) => o.validationType === "guiado").length;
 
     useEffect(() => {
@@ -71,6 +72,7 @@ export default function CycleSummaryScreen() {
             exercisesCompleted: completed.length,
             validatedCompleted: validatedCount,
             guidedCompleted: guidedCount,
+            manualCompleted: manualCount,
         }).then((history) => {
             // Deriva a contagem do próprio retorno em vez de uma segunda leitura
             // do AsyncStorage — evita uma corrida entre leitura e escrita que
@@ -125,6 +127,7 @@ export default function CycleSummaryScreen() {
                     value={`${completed.length}/${track.exerciseIds.length}`}
                 />
                 <StatTile icon="videocam" label="Validados pela câmera" value={validatedCount} />
+                <StatTile icon="touch-app" label="Confirmados por você" value={manualCount} />
                 <StatTile icon="skip-next" label="Pulados" value={skippedCount} />
                 <StatTile
                     icon="military-tech"

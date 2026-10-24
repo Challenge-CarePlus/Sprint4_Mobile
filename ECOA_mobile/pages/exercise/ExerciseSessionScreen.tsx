@@ -15,7 +15,7 @@ import { DetectorFeedback } from "../../vision/MovementDetector";
 import { createDetector } from "../../vision/createDetector";
 import type { Detector } from "../../vision/SequenceDetectors";
 import { getCalibration, hasCalibration } from "../../vision/calibrationStore";
-import { recordExerciseOutcome } from "../../services/sessionProgressStore";
+import { countedByFor, recordExerciseOutcome } from "../../services/sessionProgressStore";
 import VoicePrompt from "../../components/VoicePrompt";
 import { resetSpeechDedup, speak } from "../../services/speech";
 import { say } from "../../services/speechPhrases";
@@ -144,7 +144,13 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
     const hasFinishedRef = useRef(false);
     const finishTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const [repsDone, setRepsDone] = useState(0);
+    // Repetições pela câmera e (se o exercício permitir) à mão; o total nunca passa da meta.
+    const manualAllowed = exercise.allowManualCount === true;
+    const [cameraReps, setCameraReps] = useState(0);
+    const [manualReps, setManualReps] = useState(0);
+    const manualRepsRef = useRef(0);
+    const cameraRepsRef = useRef(0);
+    const repsDone = Math.min(targetReps, cameraReps + manualReps);
     const [message, setMessage] = useState("Posicione o rosto na câmera");
     const [feedbackKind, setFeedbackKind] = useState<DetectorFeedback["kind"] | null>(null);
     const [sessionActive, setSessionActive] = useState(true);
@@ -207,6 +213,7 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
             exerciseId: exercise.id,
             validationType: "validado",
             success: true,
+            countedBy: countedByFor(manualRepsRef.current),
         });
 
         setSessionActive(false);
@@ -265,11 +272,13 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
                 say("release", ageGroup);
             } else if (feedback.kind === "repetition-complete") {
                 hasAnnouncedHoldRef.current = false;
-                setRepsDone(feedback.repetitionsDone);
+                cameraRepsRef.current = feedback.repetitionsDone;
+                setCameraReps(feedback.repetitionsDone);
                 setMessage("Ótimo! Próxima repetição.");
                 say("release", ageGroup);
             } else if (feedback.kind === "exercise-complete") {
-                setRepsDone(feedback.repetitionsDone);
+                cameraRepsRef.current = feedback.repetitionsDone;
+                setCameraReps(feedback.repetitionsDone);
                 setMessage("Exercício concluído!");
                 say("complete", ageGroup);
                 finishExercise();
@@ -278,7 +287,32 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
         [finishExercise, ageGroup]
     );
 
+    // "Fiz uma vez": conta à mão, com o mesmo feedback gentil. Ao chegar na meta, conclui.
+    function handleManualRep() {
+        if (hasFinishedRef.current) return;
+        const next = manualRepsRef.current + 1;
+        manualRepsRef.current = next;
+        setManualReps(next);
+
+        if (cameraRepsRef.current + next >= targetReps) {
+            setMessage("Exercício concluído!");
+            say("complete", ageGroup);
+            finishExercise();
+        } else {
+            setMessage("Muito bem! Próxima repetição.");
+            say("release", ageGroup);
+        }
+    }
+
+    function handleManualFinish() {
+        if (hasFinishedRef.current) return;
+        setMessage("Exercício concluído!");
+        say("complete", ageGroup);
+        finishExercise();
+    }
+
     const cameraBox = getCameraBoxSize(0.52, 340, 520, cameraAspect, SESSION_CONTENT_PADDING);
+    const kidsTrack = ageGroup === "children";
 
     return (
         <ScrollView
@@ -356,7 +390,32 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
             <VoicePrompt />
 
-            {stuck && !errorMessage && (
+            {manualAllowed && !errorMessage && (
+                <View style={styles.skip}>
+                    <Text style={[styles.manualHint, { color: trail.textMuted }]}>
+                        A câmera tenta reconhecer; se não reconhecer, conte você mesma(o).
+                    </Text>
+                    <Button
+                        kids={kidsTrack}
+                        title="Fiz uma vez"
+                        icon="check"
+                        minHeight={Math.max(presentation.minTouchTarget, 52)}
+                        fontSize={presentation.highContrast ? 18 : undefined}
+                        onPress={handleManualRep}
+                    />
+                    <Button
+                        kids={kidsTrack}
+                        variant="secondary"
+                        title="Finalizar exercício"
+                        disabled={repsDone < 1}
+                        minHeight={Math.max(presentation.minTouchTarget, 52)}
+                        fontSize={presentation.highContrast ? 18 : undefined}
+                        onPress={handleManualFinish}
+                    />
+                </View>
+            )}
+
+            {stuck && !errorMessage && !manualAllowed && (
                 <View style={styles.skip}>
                     <Button
                         variant="secondary"
@@ -659,6 +718,13 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
     },
     skip: {
         width: "100%",
+        gap: 10,
+    },
+    manualHint: {
+        textAlign: "center",
+        fontFamily: fonts.body,
+        fontSize: 14,
+        lineHeight: 20,
     },
     error: {
         color: colors.danger,

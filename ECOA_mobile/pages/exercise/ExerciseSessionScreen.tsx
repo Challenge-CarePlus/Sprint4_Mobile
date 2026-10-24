@@ -392,6 +392,9 @@ function ValidatedExerciseSession({ track, exercise, trackId, exerciseIndex }: S
 
             {manualAllowed && !errorMessage && (
                 <View style={styles.skip}>
+                    <Text style={[styles.manualCount, { color: trail.text }]} accessibilityLiveRegion="polite">
+                        {`${repsDone}/${targetReps} repetições`}
+                    </Text>
                     <Text style={[styles.manualHint, { color: trail.textMuted }]}>
                         A câmera tenta reconhecer; se não reconhecer, conte você mesma(o).
                     </Text>
@@ -720,6 +723,7 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
         width: "100%",
         gap: 10,
     },
+    manualCount: { textAlign: "center", fontFamily: fonts.bodySemiBold, fontSize: 18, lineHeight: 24 },
     manualHint: {
         textAlign: "center",
         fontFamily: fonts.body,

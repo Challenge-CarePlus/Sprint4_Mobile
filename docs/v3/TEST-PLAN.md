@@ -187,3 +187,25 @@ pendente + hash**.
 `api-sec.js` (V3-S01…S20, S08–S13 com arquivos gerados) · `e2e-entrada.js` (T10–T19b) · `e2e-treino.js` (T20–T29, T40–T49) ·
 `e2e-tema.js` (T60–T69) · `contrast.js` (T64–T65) · `e2e-responsivo.js` (T70–T73) · `xss.js` (S30–S32).
 Reutilizar a bateria já existente da v2 (login, consentimento, calibração) como regressão (V3-T06).
+
+## Rodada 3 — feedbacks da usuária (23/10): casos V3-F1…F7
+
+Fonte: `docs/v3/tasks/feedback-3.md`. Script por item em `scratchpad/v3/f3/` (comando entre parênteses). Local = web exportada do hash + backend
+temporário (`DATA_DIR` temp, senha de admin aleatória só em `QA_ADMIN_PW`). **Nunca** rodar `f7-api.js` no Render (ele tenta excluir o padrão).
+
+| ID | Caso | Critério de aprovação | Script |
+|---|---|---|---|
+| V3-F1a–c | Tab S6: 1280×720, 1280×800, 800×1280, 712×1138 (+360/390/768/1440), `hasTouch`, claro e escuro | sem rolagem horizontal, nada fora da janela, alvos ≥ 48 px, texto ≥ 12 px em Home, Trilhas, Prévia, Calibração, Sessão e telas do admin | `f1-viewports.js` |
+| V3-F1d–g | Vídeo da prévia e câmera (calibração/sessão) | `object-fit: contain`, dentro da largura; no tablet horizontal a câmera cabe na altura útil sem cortar o rosto | `f1-viewports.js` |
+| V3-F2a–g | Voltar por tela (paciente): Trilha→Home, Prévia→Trilha, Calibração→Prévia do mesmo exercício, Sessão→Prévia do mesmo exercício, Resumo→Home, Configurações→origem | destino correto (nome da rota = `document.title`); texto da prévia idêntico ao de antes | `f2-voltar.js` (`PART=patient`) |
+| V3-F2d2–d4 | Voltar da Sessão | câmera encerrada (0 tracks `live`), nada gravado no progresso, sem loop (novo Voltar vai à Escolha de trilha) | idem |
+| V3-F2h–n | Voltar (admin): Evolução→Painel, Paciente→Evolução, Treinos→Painel, Editar exercício→Editar treino sem perder o rascunho, Escolher pacientes→Editar treino mantendo a seleção | idem; rascunho do nome do treino preservado; seleção anterior preservada | `f2-voltar.js` (`PART=admin`, `QA_ADMIN_PW`) |
+| V3-F3a–e | Infantil em claro, escuro e auto (OS claro/escuro) | fundo `#F6F6EC`/`#14123A`, contraste AA medido, texto sobre cores vivas = índigo `#2A2867`, foco visível, vídeo/câmera sem filtro; regressão: adultos no escuro igual | `f3-infantil.js` (`SKIP=1` percorre até o Resumo) |
+| V3-F4a–l | Balãozinho: prévia honesta, "Fiz uma vez" imediato, `n/5`, "Finalizar" desabilitado até a 1ª manual, voz, alvos ≥ 48 px, Resumo "Validados pela câmera" × "Confirmados por você", interruptor "Permitir contagem manual" | conforme `feedback-3.md` F4; claro e escuro (`THEME=dark`) | `f4-balao.js` |
+| V3-F5a–e | `adults-lip-trill`: hold 2000 ms, relax 1500 ms, 5 repetições, textos sem "3 segundos" | valores e textos conferidos no build do hash | `f56-detector.js <hash>` |
+| V3-F6a–h | Deglutição com lábios finos (repouso 0,18, esforço 0,45), calibração correta e subestimada; sem falso positivo; queda a ~55 % do pico vale como relaxar; regressão jaw/sorriso | 5/5 com lábios normais e finos; 1 esforço + repouso longo = 1 repetição | `f56-detector.js <hash>` |
+| V3-F7a–l | Padrão não exclui: `DELETE` do exemplo = 403 "Treino padrão não pode ser excluído"; `PUT` que tira exercício original = 400; `protected` só calculado pelo servidor; personalizado exclui; 401/403 de sempre | conforme `feedback-3.md` F7 | `run-f7.js <hash>` (backend local) |
+| V3-F7m–o | UI: sem "Excluir treino" nem lixeira nos itens padrão, selo "Padrão", texto de apoio; 403 com mensagem amigável; personalizado exclui com o diálogo próprio | manual no Chrome real / Playwright | a criar quando o Frontend entregar |
+
+Limites declarados: relaxamento adaptativo (F6) é provado por simulação do sinal, não com lábios finos reais; viewports do Tab S6 são emulados
+(Edge + `hasTouch`), não o aparelho; voz real e câmera real dependem da usuária.

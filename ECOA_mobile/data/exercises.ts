@@ -261,7 +261,7 @@ validationType: "validado",
         validationType: "validado",
         validationRule: { movement: "lipPress", activationDelta: 0.15, holdDurationMs: 1000, repetitions: 5, relaxDurationMs: 2000, promptMessage: "Engula apertando bem os lábios" },
         validationNote:
-            "A câmera confirma o esforço (lábios firmes) e o descanso entre repetições; a deglutição em si não é visível para ela.",
+            "A câmera confirma o esforço (lábios firmes) e o descanso entre repetições (basta o sinal cair bem em relação ao esforço, mesmo com lábios finos); a deglutição em si não é visível para ela.",
         professionalGuidanceRecommended: true,
         demoVideoUrl: "https://placeholder.careplus.local/videos/elderly-effortful-swallow.mp4",
         demoVideoAsset: require("../assets/videos/elderly-effortful-swallow.mp4"),

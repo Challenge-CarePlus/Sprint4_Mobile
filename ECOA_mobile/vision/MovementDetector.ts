@@ -24,6 +24,14 @@ type InternalState = "idle" | "engaging" | "cooldown";
 const HOLD_GRACE_MS = 400;
 
 /**
+ * Relaxamento adaptativo: o sinal "relaxou" quando cai a esta fração do PICO da repetição (ou fica abaixo do
+ * limiar). Quem tem o repouso acima do limiar (ex.: lábios finos no lipPress) nunca voltaria ao nível absoluto.
+ */
+export const RELAX_PEAK_RATIO = 0.6;
+/** Quando o repouso fica acima do limiar, a próxima repetição exige subir esta fração entre o repouso e o pico. */
+const REARM_FRACTION = 0.5;
+
+/**
  * Calcula o quanto um movimento está "ativo" em relação à calibração do
  * usuário (não um valor absoluto). Quando o movimento depende de mais de um
  * blendshape (ex.: sorriso = lado esquerdo + direito), usa o maior delta.
@@ -57,6 +65,12 @@ export class MovementDetector {
     private belowSince: number | null = null;
     private relaxSince: number | null = null;
     private repetitionsDone = 0;
+    /** Maior score relativo desde o início da repetição atual. */
+    private peak = 0;
+    /** Maior score visto durante o relaxamento aceito pela queda em relação ao pico (repouso acima do limiar). */
+    private relaxedLevel = 0;
+    /** Limiar para a próxima repetição (sobe quando o repouso da pessoa fica acima do limiar padrão). */
+    private engageThreshold: number | null = null;
 
     constructor(
         private readonly rule: ValidationRule,
@@ -70,18 +84,23 @@ export class MovementDetector {
     processReading(blendshapes: Blendshape[], now: number): DetectorFeedback {
         const relativeScore = computeRelativeScore(this.rule, blendshapes, this.baseline);
         const threshold = this.rule.activationDelta ?? MOVEMENT_ACTIVATION_DELTA[this.rule.movement];
-        const isAboveThreshold = relativeScore >= threshold;
         const requiredHoldMs = this.rule.holdDurationMs ?? 0;
 
         if (this.state === "idle") {
-            return this.handleIdle(isAboveThreshold, requiredHoldMs, now);
+            const above = relativeScore >= (this.engageThreshold ?? threshold);
+            const feedback = this.handleIdle(above, requiredHoldMs, now);
+            // Começou a repetição: o pico parte do score atual.
+            if (this.state !== "idle") this.peak = relativeScore;
+            return feedback;
         }
+
+        this.peak = Math.max(this.peak, relativeScore);
 
         if (this.state === "engaging") {
-            return this.handleEngaging(isAboveThreshold, requiredHoldMs, now);
+            return this.handleEngaging(relativeScore >= threshold, requiredHoldMs, now);
         }
 
-        return this.handleCooldown(isAboveThreshold, now);
+        return this.handleCooldown(relativeScore, threshold, now);
     }
 
     private handleIdle(
@@ -141,14 +160,20 @@ export class MovementDetector {
         return this.rule.promptMessage ?? ENCOURAGEMENT_BY_MOVEMENT[this.rule.movement];
     }
 
-    private handleCooldown(isAboveThreshold: boolean, now: number): DetectorFeedback {
-        if (isAboveThreshold) {
+    private handleCooldown(score: number, threshold: number, now: number): DetectorFeedback {
+        const belowThreshold = score < threshold;
+        // Relaxou: abaixo do limiar OU queda relevante em relação ao pico da repetição (repouso alto, lábios finos).
+        const droppedFromPeak = score <= this.peak * RELAX_PEAK_RATIO;
+
+        if (!belowThreshold && !droppedFromPeak) {
             // Ainda no movimento (ou voltou a ele): o relaxamento só conta com o rosto solto.
             this.relaxSince = null;
+            this.relaxedLevel = 0;
             return { kind: "waiting-release", message: "Ótimo! Relaxe antes da próxima repetição." };
         }
 
         this.relaxSince ??= now;
+        if (!belowThreshold) this.relaxedLevel = Math.max(this.relaxedLevel, score);
         const remainingMs = this.relaxMs - (now - this.relaxSince);
 
         if (remainingMs > 0) {
@@ -157,6 +182,10 @@ export class MovementDetector {
 
         this.state = "idle";
         this.relaxSince = null;
+        // Repouso acima do limiar: a próxima repetição precisa subir de verdade acima dele (sem falso positivo).
+        this.engageThreshold =
+            this.relaxedLevel >= threshold ? this.relaxedLevel + (this.peak - this.relaxedLevel) * REARM_FRACTION : null;
+        this.relaxedLevel = 0;
         return { kind: "prompt", message: this.promptMessage() };
     }
 

@@ -132,7 +132,7 @@ Rotas de admin: `POST /trainings`, `PUT /trainings/:id`, `DELETE /trainings/:id`
 | V3-T60 | P0 | E2E | Configurações → Aparência: Automático/Claro/Escuro | troca **instantânea** em todo o app (sem recarregar), sem flash de tema errado |
 | V3-T61 | P0 | E2E | escolher Escuro, recarregar | persiste (AsyncStorage/localStorage) |
 | V3-T62 | P0 | E2E | Automático com `colorScheme: 'dark'` e `'light'` do navegador | segue o aparelho; ao mudar o SO em tempo real, atualiza |
-| V3-T63 | P0 | E2E | Trilha Infantil (prévia, calibração, sessão, resumo) no tema escuro | **sempre clara** |
+| V3-T63 | P0 | E2E | Trilha Infantil (prévia, calibração, sessão, resumo) no tema escuro | **variante escura do kit** (revogada a regra "sempre clara" em 23/10): fundo #14123A, texto sobre cores vivas índigo, contraste AA |
 | V3-T64 | P0 | E2E+script | **Contraste AA no escuro e no claro**: para cada tela (Entrada, Início paciente, Painel admin, Evolução, Paciente, Treinos, Treino, Exercício, Escolher pacientes, Escolha de trilha, Prévia, Calibração, Sessão, Resumo, Configurações, Consentimento), medir via `getComputedStyle` cada nó de texto vs. fundo efetivo (percorrendo ancestrais; gradientes → pior caso) | texto normal ≥ 4,5:1, texto grande/ícones ≥ 3:1; relatório por tela e par (script `contrast.js`) |
 | V3-T65 | P1 | E2E | procurar texto ilegível: sem `color` herdado preto sobre fundo escuro (varredura de nós com contraste < 3) | zero ocorrências |
 | V3-T66 | P1 | E2E | câmera/vídeo inalterados no escuro; sombras `none` (elevação por camada); bordas dos campos visíveis | conforme DS |

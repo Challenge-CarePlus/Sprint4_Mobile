@@ -166,7 +166,7 @@ Treino personalizado percorre o mesmo fluxo: prévia → calibração → sessã
 - Três modos: `auto` (segue o aparelho), `light`, `dark`; persistido (AsyncStorage) e sincronizado em toda a UI
   (`ThemeProvider` + hook). Tokens escuros = os do DS (`surface #0A1322`, `surface-raised #131E31`, `ink #EEF2F8`,
   `brand #5AB4F0`, `brand-deep #1C3A66`, … ver `tokens.json` do DS). Sombras no escuro: `none` (elevação por camada).
-- **Trilha Infantil fica sempre clara** (regra do DS). O resto, incluindo as telas do evento, acompanha o tema.
+- **Trilha Infantil também segue claro/escuro/automático** (decisão da usuária em 23/10, que revogou a regra "sempre clara" do DS; variante escura do kit em `kidsDarkColors`, contraste em `docs/v3/CONTRASTE-INFANTIL-ESCURO.md`). Todo o app, incluindo as telas do evento, acompanha o tema.
 - Contraste AA nos dois temas (texto 4.5:1). Câmera/vídeo não mudam.
 - Refatorar o uso estático de `colors` (hoje importado direto) para cores vindas do tema.
 
@@ -179,7 +179,7 @@ Treino personalizado percorre o mesmo fluxo: prévia → calibração → sessã
    `mariana.costa@ecoa.test` o treino aparece; como `pedro.souza@ecoa.test` **não**; anônimo só vê os "para todos".
 5. O exercício criado roda o fluxo completo e é **validado pela câmera** conforme o movimento escolhido; "Testar agora" funciona.
 6. Vídeo > 30 MB ou tipo inválido é recusado com mensagem clara.
-7. Tema: troca instantânea, persiste ao recarregar, kids sempre claro, sem texto ilegível no escuro.
+7. Tema: troca instantânea, persiste ao recarregar, kids também claro/escuro (variante escura do kit), sem texto ilegível no escuro.
 8. Responsivo (360/768/1440, coluna máx. 768px) e sem rolagem horizontal; alvos ≥ 48px (56px idoso).
 9. `tsc` mobile e backend limpos; testes unitários e de API verdes; export web ok.
 

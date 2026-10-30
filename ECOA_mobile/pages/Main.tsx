@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { HeroHeader, MenuCard, Sheet } from "../components/ds";
+import { Alert, HeroHeader, MenuCard, Sheet } from "../components/ds";
 import { useAuth } from "../context/AuthContext";
 import { useDraft } from "../context/DraftContext";
 import { exerciseCountLabel } from "../data/training";
@@ -38,6 +38,12 @@ export default function Main() {
       />
 
       <Sheet>
+        <View style={styles.notice}>
+          <Alert tone="success">
+            Após o NEXT, a Care Plus escolheu o nosso projeto como o primeiro colocado! A partir de agora, ela pode
+            decidir seguir com esse projeto. Obrigado a todos que visitaram o nosso estande.
+          </Alert>
+        </View>
         {admin && (
           <>
             <MenuCard
@@ -95,5 +101,8 @@ const makeStyles = ({ colors, shadow, gradients }: Theme) => StyleSheet.create({
   },
   content: {
     paddingBottom: 24,
+  },
+  notice: {
+    marginBottom: 12,
   },
 });
